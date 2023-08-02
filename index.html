@@ -1,0 +1,140 @@
+<!DOCTYPE html>”
+<html>
+<head>
+<style>
+html, body {
+  margin: 0;
+}
+</style>
+
+<script>
+var level1 = [
+"                               ",
+"                               ",
+"                               ",
+"                               ",
+"       M                       ",
+"      Mo                       ",
+"      oo                       ",
+"      oo                       ",
+"      oo                       ",
+"      oo                       ",
+"w     oo      FFF              ",
+"FFFFFFFFFWWFFFFFFF             ",
+"FFFFFFFFFWWFFFFFFF             "];
+
+class Graphics{
+  constructor(ctx){
+	 this.ctx = ctx;
+	 this.loadImage("mario.png",   (img)=>{this.mario = img;});
+	 this.loadImage("enemies.png", (img)=>{this.enemies = img;});
+	 this.loadImage("terrain.png", (img)=>{this.terrain = img;});
+	 this.loadImage("tree.png",    (img)=>{this.tree = img;});
+  }
+  
+  loadImage(file, callback){
+	  let img = new Image();
+	  img.src = file;
+	  img.onload = ()=>{callback(img);};
+  }
+
+  drawMario(x, y, frame, size, direction){
+     this.ctx.drawImage(this.mario, frame * 60 + direction * 180, size * 81, 60, 81, x, y, 60, 81); 
+  }
+  
+  drawTile(x,y,id){
+	  this.ctx.drawImage(this.terrain, (id % 8) * 60, Math.floor(id / 8) * 42, 60, 42, x, y, 60, 42);
+  }
+  
+  drawWater(x,y, frame){
+      this.ctx.drawImage(this.terrain, (13 % 8) * 60, Math.floor(13 / 8) * 42 + frame, 60, 42 - frame, x, y, 60, 42 - frame);
+	  this.ctx.drawImage(this.terrain, (13 % 8) * 60, Math.floor(13 / 8) * 42, 60, frame, x, y + 42  - frame, 60, frame);
+  }
+  
+  drawTree(x,y, frame){
+	  this.ctx.drawImage(this.tree, 0,3 +70 * (frame % 2), 164, 70, x-51, y-42, 164, 70);
+  }
+}
+
+function getId(c, u, l, r, ul, ur){
+if (c == "F"){
+ if (u != "F"){
+   if (l != "F") return 0;
+   if (r != "F") return 4;
+   return 1;
+ }
+ if (l != "F") return 5;
+ if (r != "F") return 7;
+ if (ul != "F") return 2;
+ if (ur != "F") return 3;
+ return 6;
+ }
+ if (c == "o") return 32;
+ if (c == "W") return 13;
+ if (c == "M") return 100;
+}
+
+class Animation{
+  constructor(frames, transitionTime){
+     this.frames = frames; 
+     this.transitionTime = transitionTime;
+	 this.frame = 0;
+	 this.t = 0;
+  }
+  
+  update(dt){
+     this.t = this.t + dt;
+     this.frame = (this.frame + Math.floor(this.t / this.transitionTime)) % this.frames;
+	 this.t = this.t > this.transitionTime ? this.t - this.transitionTime : this.t;
+  }
+  
+}
+
+class Game{
+	constructor(gfx){
+		this.gfx = gfx;
+		this.frame = 0;
+		this.treeAnimation = new Animation(2, 500);
+	}
+	
+	update(time){
+	    let dt = time - (this.prevTime ?? time);
+	    this.prevTime = time;
+		this.treeAnimation.update(dt);
+		
+		this.frame = this.frame-3;
+		if (this.frame <=0) this.frame = 41;
+		this.gfx.ctx.clearRect(0, 0, 1200, 546);
+		
+		this.gfx.drawMario(100,381,0,2,0);
+		
+		for (let y=0; y<13;++y){
+	   	   for (let x=0; x<18;++x){
+			   if (level1[y][x] != " "){
+				   let tileId = getId(level1[y][x],level1[y-1][x],level1[y][x-1],level1[y][x+1],level1[y-1][x-1],level1[y-1][x+1]);
+		           if (tileId == 100){
+					  this.gfx.drawTree(60 * x, 42 * y + 16, this.treeAnimation.frame);
+				   }else if (tileId == 13){
+					  this.gfx.drawWater(60 * x, 42*y+16, this.frame);
+				   }else{
+				     this.gfx.drawTile(60 * x, 42*y, tileId);
+                   }				   
+			   }
+		   }
+		}
+	}
+}
+
+function initGame(){
+	var canvas = document.getElementById("MyCanvas");
+	var ctx = canvas.getContext("2d");
+	var graphics = new Graphics(ctx);
+	var game = new Game(graphics);
+	setInterval(()=>window.requestAnimationFrame((time)=>game.update(time)), 16);
+}
+</script>
+</head>
+<body onload="initGame()">
+   <canvas id="MyCanvas" width="1200" height="546" style="border:1px solid #000000; background-color:#5080A0;"></canvas>
+</body>
+</html>
