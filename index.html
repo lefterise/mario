@@ -29,8 +29,10 @@ class Graphics{
 	 this.ctx = ctx;
 	 this.loadImage("mario.png",   (img)=>{this.mario = img;});
 	 this.loadImage("enemies.png", (img)=>{this.enemies = img;});
+	 this.loadImage("levels.png", (img)=>{this.levels = img;});
 	 this.loadImage("terrain.png", (img)=>{this.terrain = img;});
 	 this.loadImage("tree.png",    (img)=>{this.tree = img;});
+	 this.loadImage("grass.png",    (img)=>{this.grass = img;});
   }
   
   loadImage(file, callback){
@@ -40,10 +42,14 @@ class Graphics{
   }
 
   drawMario(x, y, frame, size, direction){
-     this.ctx.drawImage(this.mario, frame * 60 + direction * 180, size * 81, 60, 81, x, y, 60, 81); 
+     this.ctx.drawImage(this.mario, frame * 63 + direction * 252, size * 88, 60, 84, x, y, 60, 84); 
   }
   
-  drawTile(x,y,id){
+  drawTile(x,y,id, type){
+	  this.ctx.drawImage(this.levels, (id % 8) * 60, Math.floor(id / 8) * 42 + 42 * type, 60, 42, x, y, 60, 42);
+  }
+  
+  drawTileOld(x,y,id){
 	  this.ctx.drawImage(this.terrain, (id % 8) * 60, Math.floor(id / 8) * 42, 60, 42, x, y, 60, 42);
   }
   
@@ -53,11 +59,11 @@ class Graphics{
   }
   
   drawTree(x,y, frame){
-	  this.ctx.drawImage(this.tree, 0,3 +70 * (frame % 2), 164, 70, x-51, y-42, 164, 70);
+	  this.ctx.drawImage(this.tree, 180,84 * (frame % 3), 180, 84, x-60, y-58, 180, 84);
   }
   
   drawWeed(x,y, frame){
-	  this.ctx.drawImage(this.tree, 0,145 + 42 * (frame % 2), 120, 43, x, y-16, 120, 43);
+	  this.ctx.drawImage(this.grass, 180, 42 * (frame % 3), 180, 42, x, y-16, 180, 42);
   }
   
   drawCoin(x,y, frame){    
@@ -85,14 +91,14 @@ function getId(c, u, l, r, ul, ur){
 if (c == "F"){
  if (u != "F"){
    if (l != "F") return 0;
-   if (r != "F") return 4;
+   if (r != "F") return 5;
    return 1;
  }
- if (l != "F") return 5;
+ if (l != "F") return 6;
  if (r != "F") return 7;
  if (ul != "F") return 2;
- if (ur != "F") return 3;
- return 6;
+ if (ur != "F") return 4;
+ return 3;
  }
  if (c == "o") return 32;
  if (c == "W") return 13;
@@ -199,7 +205,7 @@ class Game{
 		this.gfx = gfx;
 		this.controls = controls;
 		this.frame = 0;
-		this.treeAnimation = new Animation(2, 500);
+		this.treeAnimation = new Animation(3, 500);
 		this.coinAnimation = new Animation(3, 333);
 		
 		this.screenX = 0;
@@ -240,18 +246,20 @@ class Game{
 				   }else if (tileId == 103){
 					  this.gfx.drawGoomba(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 104 || tileId == 105){
-					  this.gfx.drawTurtle(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame, tileId - 104);
+					  this.gfx.drawTurtle(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame, 1-(tileId - 104));
 				   }else if (tileId == 100){
 					  this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 13){
 					  this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame);
-				   }else{
-				     this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId);
+				   }else if (tileId < 8){
+				     this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId, 0);
+                   }else{
+				     this.gfx.drawTileOld(60 * x - screenOffset, 42*y, tileId);
                    }				   
 			   }
 		   }
 		}
-		this.gfx.drawMario(400,381,0,2,0);
+		this.gfx.drawMario(400,381,0,0,1);
 	}
 }
 
