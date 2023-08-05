@@ -56,8 +56,20 @@ class Graphics{
 	  this.ctx.drawImage(this.tree, 0,3 +70 * (frame % 2), 164, 70, x-51, y-42, 164, 70);
   }
   
+  drawWeed(x,y, frame){
+	  this.ctx.drawImage(this.tree, 0,145 + 42 * (frame % 2), 120, 43, x, y-16, 120, 43);
+  }
+  
   drawCoin(x,y, frame){    
 	this.ctx.drawImage(this.enemies, 42 * frame,564, 42, 39, x, y, 42, 39);
+  }
+
+  drawGoomba(x,y, frame){    
+	this.ctx.drawImage(this.enemies, 63 * (frame % 2),0, 60, 45, x, y - 17, 60, 45);
+  }
+  
+  drawTurtle(x,y, frame, color){    
+	this.ctx.drawImage(this.enemies, 63 * (frame % 2), 92 + 145 * color, 60, 67, x, y - 41, 60, 67);
   }
   
   createBlueSkyGradient(){
@@ -84,8 +96,7 @@ if (c == "F"){
  }
  if (c == "o") return 32;
  if (c == "W") return 13;
- if (c == "M") return 100;
- 
+ if (c == "M") return 100; 
  if (c == "0") return 40;
  if (c == "1") return 41;
  if (c == "2") return 48;
@@ -95,12 +106,17 @@ if (c == "F"){
  if (c == "?") return 20;
  if (c == "J") return 17;
  if (c == "*") return 101;
+ if (c == "w") return 102;
+ if (c == "€") return 103;
+ if (c == "ˆ") return 104;
+ if (c == "‰") return 105;
+ 
  
  return 255;
 }
 
 function getTile(y,x){
-	if (y > 0 && x > 0 && y < level1.length && x < level1[y].length)
+	if (y >= 0 && x >=0 && y < level1.length && x < level1[y].length)
 		return level1[y][x];
 	return 255;
 }
@@ -207,7 +223,7 @@ class Game{
 		
 		let direction = this.controls.getDirection();
 		
-		this.screenX = this.screenX + 4 * direction;
+		this.screenX = this.screenX + 8 * direction;
 		let screenOffset = this.screenX % 60;
 		let tileOffset = Math.floor(this.screenX / 60);
 		
@@ -219,6 +235,12 @@ class Game{
 			   if (tileId != 255){				   				  
 		           if (tileId == 101){
 					  this.gfx.drawCoin(60 * x - screenOffset, 42 * y + 16, this.coinAnimation.frame);
+				   }else if (tileId == 102){
+					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
+				   }else if (tileId == 103){
+					  this.gfx.drawGoomba(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
+				   }else if (tileId == 104 || tileId == 105){
+					  this.gfx.drawTurtle(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame, tileId - 104);
 				   }else if (tileId == 100){
 					  this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 13){
