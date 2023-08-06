@@ -74,8 +74,12 @@ class Graphics{
 	this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 3 * color),0, 60, 42, x, y - 14, 60, 42);
   }
   
-  drawTurtle(x,y, frame, color, direction){    
-	this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 2 * direction), 186 + 123 * color, 60, 66, x, y - 40, 60, 66);
+  drawTurtle(x,y, frame, color, direction){
+	this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 2 * direction), 186 + 123 * color, 60, 66, x, y - 40, 60, 66);	
+  }
+  
+  drawShell(x,y, frame, color){
+    this.ctx.drawImage(this.enemies, 63 * (frame % 3), 138 + 120 * color, 60, 42, x, y - 16, 60, 42);
   }
   
   createBlueSkyGradient(){
@@ -207,17 +211,21 @@ class Game{
 		this.frame = 0;
 		this.treeAnimation = new Animation(3, 500);
 		this.coinAnimation = new Animation(3, 333);
+		this.turtleAnimation = new Animation(2, 300);
 		
 		this.screenX = 0;
 		this.level = parseLevel();
 		this.skyGradient = gfx.createBlueSkyGradient();
+		this.lastFacing = 1;
 	}
 	
 	update(time){
 	    let dt = time - (this.prevTime ?? time);
 	    this.prevTime = time;
+		if (dt > 1000) return;
 		this.treeAnimation.update(dt);
 		this.coinAnimation.update(dt);
+		this.turtleAnimation.update(dt);
 		
 		this.frame = this.frame-2;
 		if (this.frame <=0) this.frame = 41;
@@ -230,7 +238,7 @@ class Game{
 		let direction = this.controls.getDirection();
 		
 		this.screenX = this.screenX + 8 * direction;
-		let screenOffset = this.screenX % 60;
+		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
 		let tileOffset = Math.floor(this.screenX / 60);
 		
 		for (let x=0; x<21;++x){
@@ -244,9 +252,9 @@ class Game{
 				   }else if (tileId == 102){
 					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 103){
-					  this.gfx.drawGoomba(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame,0);
+					  this.gfx.drawGoomba(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame,0);
 				   }else if (tileId == 104 || tileId == 105){
-					  this.gfx.drawTurtle(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame, 1-(tileId - 104),0);
+					  this.gfx.drawTurtle(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame, 1-(tileId - 104),0);
 				   }else if (tileId == 100){
 					  this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 13){
@@ -259,7 +267,13 @@ class Game{
 			   }
 		   }
 		}
-		this.gfx.drawMario(400,381,0,0,1);
+		let facing = this.lastFacing;
+		if (direction !=0){
+			facing = direction == 1 ? 1 : 0;
+			this.lastFacing = facing;			
+		}
+		
+		this.gfx.drawMario(400,381,direction != 0 ? this.turtleAnimation.frame : 0,0,facing);
 	}
 }
 
