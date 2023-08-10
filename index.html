@@ -1,6 +1,9 @@
 <!DOCTYPE html>”
 <html>
 <head>
+<script src="graphics.js"></script>
+<script src="levels.js"></script>
+<script src="keyboard.js"></script>
 <style>
 html, body {
   margin: 0;
@@ -8,156 +11,6 @@ html, body {
 </style>
 
 <script>
-var level1 = [
-"                                                                         üüüüü                                                  @@@@23@@@@       á                                  ",
-"                                                       á             â         ã                                                  @@23@@         $       ***                        ",
-"                                           *           $  M      J? J?         $$                                                   23                  @ € @                       ",
-"     M            M                        *              o M                        @ ‰ @      M     ****                  M       01        M         @@@@@      M        M       ",
-"     o M        M o            M     JJJJJ *             Mo o               M        @@@@@      o                           oM      èá        o                    o   M    o M     ",
-"    Mo o  à     o o            o           *       à     oo o               o            @‰  @  o  …             …          oo           …    o        *******    Mo   o   Mo o     ",
-"    oo o ??     o o            o           *     01?     oo o   ?J ?J       o            @@@@@  o                   í   à   oo ****           o       @     € @   oo   o   oo o     ",
-"    oo o        o o       01   o  JJ       *     23      oo o               o   @  ‰@           o  01 $$$$$01   K01 ? JJJ   oo           01   o       @@@@@@@@@   oo   E   oo o 01  ",
-"    oo o     01 o o  **   23   o               0123      oo o               o   @@@@@        à  o  23      23    23         oo           23   o                   oo   o   oo o 23  ",
-"    oo o     23 o o       23   o               2323      oo o               o                $  o  23 €    23    23         oo           23   o                   oo   o   ooˆo 23  ",
-"w   oo oˆ € ‰23 o o   €ww 23   owww€€        ˆ 2323 ww   oo o ˆ    €   €    o                 wwo  23 ww € 23 wwˆ23  ww I   oo  wwˆ  ˆww 23 wwo      www          oww ˆo   wwwo 23ww",
-"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWFFFFFWWWWWWWWWWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFWWFFFFFFFFFFFFFFFFFFFFFWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
-"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWFFFFFWWWWWWWWWWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFWWFFFFFFFFFFFFFFFFFFFFFWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
-];
-
-class Graphics{
-  constructor(ctx){
-	 this.ctx = ctx;
-	 this.loadImage("mario.png",   (img)=>{this.mario = img;});
-	 this.loadImage("enemies.png", (img)=>{this.enemies = img;});
-	 this.loadImage("levels.png", (img)=>{this.levels = img;});
-	 this.loadImage("terrain.png", (img)=>{this.terrain = img;});
-	 this.loadImage("tree.png",    (img)=>{this.tree = img;});
-	 this.loadImage("grass.png",    (img)=>{this.grass = img;});
-  }
-  
-  loadImage(file, callback){
-	  let img = new Image();
-	  img.src = file;
-	  img.onload = ()=>{callback(img);};
-  }
-
-  drawMario(x, y, frame, size, direction){
-     this.ctx.drawImage(this.mario, frame * 63 + direction * 252, size * 88, 60, 84, x, y, 60, 84); 
-  }
-  
-  drawTile(x,y,id, type){
-	  this.ctx.drawImage(this.levels, (id % 8) * 60, Math.floor(id / 8) * 42 + 42 * type, 60, 42, x, y, 60, 42);
-  }
-  
-  drawTileOld(x,y,id){
-	  this.ctx.drawImage(this.terrain, (id % 6) * 60, Math.floor(id / 6) * 42, 60, 42, x, y, 60, 42);
-  }
-  
-  drawWater(x,y, frame){
-      this.ctx.drawImage(this.terrain, 4 * 60, 12 * 42 + frame, 60, 42 - frame, x, y, 60, 42 - frame);
-	  this.ctx.drawImage(this.terrain, 4 * 60, 12 * 42, 60, frame, x, y + 42  - frame, 60, frame);
-  }
-  
-  drawTree(x,y, frame){
-	  this.ctx.drawImage(this.tree, 180,84 * (frame % 3), 180, 84, x-60, y-58, 180, 84);
-  }
-  
-  drawWeed(x,y, frame){
-	  this.ctx.drawImage(this.grass, 180, 42 * (frame % 3), 180, 42, x, y-16, 180, 42);
-  }
-  
-  drawCoin(x,y, frame){    
-	this.ctx.drawImage(this.enemies, 63 * frame, 579, 60, 40, x, y, 60, 40);
-  }
-
-  drawGoomba(x,y, frame, color){    
-	this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 3 * color),0, 60, 42, x, y - 14, 60, 42);
-  }
-  
-  drawSpiney(x,y, frame, direction){    
-	this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 2 * direction),90, 60, 42, x, y - 14, 60, 42);
-  }
-  
-  drawFish(x,y, frame, direction){    
-	this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 2 * direction),135, 60, 45, x, y - 14, 60, 45);
-  }
-  
-  drawTurtle(x,y, frame, color, direction){
-	this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 2 * direction), 231 + 123 * color, 60, 66, x, y - 40, 60, 66);	
-  }
-  
-  drawShell(x,y, frame, color){
-    this.ctx.drawImage(this.enemies, 63 * (frame % 3), 183 + 120 * color, 60, 42, x, y - 16, 60, 42);
-  }
-  
-  createBlueSkyGradient(){
-	const grd = this.ctx.createLinearGradient(0, 0, 0, 546);
-	grd.addColorStop(0,   "#48ACE8");
-	grd.addColorStop(0.75,"#C0E8E8");
-	grd.addColorStop(1,   "#C0E8E8");
-	return grd;
-  }
-}
-
-function getId(c, u, l, r, ul, ur){
-if (c == "F"){
- if (u != "F"){
-   if (l != "F") return 0;
-   if (r != "F") return 5;
-   return 1;
- }
- if (l != "F") return 6;
- if (r != "F") return 7;
- if (ul != "F") return 2;
- if (ur != "F") return 4;
- return 3;
- }
- if (c == "o") return 9+8;
- if (c == "W") return 13+8;
- if (c == "M") return 100+8; 
- if (c == "0") return 18+8;
- if (c == "1") return 19+8;
- if (c == "2") return 24+8;
- if (c == "3") return 25+8;
- if (c == "@") return 59+8;
- if (c == "E") return 10+8;
- if (c == "?") return 12+8;
- if (c == "J") return 1+8;
- if (c == "*") return 101+8;
- if (c == "w") return 102+8;
- if (c == "€") return 103+8;
- if (c == "ˆ") return 104+8;
- if (c == "‰") return 105+8;
- 
- 
- return 255;
-}
-
-function getTile(y,x){
-	if (y >= 0 && x >=0 && y < level1.length && x < level1[y].length)
-		return level1[y][x];
-	return 255;
-}
-
-function parseLevel(){
-	let level = new Array(level1[0].length);
-	//this will convert the level walls to draw the grass and corners 
-	//as well as filp from row major to column major so that data on a screen will be more compact;
-	for (let x=0; x<level1[0].length;++x){
-		level[x] = new Array(level1.length);
-		for (let y=0; y<13;++y){	   
-		   level[x][y] = getId(
-		   getTile(y,x),
-		   getTile(y-1,x),
-		   getTile(y,x-1),
-		   getTile(y,x+1),
-		   getTile(y-1,x-1),
-		   getTile(y-1,x+1));
-	   }
-   }
-   return level;
-}
-
 class Animation{
   constructor(frames, transitionTime){
      this.frames = frames; 
@@ -174,41 +27,123 @@ class Animation{
   
 }
 
-const Directions = {
-	Idle: 0,
-	Left: -1,
-	Right: 1
+class Terrain{
+	constructor(tiles){
+		this.tiles = tiles;
+		this.tileWidth = 60;
+		this.tileHeight = 42;
+	}
+
+	inBounds(X,Y){
+		return X >= 0 && X < this.tiles.length && Y >= 0 && Y < this.tiles[X].length;
+	}
+
+	isSolid(X,Y){
+		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || [9,20,26,27,32,33,67].includes(this.tiles[X][Y]));
+	}
+
+	getPointCollisonDistance(x, y, dx, dy, tMax, wantNonSolid){		
+        //Ref: A fast voxel traversal algorithm J.Amanatides, A. Woo      
+		//(x,y) the location of the point. 
+		//(dx, dy) the normalized speed of the point in pixels per second. 
+		//tMax the number of seconds the point intents to travel
+
+        //Distance in seconds between two consecutive lines when moving at direction (dx,dy)
+        let tVertical    = this.tileWidth  / Math.abs(dx);
+        let tHorizontal  = this.tileHeight / Math.abs(dy);
+
+        //Starting Tile location
+        let X = Math.floor(x / this.tileWidth);
+        let Y = Math.floor(y / this.tileHeight);
+
+		//Ending Tile location
+        let endX = Math.floor((x + dx * tMax) / this.tileWidth);
+        let endY = Math.floor((y + dy * tMax) / this.tileHeight);
+
+		let tNextVertical, tNextHorizontal; //The distance in seconds to the next line
+        let stepX, stepY;                   //The direction we move across tiles        
+
+        if (dx >= 0.0){
+            stepX = 1;
+            tNextVertical = ((X+1) * this.tileWidth - x) / dx;
+        }else{
+            stepX = -1;
+            tNextVertical = (X * this.tileWidth - x) / dx;
+        }
+
+        if (dy >= 0.0){
+            stepY = 1;
+            tNextHorizontal = ((Y+1) * this.tileHeight - y) / dy;
+        }else{
+            stepY = -1;
+            tNextHorizontal = (Y * this.tileHeight - y) / dy;
+        }
+
+        if (this.isSolid(X, Y) && !wantNonSolid) {
+			//this tries to solve the problem if mario happens to be inside a solid block.
+			//the idea is to flip the direction and call the inverse of this function to find the first non-solid
+            return this.getPointCollisonDistance(x,y,-dx,-dy, 10000, true); 
+        }
+
+        let t = 0.0;
+        while ((X != endX || Y !=endY) && (t < tMax)){
+            if(tNextVertical < tNextHorizontal){
+                t = tNextVertical;
+                tNextVertical += tVertical;
+                X += stepX;
+
+				if (this.isSolid(X, Y) ^ wantNonSolid) {
+					if (!wantNonSolid){
+                		return t - stepX / dx; //Return t at one pixel before the collision with the solid vertical line
+					} else {
+						return t + stepX / dx; //Return t at one pixel after the collision with the non-solid vertical line
+					}
+				}
+            }else{
+                t = tNextHorizontal;
+                tNextHorizontal += tHorizontal;
+                Y += stepY;
+
+				if (this.isSolid(X, Y) ^ wantNonSolid) {
+					if (!wantNonSolid){
+                		return t - stepY / dy; //Return t at one pixel before the collision with the vertical line
+					} else {
+						return t + stepY / dy;
+					}
+				}
+            }
+        }
+        return tMax;
+    }
 }
 
-class Keyboard{
-	constructor(){
-		this.direction = Directions.Idle;
-	
-		document.addEventListener('keydown', (ev) => {
-			if (ev.key == "ArrowLeft" || ev.keyCode == 37){
-				this.direction =  Directions.Left;
-			}
-			if (ev.key == "ArrowRight"|| ev.keyCode == 39){
-				this.direction = Directions.Right;
-			}
-			
-			if (ev.key == "Space" || ev.keyCode == 32){
-				
-			}
-			
-			ev.preventDefault();    
-			return false;
-		}, false);
-		
-		document.addEventListener('keyup', (ev) => {
-			this.direction = Directions.Idle;
-			ev.preventDefault();
-			return false;
-		}, false);
+class Mario{
+	constructor(x, y, dx, dy){
+		this.x = x;     //in pixels
+		this.y = y;     //in pixels
+		this.dx = dx;   //in pixels per millisecond
+		this.dy = dy;   //in pixels per millisecond
+		this.ay = 0.04;  //in pixels per millisecond per millisecond
+		this.dyTerminal = 1.0; //in pixels per millisecond
+		this.isMarioTouchingGround = false;
 	}
-	
-	getDirection(){
-		return this.direction;
+
+	update(dt, terrain){
+		let tDiagonal = terrain.getPointCollisonDistance(this.x, this.y, this.dx, this.dy, dt, false);
+		this.x = this.x + this.dx * tDiagonal;
+		this.y = this.y + this.dy * tDiagonal;
+		//check if mario can move stricly in dx or dy for the remainder of the distance
+		let tHorizontal = terrain.getPointCollisonDistance(this.x, this.y, this.dx, 0.0, dt - tDiagonal, false);
+		this.x = this.x + this.dx * tHorizontal;		
+		let tVertical = terrain.getPointCollisonDistance(this.x, this.y, 0.0, this.dy, dt - tDiagonal, false);
+		this.y = this.y + this.dy * tVertical;
+		
+		this.isTouchingGround = terrain.getPointCollisonDistance(this.x, this.y, 0.0, 1.0, 1.0, false) < 1.0;
+		
+		if (!this.isTouchingGround)
+			this.dy = Math.min(this.dy + this.ay, this.dyTerminal);
+		else
+			this.dy = 0.0;
 	}
 }
 
@@ -223,8 +158,10 @@ class Game{
 		
 		this.screenX = 0;
 		this.level = parseLevel();
+		this.terrain = new Terrain(this.level);
 		this.skyGradient = gfx.createBlueSkyGradient();
 		this.lastFacing = 1;
+		this.mario = new Mario(200,10,0.0,0.08);
 	}
 	
 	update(time){
@@ -234,7 +171,8 @@ class Game{
 		this.treeAnimation.update(dt);
 		this.coinAnimation.update(dt);
 		this.turtleAnimation.update(dt);
-		
+		this.mario.update(dt, this.terrain);
+
 		this.frame = this.frame-2;
 		if (this.frame <=0) this.frame = 41;
 		//this.gfx.ctx.clearRect(0, 0, 1200, 546);
@@ -245,10 +183,23 @@ class Game{
 		
 		let direction = this.controls.getDirection();
 		
-		this.screenX = this.screenX + 8 * direction;
+		if (this.controls.wantJump() && this.mario.isTouchingGround){
+			this.mario.dy = -1;
+		}
+
+		let facing = this.lastFacing;
+		if (direction !=0){
+			facing = direction == 1 ? 1 : 0;			
+			this.lastFacing = facing;			
+		}
+
+		this.mario.dx = 0.2 * direction;
+
+		this.screenX = Math.floor(this.mario.x) - 200;
 		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
 		let tileOffset = Math.floor(this.screenX / 60);
 		
+		//Draw tiles
 		for (let x=0; x<21;++x){
 		    if (x+tileOffset < 0) continue;
 			if (x+tileOffset >= this.level.length-1) break;
@@ -278,13 +229,48 @@ class Game{
 			   }
 		   }
 		}
-		let facing = this.lastFacing;
-		if (direction !=0){
-			facing = direction == 1 ? 1 : 0;
-			this.lastFacing = facing;			
+
+		//Draw Mario
+		this.gfx.drawMario(this.mario.x - this.screenX - 30,this.mario.y - 83,direction != 0 ? this.turtleAnimation.frame : 0,0,facing);
+
+		//Draw Grid
+		this.gfx.ctx.strokeStyle = "darkGray";
+		for (let x=0; x<21;++x){
+			this.gfx.ctx.beginPath();
+	        this.gfx.ctx.moveTo(x * 60 - screenOffset, 0);
+		    this.gfx.ctx.lineTo(x * 60 - screenOffset, 13*42);
+	        this.gfx.ctx.stroke();
+		}
+		for (let y=0; y<13;++y){
+			this.gfx.ctx.beginPath();
+	        this.gfx.ctx.moveTo(0, y*42);
+		    this.gfx.ctx.lineTo(21 * 60, y*42);
+	        this.gfx.ctx.stroke();
+		}
+
+		//Draw Solid blocks
+		this.gfx.ctx.strokeStyle = "red";
+		for (let x=0; x<21;++x){
+		    if (x+tileOffset < 0) continue;
+			if (x+tileOffset >= this.level.length-1) break;
+			for (let y=0; y<13;++y){
+			   if (this.terrain.isSolid(x+tileOffset,y)){
+				   this.gfx.ctx.strokeRect(x * 60 - screenOffset, y*42, 60,42);
+			   }
+		    }
 		}
 		
-		this.gfx.drawMario(400,381,direction != 0 ? this.turtleAnimation.frame : 0,0,facing);
+		//Draw mario direction
+		this.gfx.ctx.strokeStyle = "green";
+		this.gfx.ctx.beginPath();
+        this.gfx.ctx.moveTo(this.mario.x - this.screenX, this.mario.y);
+	    this.gfx.ctx.lineTo(this.mario.x + this.mario.dx * dt * 5 - this.screenX, this.mario.y + this.mario.dy * dt * 5);
+        this.gfx.ctx.stroke();
+		//Draw mario location
+		this.gfx.ctx.beginPath();
+		this.gfx.ctx.arc(this.mario.x - this.screenX,this.mario.y, 5, 0, 2 * Math.PI);
+		this.gfx.ctx.stroke();
+
 	}
 }
 
