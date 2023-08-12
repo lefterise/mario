@@ -48,8 +48,6 @@ class Terrain{
 		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || [9,20,26,27,32,33,67].includes(this.tiles[X][Y]));
 	}
 	
-
-
 	getPointCollisonDistance(x, y, dx, dy, tMax, wantNonSolid){		
         //Ref: A fast voxel traversal algorithm J.Amanatides, A. Woo      
 		//(x,y) the location of the point. 
@@ -125,7 +123,7 @@ class Terrain{
     }
 }
 
-class Mario{
+class Moveable{
 	constructor(x, y, dx, dy){
 		this.x = x;     //in pixels
 		this.y = y;     //in pixels
@@ -135,15 +133,7 @@ class Mario{
 		this.dyTerminal = 1.0; //in pixels per millisecond
 		this.isTouchingGround = false;
 		this.isBumpingCeiling = false;
-
-		this.collisionPoints = [
-			{x:-26, y:  0}, 
-			{x: 26, y:  0},
-			{x:-26, y:-50}, 
-			{x: 26, y:-50},
-			{x:-26, y:-25}, 
-			{x: 26, y:-25},
-		];
+		this.collisionPoints = [];
 	}
 
 	getCollisionDistance(terrain, x,y,dx,dy,dt){
@@ -166,7 +156,7 @@ class Mario{
 		this.y = this.y + this.dy * tVertical;
 		
 		this.isTouchingGround = this.getCollisionDistance(terrain, this.x, this.y, 0.0,  1.0, 2.0, false) <= 1.0;
-		this.isBumpingCeiling = this.getCollisionDistance(terrain, this.x, this.y, 0.0, -1.0, 2.0, false) <= 1.0;		
+		this.isBumpingCeiling = this.getCollisionDistance(terrain, this.x, this.y, 0.0, -1.0, 2.0, false) <= 1.0;
 		
 		if (!this.isTouchingGround)
 			this.dy = Math.min(this.dy + this.ay * dt, this.dyTerminal);
@@ -175,6 +165,45 @@ class Mario{
 
 		if (this.isBumpingCeiling && this.dy < 0.0)
 			this.dy = 0.0;
+	}
+}
+
+class Mario extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+			{x:-26, y:  0}, 
+			{x: 26, y:  0},
+			{x:-26, y:-50}, 
+			{x: 26, y:-50},
+			{x:-26, y:-25}, 
+			{x: 26, y:-25},
+		];
+	}
+}
+
+class Goomba extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+			{x:  4, y:  0}, 
+			{x: 56, y:  0},
+			{x:  4, y:-41}, 
+			{x: 56, y:-41},
+		];
+	}
+
+	update(dt, terrain){
+		super.update(dt,terrain);
+		let isHittingLeftWall = this.getCollisionDistance(terrain, this.x, this.y, -1.0, 0.0, 2.0, false) <= 1.0;
+		let isHittingRightWall = this.getCollisionDistance(terrain, this.x, this.y, 1.0, 0.0, 2.0, false) <= 1.0;
+
+		if (isHittingLeftWall && !isHittingRightWall){
+			this.dx = Math.abs(this.dx);
+		}
+		if (!isHittingLeftWall && isHittingRightWall){
+			this.dx = -Math.abs(this.dx);
+		}
 	}
 }
 
@@ -188,30 +217,30 @@ class Game{
 		this.turtleAnimation = new Animation(2, 300);
 		
 		this.screenX = 0;
+		this.screenPan = 300;
 		this.level = parseLevel();
 		this.terrain = new Terrain(this.level);
 		this.skyGradient = gfx.createBlueSkyGradient();
 		this.lastFacing = 1;
-		this.mario = new Mario(200,10,0.0,0.08);
+		this.mario = new Mario(300,10,0.0,0.0);				
+		this.enemies = [];
+		this.spawnEnemies();
 	}
 	
 	update(time){
 	    let dt = time - (this.prevTime ?? time);
 	    this.prevTime = time;
+		
 		if (dt > 1000) return;
 
 		this.treeAnimation.update(dt);
 		this.coinAnimation.update(dt);
 		this.turtleAnimation.update(dt);
 		this.mario.update(dt, this.terrain);
+		this.updateEnemies(dt);
 
 		this.frame = this.frame-2;
-		if (this.frame <=0) this.frame = 41;
-		//this.gfx.ctx.clearRect(0, 0, 1200, 546);
-		
-		this.gfx.ctx.fillStyle = this.skyGradient;
-		this.gfx.ctx.fillRect(0, 0, 1200, 546);
-				
+		if (this.frame <=0) this.frame = 41;			
 		
 		let direction = this.controls.direction;
 		
@@ -227,15 +256,35 @@ class Game{
 
 		this.mario.dx = 0.2 * direction * (this.controls.run ? 2 : 1);
 
+		if (this.controls.pan != Directions.Idle){
+			this.screenPan += Math.round((this.controls.pan == Directions.Left ? 1: -1) * dt * 0.3);
+
+			//clip mario camera offset to 200 pixels off each side of the screen
+			if (this.screenPan < 200) this.screenPan = 200;
+			if (this.screenPan > 21 * 60 - 200) this.screenPan = 21 * 60 - 200;
+		}
+
 		if (this.mario.y > 42*14) this.mario.y = 0;
 
-		this.screenX = Math.floor(this.mario.x) - 200;
+		this.screenX = Math.floor(this.mario.x) - this.screenPan;
+
+		//Clip screen X to the level size
+		if (this.screenX > 60 * (this.level.length-21)) this.screenX = 60 * (this.level.length-21); //21 visible tiles
+		if (this.screenX < 0) this.screenX = 0;
+
 		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
 		let tileOffset = Math.floor(this.screenX / 60);
 		
+		this.spawnEnemies();
+
+		this.gfx.ctx.fillStyle = this.skyGradient;		
+		this.gfx.ctx.fillRect(0, 0, 1200, 546);
+		this.gfx.ctx.fillStyle = "black";
+		this.gfx.ctx.fillText(dt.toFixed(0), 10, 50);
 
 		if ((this.controls.debug % 3) < 2){
 			this.drawTerrain();
+			this.drawEnemies();
 			this.gfx.drawMario(this.mario.x - this.screenX - 30,this.mario.y - 83,direction != 0 ? this.turtleAnimation.frame : 0,0,facing);
 		}
 		if ((this.controls.debug % 3) > 0){
@@ -243,10 +292,38 @@ class Game{
 		}
 	}
 
+	spawnEnemies(){
+		let tileOffset = Math.floor(this.screenX / 60);
+		for (let x=0; x<21;++x){
+		    if (x+tileOffset < 0) continue;
+			if (x+tileOffset >= this.level.length-1) break;
+			for (let y=0; y<13;++y){
+				let tileId = this.level[x+tileOffset][y];
+				if (tileId == 103+8){
+					let goomba = new Goomba(60 * (x+tileOffset),42*y+41,-0.1,0.0);
+					this.enemies.push(goomba);
+					this.level[x+tileOffset][y] = 255;
+				}
+			}
+		}
+	}
+
+	updateEnemies(dt){
+		for (let e of this.enemies){
+			e.update(dt, this.terrain)
+		}
+	}
+
+	drawEnemies(){
+		for (let e of this.enemies){
+			this.gfx.drawGoomba(e.x - this.screenX, e.y -41, this.turtleAnimation.frame,0);
+		}
+	}
+
 	drawTerrain(){
 		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
 		let tileOffset = Math.floor(this.screenX / 60);
-		for (let x=0; x<21;++x){
+		for (let x=-2; x<21 +1;++x){
 		    if (x+tileOffset < 0) continue;
 			if (x+tileOffset >= this.level.length-1) break;
 			for (let y=0; y<13;++y){
@@ -257,7 +334,7 @@ class Game{
 				   }else if (tileId == 102+8){
 					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 103+8){
-					  this.gfx.drawGoomba(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame,0);
+					  //this.gfx.drawGoomba(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame,0);
 				   }else if (tileId == 104 +8|| tileId == 105+8){
 					  //this.gfx.drawTurtle(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame, 1-(tileId - 104),0);
 					  //this.gfx.drawShell(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame, 1-(tileId - 104),0);
@@ -322,7 +399,15 @@ class Game{
 			this.gfx.ctx.beginPath();
 			this.gfx.ctx.arc(this.mario.x - this.screenX + p.x, this.mario.y + p.y, 3, 0, 2 * Math.PI);
 			this.gfx.ctx.stroke();
-		}	
+		}
+
+		for (let e of this.enemies){
+			for (let p of e.collisionPoints){
+				this.gfx.ctx.beginPath();
+				this.gfx.ctx.arc(e.x - this.screenX + p.x, e.y + p.y, 3, 0, 2 * Math.PI);
+				this.gfx.ctx.stroke();
+			}	
+		}
 	}
 }
 

@@ -11,6 +11,7 @@ class Keyboard{
 		this.jump = false;
 		this.run = false;
 		this.debug = 0;
+		this.pan = Directions.Idle;
 
 		document.addEventListener('keydown', (ev) => {
 			if (ev.code == "ArrowLeft"){
@@ -20,6 +21,14 @@ class Keyboard{
 				this.direction = Directions.Right;
 			}
 			
+			if (ev.code == "ShiftLeft"){
+				this.pan = Directions.Left;
+			}
+
+			if (ev.code == "ShiftRight"){
+				this.pan = Directions.Right;
+			}
+
 			if (ev.code == "Space"){
 				this.jump = true;
 			}
@@ -27,6 +36,8 @@ class Keyboard{
 			if (ev.code == "ControlLeft"){
 				this.run = true;
 			}
+
+
 
 			if (ev.code == "KeyD"){
 				this.debug++;
@@ -43,6 +54,14 @@ class Keyboard{
 
 			if (this.direction == Directions.Right && ev.code == "ArrowRight"){
 				this.direction = Directions.Idle;
+			}
+
+			if (this.pan == Directions.Left && ev.code == "ShiftLeft"){
+				this.pan = Directions.Idle;
+			}
+
+			if (this.pan == Directions.Right && ev.code == "ShiftRight"){
+				this.pan = Directions.Idle;
 			}
 
 			if (this.jump && ev.code == "Space"){
