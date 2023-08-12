@@ -1,12 +1,12 @@
 class Graphics{
     constructor(ctx){
        this.ctx = ctx;
-       this.loadImage("mario.png",   (img)=>{this.mario = img;});
-       this.loadImage("enemies.png", (img)=>{this.enemies = img;});
-       this.loadImage("levels.png", (img)=>{this.levels = img;});
-       this.loadImage("terrain.png", (img)=>{this.terrain = img;});
-       this.loadImage("tree.png",    (img)=>{this.tree = img;});
-       this.loadImage("grass.png",    (img)=>{this.grass = img;});
+       this.loadImage("graphics/mario.png",   (img)=>{this.mario = img;});
+       this.loadImage("graphics/enemies.png", (img)=>{this.enemies = img;});
+       this.loadImage("graphics/levels.png", (img)=>{this.levels = img;});
+       this.loadImage("graphics/terrain.png", (img)=>{this.terrain = img;});
+       this.loadImage("graphics/tree.png",    (img)=>{this.tree = img;});
+       this.loadImage("graphics/grass.png",    (img)=>{this.grass = img;});
     }
     
     loadImage(file, callback){
