@@ -57,7 +57,7 @@ class Graphics{
     }
     
     drawTurtle(x,y, frame, color, direction){
-      this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 2 * direction), 231 + 123 * color, 60, 66, x, y - 40, 60, 66);	
+      this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 2 * direction), 231 + 123 * color, 60, 66, x, y, 60, 66);	
     }
     
     drawShell(x,y, frame, color){

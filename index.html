@@ -85,6 +85,10 @@ class Terrain{
             tNextHorizontal = (Y * this.tileHeight - y) / dy;
         }
 
+		if (isNaN(tNextVertical) || isNaN(tNextHorizontal)){
+			debugger;
+		}
+
         if (this.isSolid(X, Y) && !wantNonSolid) {
 			//this tries to solve the problem if mario happens to be inside a solid block.
 			//the idea is to flip the direction and call the inverse of this function to find the first non-solid
@@ -155,8 +159,12 @@ class Moveable{
 		let tVertical = this.getCollisionDistance(terrain, this.x, this.y, 0.0, this.dy, dt - tDiagonal);
 		this.y = this.y + this.dy * tVertical;
 		
-		this.isTouchingGround = this.getCollisionDistance(terrain, this.x, this.y, 0.0,  1.0, 2.0, false) <= 1.0;
-		this.isBumpingCeiling = this.getCollisionDistance(terrain, this.x, this.y, 0.0, -1.0, 2.0, false) <= 1.0;
+		if (isNaN(this.x) || isNaN(this.y)){
+			debugger;
+		}
+
+		this.isTouchingGround = this.getCollisionDistance(terrain, this.x, this.y, 0.0,  1.0, 2.0) <= 1.0;
+		this.isBumpingCeiling = this.getCollisionDistance(terrain, this.x, this.y, 0.0, -1.0, 2.0) <= 1.0;
 		
 		if (!this.isTouchingGround)
 			this.dy = Math.min(this.dy + this.ay * dt, this.dyTerminal);
@@ -195,13 +203,67 @@ class Goomba extends Moveable{
 
 	update(dt, terrain){
 		super.update(dt,terrain);
-		let isHittingLeftWall = this.getCollisionDistance(terrain, this.x, this.y, -1.0, 0.0, 2.0, false) <= 1.0;
-		let isHittingRightWall = this.getCollisionDistance(terrain, this.x, this.y, 1.0, 0.0, 2.0, false) <= 1.0;
+		let isHittingLeftWall = this.getCollisionDistance(terrain, this.x, this.y, -1.0, 0.0, 2.0) <= 1.0;
+		let isHittingRightWall = this.getCollisionDistance(terrain, this.x, this.y, 1.0, 0.0, 2.0) <= 1.0;
 
 		if (isHittingLeftWall && !isHittingRightWall){
 			this.dx = Math.abs(this.dx);
 		}
 		if (!isHittingLeftWall && isHittingRightWall){
+			this.dx = -Math.abs(this.dx);
+		}
+	}
+}
+
+class Koopa extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+			{x:  4, y:  0}, 
+			{x: 56, y:  0},
+			{x:  4, y:-41}, 
+			{x: 56, y:-41},
+		];
+	}
+
+	update(dt, terrain){
+		super.update(dt,terrain);
+		let isHittingLeftWall = this.getCollisionDistance(terrain, this.x, this.y, -1.0, 0.0, 2.0) <= 1.0;
+		let isHittingRightWall = this.getCollisionDistance(terrain, this.x, this.y, 1.0, 0.0, 2.0) <= 1.0;
+
+		if (isHittingLeftWall && !isHittingRightWall){
+			this.dx = Math.abs(this.dx);
+		}
+		if (!isHittingLeftWall && isHittingRightWall){
+			this.dx = -Math.abs(this.dx);
+		}
+	}
+}
+
+class RedKoopa extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+			{x:  4, y:  0}, 
+			{x: 56, y:  0},
+			{x:  4, y:-41}, 
+			{x: 56, y:-41},
+		];
+	}
+
+	update(dt, terrain){
+		super.update(dt,terrain);
+		let isHittingLeftWall  = this.getCollisionDistance(terrain, this.x, this.y, -1.0, 0.0, 2.0) <= 1.0;
+		let isHittingRightWall = this.getCollisionDistance(terrain, this.x, this.y, 1.0, 0.0, 2.0) <= 1.0;
+
+		let isLeftFootOnAir  = terrain.getPointCollisonDistance(this.x + this.collisionPoints[0].x, this.y + this.collisionPoints[0].y, 0.0, 1.0, 2.0, false) > 1.0;
+		let isRightFootOnAir = terrain.getPointCollisonDistance(this.x + this.collisionPoints[1].x, this.y + this.collisionPoints[1].y, 0.0, 1.0, 2.0, false) > 1.0;
+
+		if (isHittingLeftWall || (this.isTouchingGround && isLeftFootOnAir)){
+			this.dx = Math.abs(this.dx);
+		}
+
+		if (isHittingRightWall || (this.isTouchingGround && isRightFootOnAir)){
 			this.dx = -Math.abs(this.dx);
 		}
 	}
@@ -222,7 +284,7 @@ class Game{
 		this.terrain = new Terrain(this.level);
 		this.skyGradient = gfx.createBlueSkyGradient();
 		this.lastFacing = 1;
-		this.mario = new Mario(300,10,0.0,0.0);				
+		this.mario = new Mario(300,461,0.0,0.0);				
 		this.enemies = [];
 		this.spawnEnemies();
 	}
@@ -303,6 +365,14 @@ class Game{
 					let goomba = new Goomba(60 * (x+tileOffset),42*y+41,-0.1,0.0);
 					this.enemies.push(goomba);
 					this.level[x+tileOffset][y] = 255;
+				}else if (tileId == 104+8){
+					let koopa = new Koopa(60 * (x+tileOffset),42*y+41,-0.1,0.0);
+					this.enemies.push(koopa);
+					this.level[x+tileOffset][y] = 255;
+				}else if (tileId == 105+8){
+					let koopa = new RedKoopa(60 * (x+tileOffset),42*y+41,-0.1,0.0);
+					this.enemies.push(koopa);
+					this.level[x+tileOffset][y] = 255;
 				}
 			}
 		}
@@ -316,7 +386,13 @@ class Game{
 
 	drawEnemies(){
 		for (let e of this.enemies){
-			this.gfx.drawGoomba(e.x - this.screenX, e.y -41, this.turtleAnimation.frame,0);
+			if (e.constructor.name == "Goomba"){
+				this.gfx.drawGoomba(e.x - this.screenX, e.y -41, this.turtleAnimation.frame,0);
+			}else if (e.constructor.name == "Koopa"){
+				this.gfx.drawTurtle(e.x - this.screenX, e.y -65, this.turtleAnimation.frame, 0, e.dx > 0 ? 1 : 0);
+			}else if (e.constructor.name == "RedKoopa"){
+				this.gfx.drawTurtle(e.x - this.screenX, e.y -65, this.turtleAnimation.frame, 1, e.dx > 0 ? 1 : 0);
+			}
 		}
 	}
 
