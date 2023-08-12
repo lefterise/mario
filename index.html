@@ -123,7 +123,7 @@ class Mario{
 		this.y = y;     //in pixels
 		this.dx = dx;   //in pixels per millisecond
 		this.dy = dy;   //in pixels per millisecond
-		this.ay = 0.04;  //in pixels per millisecond per millisecond
+		this.ay = 0.0025;  //in pixels per millisecond per millisecond
 		this.dyTerminal = 1.0; //in pixels per millisecond
 		this.isMarioTouchingGround = false;
 	}
@@ -141,7 +141,7 @@ class Mario{
 		this.isTouchingGround = terrain.getPointCollisonDistance(this.x, this.y, 0.0, 1.0, 1.0, false) < 1.0;
 		
 		if (!this.isTouchingGround)
-			this.dy = Math.min(this.dy + this.ay, this.dyTerminal);
+			this.dy = Math.min(this.dy + this.ay * dt, this.dyTerminal);
 		else
 			this.dy = 0.0;
 	}
@@ -168,6 +168,7 @@ class Game{
 	    let dt = time - (this.prevTime ?? time);
 	    this.prevTime = time;
 		if (dt > 1000) return;
+
 		this.treeAnimation.update(dt);
 		this.coinAnimation.update(dt);
 		this.turtleAnimation.update(dt);
@@ -181,9 +182,9 @@ class Game{
 		this.gfx.ctx.fillRect(0, 0, 1200, 546);
 				
 		
-		let direction = this.controls.getDirection();
+		let direction = this.controls.direction;
 		
-		if (this.controls.wantJump() && this.mario.isTouchingGround){
+		if (this.controls.jump && this.mario.isTouchingGround){
 			this.mario.dy = -1;
 		}
 
@@ -193,7 +194,10 @@ class Game{
 			this.lastFacing = facing;			
 		}
 
-		this.mario.dx = 0.2 * direction;
+		this.mario.dx = 0.2 * direction * (this.controls.run ? 2 : 1);
+
+
+		if (this.mario.y > 42*14) this.mario.y = 0;
 
 		this.screenX = Math.floor(this.mario.x) - 200;
 		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue

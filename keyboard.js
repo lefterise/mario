@@ -21,6 +21,10 @@ class Keyboard{
 				this.jump = true;
 			}
 			
+			if (ev.code == "ControlLeft"){
+				this.run = true;
+			}
+
 			ev.preventDefault();    
 			return false;
 		}, false);
@@ -38,16 +42,12 @@ class Keyboard{
 				this.jump = false;
 			}
 
+			if (this.run && ev.code == "ControlLeft"){
+				this.run = false;
+			}
+
 			ev.preventDefault();
 			return false;
 		}, false);
-	}
-	
-	getDirection(){
-		return this.direction;
-	}
-
-	wantJump(){
-		return this.jump;
 	}
 }
