@@ -27,6 +27,12 @@ class Animation{
   
 }
 
+function noNaN(x){
+	if (isNaN(x))
+		return 0;
+	return x;
+}
+	
 class Terrain{
 	constructor(tiles){
 		this.tiles = tiles;
@@ -41,6 +47,8 @@ class Terrain{
 	isSolid(X,Y){
 		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || [9,20,26,27,32,33,67].includes(this.tiles[X][Y]));
 	}
+	
+
 
 	getPointCollisonDistance(x, y, dx, dy, tMax, wantNonSolid){		
         //Ref: A fast voxel traversal algorithm J.Amanatides, A. Woo      
@@ -94,9 +102,9 @@ class Terrain{
 
 				if (this.isSolid(X, Y) ^ wantNonSolid) {
 					if (!wantNonSolid){
-                		return t - stepX / dx; //Return t at one pixel before the collision with the solid vertical line
+                		return t - noNaN(stepX / dx); //Return t at one pixel before the collision with the solid vertical line
 					} else {
-						return t + stepX / dx; //Return t at one pixel after the collision with the non-solid vertical line
+						return t + noNaN(stepX / dx); //Return t at one pixel after the collision with the non-solid vertical line
 					}
 				}
             }else{
@@ -106,9 +114,9 @@ class Terrain{
 
 				if (this.isSolid(X, Y) ^ wantNonSolid) {
 					if (!wantNonSolid){
-                		return t - stepY / dy; //Return t at one pixel before the collision with the vertical line
+                		return t - noNaN(stepY / dy); //Return t at one pixel before the collision with the vertical line
 					} else {
-						return t + stepY / dy;
+						return t + noNaN(stepY / dy);
 					}
 				}
             }
@@ -125,24 +133,47 @@ class Mario{
 		this.dy = dy;   //in pixels per millisecond
 		this.ay = 0.0025;  //in pixels per millisecond per millisecond
 		this.dyTerminal = 1.0; //in pixels per millisecond
-		this.isMarioTouchingGround = false;
+		this.isTouchingGround = false;
+		this.isBumpingCeiling = false;
+
+		this.collisionPoints = [
+			{x:-26, y:  0}, 
+			{x: 26, y:  0},
+			{x:-26, y:-50}, 
+			{x: 26, y:-50},
+			{x:-26, y:-25}, 
+			{x: 26, y:-25},
+		];
+	}
+
+	getCollisionDistance(terrain, x,y,dx,dy,dt){
+		let minT = 99999999999;
+		for (let p of this.collisionPoints){
+			let t = terrain.getPointCollisonDistance(x + p.x, y + p.y, dx, dy, dt, false);
+			minT = Math.min(minT, t);
+		}
+		return minT;
 	}
 
 	update(dt, terrain){
-		let tDiagonal = terrain.getPointCollisonDistance(this.x, this.y, this.dx, this.dy, dt, false);
+		let tDiagonal = this.getCollisionDistance(terrain, this.x, this.y, this.dx, this.dy, dt);
 		this.x = this.x + this.dx * tDiagonal;
 		this.y = this.y + this.dy * tDiagonal;
 		//check if mario can move stricly in dx or dy for the remainder of the distance
-		let tHorizontal = terrain.getPointCollisonDistance(this.x, this.y, this.dx, 0.0, dt - tDiagonal, false);
+		let tHorizontal = this.getCollisionDistance(terrain, this.x, this.y, this.dx, 0.0, dt - tDiagonal);
 		this.x = this.x + this.dx * tHorizontal;		
-		let tVertical = terrain.getPointCollisonDistance(this.x, this.y, 0.0, this.dy, dt - tDiagonal, false);
+		let tVertical = this.getCollisionDistance(terrain, this.x, this.y, 0.0, this.dy, dt - tDiagonal);
 		this.y = this.y + this.dy * tVertical;
 		
-		this.isTouchingGround = terrain.getPointCollisonDistance(this.x, this.y, 0.0, 1.0, 1.0, false) < 1.0;
+		this.isTouchingGround = this.getCollisionDistance(terrain, this.x, this.y, 0.0,  1.0, 2.0, false) <= 1.0;
+		this.isBumpingCeiling = this.getCollisionDistance(terrain, this.x, this.y, 0.0, -1.0, 2.0, false) <= 1.0;		
 		
 		if (!this.isTouchingGround)
 			this.dy = Math.min(this.dy + this.ay * dt, this.dyTerminal);
 		else
+			this.dy = 0.0;
+
+		if (this.isBumpingCeiling && this.dy < 0.0)
 			this.dy = 0.0;
 	}
 }
@@ -196,14 +227,25 @@ class Game{
 
 		this.mario.dx = 0.2 * direction * (this.controls.run ? 2 : 1);
 
-
 		if (this.mario.y > 42*14) this.mario.y = 0;
 
 		this.screenX = Math.floor(this.mario.x) - 200;
 		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
 		let tileOffset = Math.floor(this.screenX / 60);
 		
-		//Draw tiles
+
+		if ((this.controls.debug % 3) < 2){
+			this.drawTerrain();
+			this.gfx.drawMario(this.mario.x - this.screenX - 30,this.mario.y - 83,direction != 0 ? this.turtleAnimation.frame : 0,0,facing);
+		}
+		if ((this.controls.debug % 3) > 0){
+			this.drawDebug(dt);
+		}
+	}
+
+	drawTerrain(){
+		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
+		let tileOffset = Math.floor(this.screenX / 60);
 		for (let x=0; x<21;++x){
 		    if (x+tileOffset < 0) continue;
 			if (x+tileOffset >= this.level.length-1) break;
@@ -233,10 +275,11 @@ class Game{
 			   }
 		   }
 		}
-
-		//Draw Mario
-		this.gfx.drawMario(this.mario.x - this.screenX - 30,this.mario.y - 83,direction != 0 ? this.turtleAnimation.frame : 0,0,facing);
-
+	}
+	
+	drawDebug(dt){
+		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
+		let tileOffset = Math.floor(this.screenX / 60);
 		//Draw Grid
 		this.gfx.ctx.strokeStyle = "darkGray";
 		for (let x=0; x<21;++x){
@@ -274,7 +317,12 @@ class Game{
 		this.gfx.ctx.beginPath();
 		this.gfx.ctx.arc(this.mario.x - this.screenX,this.mario.y, 5, 0, 2 * Math.PI);
 		this.gfx.ctx.stroke();
-
+		//Draw Mario collison points
+		for (let p of this.mario.collisionPoints){
+			this.gfx.ctx.beginPath();
+			this.gfx.ctx.arc(this.mario.x - this.screenX + p.x, this.mario.y + p.y, 3, 0, 2 * Math.PI);
+			this.gfx.ctx.stroke();
+		}	
 	}
 }
 

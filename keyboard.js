@@ -8,7 +8,10 @@ const Directions = {
 class Keyboard{
 	constructor(){
 		this.direction = Directions.Idle;
-	
+		this.jump = false;
+		this.run = false;
+		this.debug = 0;
+
 		document.addEventListener('keydown', (ev) => {
 			if (ev.code == "ArrowLeft"){
 				this.direction =  Directions.Left;
@@ -23,6 +26,10 @@ class Keyboard{
 			
 			if (ev.code == "ControlLeft"){
 				this.run = true;
+			}
+
+			if (ev.code == "KeyD"){
+				this.debug++;
 			}
 
 			ev.preventDefault();    
