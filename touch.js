@@ -19,27 +19,23 @@ class Touch{
 			var touchobj = e.changedTouches[0];
 			var rect = canvas.getBoundingClientRect();
 			
-            let x = (touchobj.clientX - rect.left) * canvas.width / canvas.clientWidth;
-			let y = (touchobj.clientY - rect.top) * canvas.height / canvas.clientHeight;
-			
-            if (x > 30 && y > 440 && x < 30 + 98 && y < 440 +98){
-                this.direction = Directions.Left;
-            }
+            let x = (touchobj.clientX - rect.left);
+			let y = (touchobj.clientY - rect.top);
 
-            if (this.overlaps(x, y, this.leftButton)){
+            let pt = this.fullScreenToCanvas(canvas, x,y);
+			
+            if (this.overlaps(pt, this.leftButton)){
                 this.direction = Directions.Left;
-            } else if (this.overlaps(x, y, this.rightButton)){
+            } else if (this.overlaps(pt, this.rightButton)){
                 this.direction = Directions.Right;
             } else {
                 this.direction = Directions.Idle;    
             }
 
-            if (this.overlaps(x, y, this.jumpButton)){
+            if (this.overlaps(pt, this.jumpButton)){
                 this.jump = true;
             } 
-			
-			this.touchActive = {x: x, y: y};
-			
+					
 			e.preventDefault();
 		}, false);
 		
@@ -48,12 +44,14 @@ class Touch{
 			var touchobj = e.changedTouches[0];
 			var rect = canvas.getBoundingClientRect();
 			
-			let x = (touchobj.clientX - rect.left) * canvas.width / canvas.clientWidth;
-			let y = (touchobj.clientY - rect.top) * canvas.height / canvas.clientHeight;
+			let x = (touchobj.clientX - rect.left);
+			let y = (touchobj.clientY - rect.top);
+
+            let pt = this.fullScreenToCanvas(canvas, x,y);
 				
-            if (this.overlaps(x, y, this.leftButton)){
+            if (this.overlaps(pt, this.leftButton)){
                 this.direction = Directions.Left;
-            }else if (this.overlaps(x, y, this.rightButton)){
+            }else if (this.overlaps(pt, this.rightButton)){
                 this.direction = Directions.Right;
             } else {
                 this.direction = Directions.Idle;
@@ -66,9 +64,11 @@ class Touch{
 			var touchobj = e.changedTouches[0];
 			var rect = canvas.getBoundingClientRect();
 			
-			let x = (touchobj.clientX - rect.left) * canvas.width / canvas.clientWidth;
-			let y = (touchobj.clientY - rect.top) * canvas.height / canvas.clientHeight;
+			let x = (touchobj.clientX - rect.left);
+			let y = (touchobj.clientY - rect.top);
 			
+            let pt = this.fullScreenToCanvas(canvas, x,y);
+
 			this.direction = Directions.Idle;			            
             this.jump = false;
 
@@ -76,8 +76,30 @@ class Touch{
 		}, false);
 	}
     
-    overlaps(x,y, button){
-        return x > button.x && y > button.y && x < button.x + button.w && y < button.y + button.h;
+    fullScreenToCanvas(canvas, x, y){
+        if (screen.width / canvas.width < screen.height/canvas.height){
+            //width fits, height is adjusted.
+            let width = screen.width;
+            let height = canvas.height * screen.width / canvas.width;
+            let left = 0;
+            let top = (screen.height - height) / 2;
+
+            return {x: (x - left) / width * canvas.width, y: (y - top) / height * canvas.height};
+        }else {
+            //height fits, width is adjusted
+            let width = canvas.width * screen.height / canvas.height;
+            let height = screen.height;
+            let left = (screen.width - width) / 2;
+            let top = 0;
+
+            return {x: (x - left) / width * canvas.width, y: (y - top) / height * canvas.height};
+        }
+
+    }
+
+
+    overlaps(pt, button){
+        return pt.x > button.x && pt.y > button.y && pt.x < button.x + button.w && pt.y < button.y + button.h;
     }
 
     draw(gfx){
