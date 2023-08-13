@@ -6,6 +6,9 @@ class Touch{
 		this.debug = 0;
 		this.pan = Directions.Idle;
 
+        this.directionTouchIdentifier =-1;
+        this.jumpTouchIdentifier =-1;
+
         this.leftButton  = {x:   30, y:440, w: 98, h: 98};
         this.rightButton = {x:  130, y:440, w: 98, h: 98};
         this.jumpButton  = {x: 1080, y:440, w: 98, h: 98};
@@ -15,63 +18,68 @@ class Touch{
             if (canvas.requestFullscreen && ! canvas.fullscreenElement){
                 canvas.requestFullscreen();
             }
+            
+            let rect = canvas.getBoundingClientRect();
+			for (let touchobj of e.changedTouches){
+                let x = (touchobj.clientX - rect.left);
+                let y = (touchobj.clientY - rect.top);
 
-			var touchobj = e.changedTouches[0];
-			var rect = canvas.getBoundingClientRect();
-			
-            let x = (touchobj.clientX - rect.left);
-			let y = (touchobj.clientY - rect.top);
+                let pt = this.fullScreenToCanvas(canvas, x,y);
+                
+                if (this.overlaps(pt, this.leftButton)){
+                    this.direction = Directions.Left;
+                    this.directionTouchIdentifier = touchobj.identifier;
+                } else if (this.overlaps(pt, this.rightButton)){
+                    this.direction = Directions.Right;
+                    this.directionTouchIdentifier = touchobj.identifier;
+                } 
 
-            let pt = this.fullScreenToCanvas(canvas, x,y);
-			
-            if (this.overlaps(pt, this.leftButton)){
-                this.direction = Directions.Left;
-            } else if (this.overlaps(pt, this.rightButton)){
-                this.direction = Directions.Right;
-            } else {
-                this.direction = Directions.Idle;    
+                if (this.overlaps(pt, this.jumpButton)){
+                    this.jump = true;
+                    this.jumpTouchIdentifier = touchobj.identifier;
+                } 
             }
-
-            if (this.overlaps(pt, this.jumpButton)){
-                this.jump = true;
-            } 
-					
 			e.preventDefault();
 		}, false);
 		
 		canvas.addEventListener('touchmove', (e)=>{
 			if (e.buttons == 0) return;
-			var touchobj = e.changedTouches[0];
-			var rect = canvas.getBoundingClientRect();
-			
-			let x = (touchobj.clientX - rect.left);
-			let y = (touchobj.clientY - rect.top);
+            var rect = canvas.getBoundingClientRect();
+			for (let touchobj of e.changedTouches){                 
+                let x = (touchobj.clientX - rect.left);
+                let y = (touchobj.clientY - rect.top);
 
-            let pt = this.fullScreenToCanvas(canvas, x,y);
-				
-            if (this.overlaps(pt, this.leftButton)){
-                this.direction = Directions.Left;
-            }else if (this.overlaps(pt, this.rightButton)){
-                this.direction = Directions.Right;
-            } else {
-                this.direction = Directions.Idle;
+                let pt = this.fullScreenToCanvas(canvas, x,y);
+                
+                if (this.directionTouchIdentifier == touchobj.identifier){
+                    if (this.overlaps(pt, this.leftButton)){
+                        this.direction = Directions.Left;
+                    }else if (this.overlaps(pt, this.rightButton)){
+                        this.direction = Directions.Right;
+                    } else {
+                        this.direction = Directions.Idle;
+                    }
+                }
             }
-
 			e.preventDefault();
 		}, false);
 		
 		canvas.addEventListener('touchend', (e)=>{
-			var touchobj = e.changedTouches[0];
-			var rect = canvas.getBoundingClientRect();
-			
-			let x = (touchobj.clientX - rect.left);
-			let y = (touchobj.clientY - rect.top);
-			
-            let pt = this.fullScreenToCanvas(canvas, x,y);
+            var rect = canvas.getBoundingClientRect();
+			for (let touchobj of e.changedTouches){                
+                let x = (touchobj.clientX - rect.left);
+                let y = (touchobj.clientY - rect.top);
+                
+                //let pt = this.fullScreenToCanvas(canvas, x,y);
+                
+                if (this.directionTouchIdentifier == touchobj.identifier){
+                    this.direction = Directions.Idle;
+                }
 
-			this.direction = Directions.Idle;			            
-            this.jump = false;
-
+                if (this.jumpTouchIdentifier == touchobj.identifier){
+                    this.jump = false;
+                }
+            }
 			e.preventDefault();
 		}, false);
 	}
