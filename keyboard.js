@@ -76,4 +76,6 @@ class Keyboard{
 			return false;
 		}, false);
 	}
+
+	draw(gfx){}
 }

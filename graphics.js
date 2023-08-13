@@ -3,10 +3,11 @@ class Graphics{
        this.ctx = ctx;
        this.loadImage("graphics/mario.png",   (img)=>{this.mario = img;});
        this.loadImage("graphics/enemies.png", (img)=>{this.enemies = img;});
-       this.loadImage("graphics/levels.png", (img)=>{this.levels = img;});
+       this.loadImage("graphics/levels.png",  (img)=>{this.levels = img;});
        this.loadImage("graphics/terrain.png", (img)=>{this.terrain = img;});
        this.loadImage("graphics/tree.png",    (img)=>{this.tree = img;});
-       this.loadImage("graphics/grass.png",    (img)=>{this.grass = img;});
+       this.loadImage("graphics/grass.png",   (img)=>{this.grass = img;});
+       this.loadImage("graphics/buttons.png", (img)=>{this.buttons = img;});
     }
     
     loadImage(file, callback){
@@ -62,6 +63,10 @@ class Graphics{
     
     drawShell(x,y, frame, color){
       this.ctx.drawImage(this.enemies, 63 * (frame % 3), 183 + 120 * color, 60, 42, x, y - 16, 60, 42);
+    }
+
+    drawButton(x,y, id){
+      this.ctx.drawImage(this.buttons, 98 * id, 0, 98, 98, x, y, 98, 98);
     }
     
     createBlueSkyGradient(){

@@ -4,6 +4,7 @@
 <script src="graphics.js"></script>
 <script src="levels.js"></script>
 <script src="keyboard.js"></script>
+<script src="touch.js"></script>
 <script src="sound.js"></script>
 <style>
 html, body {
@@ -280,12 +281,12 @@ class Game{
 		this.turtleAnimation = new Animation(2, 300);
 		
 		this.screenX = 0;
-		this.screenPan = 300;
+		this.screenPan = 360;
 		this.level = parseLevel();
 		this.terrain = new Terrain(this.level);
 		this.skyGradient = gfx.createBlueSkyGradient();
 		this.lastFacing = 1;
-		this.mario = new Mario(300,461,0.0,0.0);				
+		this.mario = new Mario(360,461,0.0,0.0);				
 		this.enemies = [];
 		this.spawnEnemies();
 	}
@@ -357,6 +358,8 @@ class Game{
 		if ((this.controls.debug % 3) > 0){
 			this.drawDebug(dt);
 		}
+
+		this.controls.draw(this.gfx);
 	}
 
 	spawnEnemies(){
@@ -496,8 +499,24 @@ function initGame(){
 	var canvas = document.getElementById("MyCanvas");
 	var ctx = canvas.getContext("2d");
 	var graphics = new Graphics(ctx);
+
 	var keyboard = new Keyboard();
-	var game = new Game(graphics, keyboard);
+	var touch = new Touch(canvas);
+	var controls;
+
+	if (navigator.userAgent.match(/Android/i)
+         || navigator.userAgent.match(/webOS/i)
+         || navigator.userAgent.match(/iPhone/i)
+         || navigator.userAgent.match(/iPad/i)
+         || navigator.userAgent.match(/iPod/i)
+         || navigator.userAgent.match(/BlackBerry/i)
+         || navigator.userAgent.match(/Windows Phone/i)) {
+		controls = touch;
+	} else {
+		controls = keyboard;
+	}
+	
+	var game = new Game(graphics, controls);
 	setInterval(()=>window.requestAnimationFrame((time)=>game.update(time)), 16);
 }
 </script>
