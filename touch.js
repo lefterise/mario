@@ -11,12 +11,13 @@ class Touch{
 
         this.leftButton  = {x:   30, y:440, w: 98, h: 98};
         this.rightButton = {x:  130, y:440, w: 98, h: 98};
-        this.jumpButton  = {x: 1080, y:440, w: 98, h: 98};
+        this.jumpButton  = {x: 1040, y:440, w: 98, h: 98};
 
 		canvas.addEventListener('touchstart', (e)=>{
             
-            if (canvas.requestFullscreen && ! canvas.fullscreenElement){
-                canvas.requestFullscreen();
+            if (canvas.requestFullscreen && !canvas.fullscreenElement){
+                screen.orientation.lock("landscape");
+                canvas.requestFullscreen();                
             }
             
             let rect = canvas.getBoundingClientRect();
