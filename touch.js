@@ -19,8 +19,8 @@ class Touch{
 			var touchobj = e.changedTouches[0];
 			var rect = canvas.getBoundingClientRect();
 			
-			let x = touchobj.clientX - rect.left;
-			let y = touchobj.clientY - rect.top;
+            let x = (touchobj.clientX - rect.left) * canvas.width / canvas.clientWidth;
+			let y = (touchobj.clientY - rect.top) * canvas.height / canvas.clientHeight;
 			
             if (x > 30 && y > 440 && x < 30 + 98 && y < 440 +98){
                 this.direction = Directions.Left;
@@ -48,8 +48,8 @@ class Touch{
 			var touchobj = e.changedTouches[0];
 			var rect = canvas.getBoundingClientRect();
 			
-			let x = touchobj.clientX - rect.left;
-			let y = touchobj.clientY - rect.top;
+			let x = (touchobj.clientX - rect.left) * canvas.width / canvas.clientWidth;
+			let y = (touchobj.clientY - rect.top) * canvas.height / canvas.clientHeight;
 				
             if (this.overlaps(x, y, this.leftButton)){
                 this.direction = Directions.Left;
@@ -66,8 +66,8 @@ class Touch{
 			var touchobj = e.changedTouches[0];
 			var rect = canvas.getBoundingClientRect();
 			
-			let x = touchobj.clientX - rect.left;
-			let y = touchobj.clientY - rect.top;
+			let x = (touchobj.clientX - rect.left) * canvas.width / canvas.clientWidth;
+			let y = (touchobj.clientY - rect.top) * canvas.height / canvas.clientHeight;
 			
 			this.direction = Directions.Idle;			            
             this.jump = false;
