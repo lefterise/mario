@@ -6,7 +6,7 @@ const Directions = {
 
 //https://www.toptal.com/developers/keycode
 class Keyboard{
-	constructor(){
+	constructor(canvas){
 		this.direction = Directions.Idle;
 		this.jump = false;
 		this.run = false;
@@ -37,11 +37,13 @@ class Keyboard{
 				this.run = true;
 			}
 
-
-
 			if (ev.code == "KeyD"){
 				this.debug++;
 			}
+
+			if (ev.code == "KeyF" && canvas.requestFullscreen && ! canvas.fullscreenElement){
+                canvas.requestFullscreen();
+            }
 
 			ev.preventDefault();    
 			return false;

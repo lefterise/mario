@@ -286,7 +286,7 @@ class Game{
 		this.terrain = new Terrain(this.level);
 		this.skyGradient = gfx.createBlueSkyGradient();
 		this.lastFacing = 1;
-		this.mario = new Mario(360,461,0.0,0.0);				
+		this.mario = new Mario(360, 461, 0.0, 0.0);				
 		this.enemies = [];
 		this.spawnEnemies();
 	}
@@ -294,8 +294,8 @@ class Game{
 	update(time){
 	    let dt = time - (this.prevTime ?? time);
 	    this.prevTime = time;
-		
-		if (dt > 1000) return;
+				
+		if (dt == 0 || dt > 1000) return;
 
 		this.treeAnimation.update(dt);
 		this.coinAnimation.update(dt);
@@ -500,7 +500,7 @@ function initGame(){
 	var ctx = canvas.getContext("2d");
 	var graphics = new Graphics(ctx);
 
-	var keyboard = new Keyboard();
+	var keyboard = new Keyboard(canvas);
 	var touch = new Touch(canvas);
 	var controls;
 

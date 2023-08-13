@@ -6,9 +6,9 @@ class Touch{
 		this.debug = 0;
 		this.pan = Directions.Idle;
 
-        this.leftButton = {x: 30, y:440, w: 98, h: 98}
-        this.rightButton = {x: 130, y:440, w: 98, h: 98}
-        this.jumpButton = {x: 1080, y:440, w: 98, h: 98}
+        this.leftButton  = {x:   30, y:440, w: 98, h: 98};
+        this.rightButton = {x:  130, y:440, w: 98, h: 98};
+        this.jumpButton  = {x: 1080, y:440, w: 98, h: 98};
 
 		canvas.addEventListener('touchstart', (e)=>{
             
@@ -103,8 +103,8 @@ class Touch{
     }
 
     draw(gfx){
-		gfx.drawButton(this.leftButton.x, this.leftButton.y,0);
+		gfx.drawButton(this.leftButton.x,  this.leftButton.y, 0);
 		gfx.drawButton(this.rightButton.x, this.rightButton.y,1);
-		gfx.drawButton(this.jumpButton.x, this.jumpButton.y,2);
+		gfx.drawButton(this.jumpButton.x,  this.jumpButton.y, 2);
     }
 }
