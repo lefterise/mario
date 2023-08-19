@@ -41,7 +41,11 @@ var level1 = [
      if (c == "?") return 12+8;
      if (c == "J") return 1+8;
      if (c == "*") return 101+8;
-     if (c == "w") return 102+8;
+     if (c == "w") {
+        if (u == 'o')
+            return 106+8;
+        return 102+8;
+     }
      if (c == "€") return 103+8;
      if (c == "ˆ") return 104+8;
      if (c == "‰") return 105+8;

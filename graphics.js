@@ -8,6 +8,7 @@ class Graphics{
        this.loadImage("graphics/tree.png",    (img)=>{this.tree = img;});
        this.loadImage("graphics/grass.png",   (img)=>{this.grass = img;});
        this.loadImage("graphics/buttons.png", (img)=>{this.buttons = img;});
+       this.loadImage("graphics/joystick.png", (img)=>{this.joystick = img;});
     }
     
     loadImage(file, callback){
@@ -68,6 +69,10 @@ class Graphics{
 
     drawButton(x,y, id){
       this.ctx.drawImage(this.buttons, 98 * id, 0, 98, 98, x, y, 98, 98);
+    }
+
+    drawJoystick(x,y){
+      this.ctx.drawImage(this.joystick, 0, 0, 200, 20, x, y, 200, 20);
     }
     
     createBlueSkyGradient(){

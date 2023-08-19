@@ -8,8 +8,19 @@
 <script src="touch.js"></script>
 <script src="sound.js"></script>
 <style>
-html, body {
+html,
+body {
+  width: 100%;
+  height: 100%;
   margin: 0;
+}
+canvas {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 </style>
 
@@ -315,6 +326,17 @@ class AnimationBehavior{
 		this.startFrame = startFrame;
 	}
 
+	changeSpeed(frameDuration){
+		this.animation.transitionTime = frameDuration;
+	}
+
+	reset(startFrame, numFrames, frameDuration){
+		this.animation.transitionTime = frameDuration;
+		this.startFrame = startFrame;
+		this.animation.frame = 0;
+		this.animation.frames = numFrames;
+	}
+
 	computeFuturePosition(moveable, dt, terrain){
 		this.animation.update(dt);
 		moveable.frame = this.animation.frame + this.startFrame;
@@ -340,6 +362,28 @@ class AlarmBehavior{
 	reactToNewPosition(moveable, dt, terrain){}
 }
 
+class MinimumX{
+	constructor(x){
+		this.minX = x;
+	}
+	computeFuturePosition(moveable, dt, terrain){		
+		if (moveable.futureX < this.minX) moveable.futureX = this.minX;
+	}
+	
+	reactToNewPosition(moveable, dt, terrain){}
+}
+
+class MaximumX{
+	constructor(x){
+		this.maxX = x;
+	}
+	computeFuturePosition(moveable, dt, terrain){		
+		if (moveable.futureX > this.maxX) moveable.futureX = this.maxX;
+	}
+	
+	reactToNewPosition(moveable, dt, terrain){}
+}
+
 class Mario extends Moveable{
 	constructor(x,y,dx,dy){
 		super(x,y,dx,dy);
@@ -351,8 +395,10 @@ class Mario extends Moveable{
 			{x:-26, y:-25}, 
 			{x: 26, y:-25},
 		];
-
-		this.behaviours = [new RespectsTerrain()];
+		this.animation = new AnimationBehavior(0,1,250);
+		this.behaviours = [new RespectsTerrain(), new MinimumX(30), new MaximumX(179*60-30), this.animation];
+		this.facing = 1;
+		this.direction = Directions.Idle;
 	}
 
 	collidesWith(other){
@@ -365,6 +411,35 @@ class Mario extends Moveable{
 			if (other.touch)
 				other.touch(this);
 		}
+	}
+
+	jump(){
+		this.dy = -1;
+		sound.jump.play();
+	}
+
+	setDirection(direction, running){	
+		if (direction != Directions.Idle){
+			this.facing = direction == Directions.Left ? 0 : 1;
+		}
+
+		if (direction != this.direction){
+			if (direction != Directions.Idle){
+				this.animation.reset(0,2,250); //walking
+			}else{
+				this.animation.reset(0,1,250); //standing
+			}
+		}
+
+		if (running){
+			this.animation.changeSpeed(125);
+		}else{
+			this.animation.changeSpeed(250);
+		}
+
+		this.dx = 0.2 * direction * (running ? 2 : 1);
+
+		this.direction = direction;
 	}
 }
 
@@ -534,7 +609,6 @@ class Game{
 		this.level = parseLevel();
 		this.terrain = new Terrain(this.level);
 		this.skyGradient = gfx.createBlueSkyGradient();
-		this.lastFacing = 1;
 		this.mario = new Mario(360, 461, 0.0, 0.0);
 		this.enemies = [];
 
@@ -561,17 +635,10 @@ class Game{
 		let direction = this.controls.direction;
 		
 		if (this.controls.jump && this.mario.isTouchingGround){
-			this.mario.dy = -1;
-			sound.jump.play();
+			this.mario.jump();			
 		}
 
-		let facing = this.lastFacing;
-		if (direction !=0){
-			facing = direction == 1 ? 1 : 0;			
-			this.lastFacing = facing;			
-		}
-
-		this.mario.dx = 0.2 * direction * (this.controls.run ? 2 : 1);
+		this.mario.setDirection(this.controls.direction, this.controls.run);
 
 		if (this.controls.pan != Directions.Idle){
 			this.screenPan += Math.round((this.controls.pan == Directions.Left ? 1: -1) * dt * 0.3);
@@ -581,7 +648,7 @@ class Game{
 			if (this.screenPan > 21 * 60 - 200) this.screenPan = 21 * 60 - 200;
 		}
 
-		if (this.mario.y > 42*14) {
+		if (this.mario.y > 42*14) { //mario fell off screen
 			this.mario.y = 0;
 			sound.die.play();
 		}
@@ -612,7 +679,7 @@ class Game{
 		if ((this.controls.debug % 3) < 2){
 			this.drawTerrain();
 			this.drawEnemies();
-			this.gfx.drawMario(this.mario.x - this.screenX - 30,this.mario.y - 83,direction != 0 ? this.turtleAnimation.frame : 0,0,facing);
+			this.gfx.drawMario(this.mario.x - this.screenX - 30, this.mario.y - 83, this.mario.frame, 0, this.mario.facing);
 		}
 		if ((this.controls.debug % 3) > 0){
 			this.drawDebug(dt);
@@ -703,13 +770,16 @@ class Game{
 		           if (tileId == 101+8){
 					  this.gfx.drawCoin(60 * x - screenOffset, 42 * y + 16, this.coinAnimation.frame);
 				   }else if (tileId == 102+8){
-					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);					
+					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 100+8){
 					  this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 13+8){
 					  this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame);
 				   }else if (tileId < 8){
 				     this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId, 0);
+                   }else if (tileId == 106+8){
+					 this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
+					 this.gfx.drawTileOld(60 * x - screenOffset, 42*y, 9);
                    }else{
 				     this.gfx.drawTileOld(60 * x - screenOffset, 42*y, tileId-8);
                    }				   
