@@ -46,7 +46,7 @@ class Graphics{
     }
   
     drawGoomba(x,y, frame, color){    
-      this.ctx.drawImage(this.enemies, 63 * frame + 3 * color,0, 60, 42, x, y, 60, 42);
+      this.ctx.drawImage(this.enemies, 63 * frame + 3 * color,0, 60, 42, x, y-41, 60, 42);
     }
     
     drawSpiney(x,y, frame, direction){    
