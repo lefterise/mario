@@ -221,25 +221,30 @@ class Moveable{
 class RespectsTerrain {
 	computeFuturePosition(moveable, dt, terrain){
 		let tDiagonal = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, moveable.dx, moveable.dy, dt, moveable.collisionPoints);
-		let x = moveable.x + moveable.dx * tDiagonal;
-		let y = moveable.y + moveable.dy * tDiagonal;
 		
-		if (isNaN(x) || isNaN(y)){
-			debugger;
-		}	
-		//check if mario can move stricly in dx or dy for the remainder of the distance
-		let tHorizontal = terrain.getMultipointCollisionDistance(x, y, moveable.dx, 0.0, dt - tDiagonal, moveable.collisionPoints);
-		x = x + moveable.dx * tHorizontal;	
-		if (isNaN(x) || isNaN(y)){
+		if (isNaN(tDiagonal)){
 			debugger;
 		}	
 
-		let tVertical = terrain.getMultipointCollisionDistance(x, y, 0.0, moveable.dy, dt - tDiagonal, moveable.collisionPoints);
-		y = y + moveable.dy * tVertical;
+		let x = moveable.x + moveable.dx * tDiagonal;
+		let y = moveable.y + moveable.dy * tDiagonal;
+				
+		//check if mario can move stricly in dx or dy for the remainder of the distance
+		let tHorizontal = terrain.getMultipointCollisionDistance(x, y, moveable.dx, 0.0, dt - tDiagonal, moveable.collisionPoints);
 		
-		if (isNaN(x) || isNaN(y)){
+		if (isNaN(tHorizontal)){
+			debugger;
+		}	
+
+		x = x + moveable.dx * tHorizontal;	
+
+		let tVertical = terrain.getMultipointCollisionDistance(x, y, 0.0, moveable.dy, dt - tDiagonal, moveable.collisionPoints);
+		
+		if (isNaN(tVertical)){
 			debugger;
 		}		
+
+		y = y + moveable.dy * tVertical;
 		
 		moveable.futureX = x;
 		moveable.futureY = y;
@@ -293,6 +298,36 @@ class AvoidsCliffs{
 	}
 }
 
+class AnimationBehavior{
+	constructor(startFrame, numFrames, frameDuration){
+		this.animation = new Animation(numFrames, frameDuration);
+		this.startFrame = startFrame;
+	}
+
+	computeFuturePosition(moveable, dt, terrain){
+		this.animation.update(dt);
+		moveable.frame = this.animation.frame + this.startFrame;
+	}
+	
+	reactToNewPosition(moveable, dt, terrain){}
+}
+
+class AlarmBehavior{
+	constructor(delay, name){
+		this.delay = delay;
+		this.name = name;
+		this.timeElapsed = 0;
+	}
+
+	computeFuturePosition(moveable, dt, terrain){		
+		this.timeElapsed += dt;
+		if (this.timeElapsed > this.delay){
+			moveable.alarm(this.name)
+		}
+	}
+	
+	reactToNewPosition(moveable, dt, terrain){}
+}
 
 class Mario extends Moveable{
 	constructor(x,y,dx,dy){
@@ -310,7 +345,7 @@ class Mario extends Moveable{
 	}
 
 	collidesWith(other){
-		if (other.state == States.Dead) return;
+		if (other.state == States.Dead || other.state == States.Dying) return;
 		let relativeLocation = this.getRelativeLocationTo(other);
 		if (relativeLocation.above){
 			this.dy = -1.1;
@@ -330,11 +365,11 @@ class Goomba extends Moveable{
 			{x: 56, y:-41},
 		];
 
-		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls()];
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(0,2,300)];		
 	}
 
 	collidesWith(other){
-		if (this.state == States.Dead) return;
+		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
 
 		let relativeLocation = this.getRelativeLocationTo(other);
 		if (relativeLocation.above){
@@ -347,7 +382,16 @@ class Goomba extends Moveable{
 	}
 
 	stomp(){
-		this.state = States.Dying;
+		this.state = States.Dying;		
+		this.behaviours = [new AlarmBehavior(1000, "CleanupCorpse")];
+		this.frame = 2;
+		sound.stomp.play();
+	}
+
+	alarm(name){
+		if (name == "CleanupCorpse"){
+			this.state = States.Dead;
+		}
 	}
 }
 
@@ -361,10 +405,12 @@ class Koopa extends Moveable{
 			{x: 56, y:-41},
 		];
 
-		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls()];
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(0,2,300)];
 	}
 
 	collidesWith(other){
+		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+
 		let relativeLocation = this.getRelativeLocationTo(other);
 		if (relativeLocation.left || relativeLocation.right){
 			this.dx = -this.dx;
@@ -373,6 +419,20 @@ class Koopa extends Moveable{
 		if (relativeLocation.above){
 			this.dy = 0;
 			this.futureY = this.y;
+		}
+	}
+
+	stomp(){
+		this.behaviours = [new AlarmBehavior(3000, "PrepareToEmerge")];
+		this.frame = 3;
+		sound.stomp.play();
+	}
+
+	alarm(name){
+		if (name == "PrepareToEmerge"){
+			this.behaviours = [new AnimationBehavior(2,3,100), new AlarmBehavior(500, "Emerge")];
+		}else if (name == "Emerge"){
+			this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(0,2,300)];
 		}
 	}
 }
@@ -387,10 +447,12 @@ class RedKoopa extends Moveable{
 			{x: 56, y:-41},
 		];
 
-		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AvoidsCliffs()];
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AvoidsCliffs(), new AnimationBehavior(0,2,300)];
 	}
 
 	collidesWith(other){
+		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+
 		let relativeLocation = this.getRelativeLocationTo(other);
 		if (relativeLocation.left || relativeLocation.right){
 			this.dx = -this.dx;
@@ -399,6 +461,20 @@ class RedKoopa extends Moveable{
 		if (relativeLocation.above){
 			this.dy = 0;
 			this.futureY = this.y;
+		}
+	}
+
+	stomp(){		
+		this.behaviours = [new AlarmBehavior(3000, "PrepareToEmerge")];
+		this.frame = 3;
+		sound.stomp.play();
+	}
+
+	alarm(name){
+		if (name == "PrepareToEmerge"){
+			this.behaviours = [new AnimationBehavior(2,3,100), new AlarmBehavior(500, "Emerge")];
+		}else if (name == "Emerge"){
+			this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AvoidsCliffs(), new AnimationBehavior(0,2,300)];
 		}
 	}
 }
@@ -418,8 +494,11 @@ class Game{
 		this.terrain = new Terrain(this.level);
 		this.skyGradient = gfx.createBlueSkyGradient();
 		this.lastFacing = 1;
-		this.mario = new Mario(360, 461, 0.0, 0.0);				
+		this.mario = new Mario(360, 461, 0.0, 0.0);
 		this.enemies = [];
+
+		this.performance = [];
+		this.perfIndex = 0;
 		this.spawnEnemies();
 	}
 	
@@ -477,10 +556,17 @@ class Game{
 		
 		this.spawnEnemies();
 
+		this.performance[this.perfIndex] = dt;
+		this.perfIndex = (this.perfIndex + 1) % 40;
+
 		this.gfx.ctx.fillStyle = this.skyGradient;		
 		this.gfx.ctx.fillRect(0, 0, 1200, 546);
 		this.gfx.ctx.fillStyle = "black";
-		this.gfx.ctx.fillText(dt.toFixed(0), 10, 50);
+		let txtx = 10;
+		for (let m of this.performance){
+			this.gfx.ctx.fillText(m.toFixed(0), txtx, 50);
+			txtx += 20;
+		}
 
 		if ((this.controls.debug % 3) < 2){
 			this.drawTerrain();
@@ -519,7 +605,7 @@ class Game{
 	}
 
 	checkEnemiesCollisions(){		
-		this.enemies = this.enemies.filter((e)=>e.y < 1000);
+		this.enemies = this.enemies.filter((e)=>e.y < 1000 && e.state != States.Dead);
 		
 		for (let i = 0; i < this.enemies.length - 1; i++) {
 			for (let j = i + 1; j < this.enemies.length; j++) {
@@ -555,11 +641,11 @@ class Game{
 	drawEnemies(){
 		for (let e of this.enemies){
 			if (e.constructor.name == "Goomba"){
-				this.gfx.drawGoomba(e.x - this.screenX, e.y -41, this.turtleAnimation.frame,0);
+				this.gfx.drawGoomba(e.x - this.screenX, e.y -41, e.frame, 0);
 			}else if (e.constructor.name == "Koopa"){
-				this.gfx.drawTurtle(e.x - this.screenX, e.y -65, this.turtleAnimation.frame, 0, e.dx > 0 ? 1 : 0);
+				this.gfx.drawTurtle(e.x - this.screenX, e.y, e.frame, 0, e.dx > 0 ? 1 : 0);
 			}else if (e.constructor.name == "RedKoopa"){
-				this.gfx.drawTurtle(e.x - this.screenX, e.y -65, this.turtleAnimation.frame, 1, e.dx > 0 ? 1 : 0);
+				this.gfx.drawTurtle(e.x - this.screenX, e.y, e.frame, 1, e.dx > 0 ? 1 : 0);
 			}
 		}
 	}
@@ -577,8 +663,6 @@ class Game{
 					  this.gfx.drawCoin(60 * x - screenOffset, 42 * y + 16, this.coinAnimation.frame);
 				   }else if (tileId == 102+8){
 					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
-				   }else if (tileId == 103+8){
-					  //this.gfx.drawGoomba(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame,0);
 				   }else if (tileId == 104 +8|| tileId == 105+8){
 					  //this.gfx.drawTurtle(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame, 1-(tileId - 104),0);
 					  //this.gfx.drawShell(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame, 1-(tileId - 104),0);
@@ -606,13 +690,13 @@ class Game{
 		for (let x=0; x<21;++x){
 			this.gfx.ctx.beginPath();
 	        this.gfx.ctx.moveTo(x * 60 - screenOffset, 0);
-		    this.gfx.ctx.lineTo(x * 60 - screenOffset, 13*42);
+		    this.gfx.ctx.lineTo(x * 60 - screenOffset, 13 * 42);
 	        this.gfx.ctx.stroke();
 		}
 		for (let y=0; y<13;++y){
 			this.gfx.ctx.beginPath();
-	        this.gfx.ctx.moveTo(0, y*42);
-		    this.gfx.ctx.lineTo(21 * 60, y*42);
+	        this.gfx.ctx.moveTo(0,       y * 42);
+		    this.gfx.ctx.lineTo(21 * 60, y * 42);
 	        this.gfx.ctx.stroke();
 		}
 
@@ -623,7 +707,7 @@ class Game{
 			if (x+tileOffset >= this.level.length-1) break;
 			for (let y=0; y<13;++y){
 			   if (this.terrain.isSolid(x+tileOffset,y)){
-				   this.gfx.ctx.strokeRect(x * 60 - screenOffset, y*42, 60,42);
+				   this.gfx.ctx.strokeRect(x * 60 - screenOffset, y * 42, 60, 42);
 			   }
 		    }
 		}

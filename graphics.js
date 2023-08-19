@@ -34,11 +34,11 @@ class Graphics{
     }
     
     drawTree(x,y, frame){
-        this.ctx.drawImage(this.tree, 180,84 * (frame % 3), 180, 84, x-60, y-58, 180, 84);
+        this.ctx.drawImage(this.tree, 180,84 * frame, 180, 84, x-60, y-58, 180, 84);
     }
     
     drawWeed(x,y, frame){
-        this.ctx.drawImage(this.grass, 180, 42 * (frame % 3), 180, 42, x, y-16, 180, 42);
+        this.ctx.drawImage(this.grass, 180, 42 * frame, 180, 42, x, y-16, 180, 42);
     }
     
     drawCoin(x,y, frame){    
@@ -46,24 +46,25 @@ class Graphics{
     }
   
     drawGoomba(x,y, frame, color){    
-      this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 3 * color),0, 60, 42, x, y, 60, 42);
+      this.ctx.drawImage(this.enemies, 63 * frame + 3 * color,0, 60, 42, x, y, 60, 42);
     }
     
     drawSpiney(x,y, frame, direction){    
-      this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 2 * direction),90, 60, 42, x, y - 14, 60, 42);
+      this.ctx.drawImage(this.enemies, 63 * (frame + 2 * direction),90, 60, 42, x, y - 14, 60, 42);
     }
     
     drawFish(x,y, frame, direction){    
-      this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 2 * direction),135, 60, 45, x, y - 14, 60, 45);
+      this.ctx.drawImage(this.enemies, 63 * (frame + 2 * direction),135, 60, 45, x, y - 14, 60, 45);
     }
     
     drawTurtle(x,y, frame, color, direction){
-      this.ctx.drawImage(this.enemies, 63 * (frame % 2 + 2 * direction), 231 + 123 * color, 60, 66, x, y, 60, 66);	
+      if (frame < 2){
+        this.ctx.drawImage(this.enemies, 63 * (frame + 2 * direction), 231 + 123 * color, 60, 66, x, y - 65, 60, 66);	//walking
+      }else{
+        this.ctx.drawImage(this.enemies, 63 * (frame-2), 183 + 120 * color, 60, 42, x, y-41, 60, 42); //cowering
+      }
     }
     
-    drawShell(x,y, frame, color){
-      this.ctx.drawImage(this.enemies, 63 * (frame % 3), 183 + 120 * color, 60, 42, x, y - 16, 60, 42);
-    }
 
     drawButton(x,y, id){
       this.ctx.drawImage(this.buttons, 98 * id, 0, 98, 98, x, y, 98, 98);
