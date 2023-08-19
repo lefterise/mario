@@ -159,9 +159,11 @@ class Moveable{
 		this.dyTerminal = 1.0; //in pixels per millisecond
 		this.isTouchingGround = false;
 		this.isBumpingCeiling = false;
-		this.collisionPoints = [];
-		this.futureX = x;
-		this.futureY = y;
+		this.collisionPoints = []; //The first four must be the corners: bottom-left, bottom-right, top-left, top-right 
+		this.futureX = x; //in pixels
+		this.futureY = y; //in pixels
+
+		this.behaviours = [];
 	}
 
 
@@ -199,50 +201,98 @@ class Moveable{
 		return {dx: Math.max(dx1,dx2), dy: Math.max(dy1,dy2)};
 	}
 
-	calculateFuturePosition(dt, terrain, enemies){
-		let tDiagonal = terrain.getMultipointCollisionDistance(this.x, this.y, this.dx, this.dy, dt, this.collisionPoints);
-		let x = this.x + this.dx * tDiagonal;
-		let y = this.y + this.dy * tDiagonal;
+	calculateFuturePosition(dt, terrain){
+		for (let b of this.behaviours){
+			b.computeFuturePosition(this, dt, terrain);
+		}
+	}
+	
+	applyPosition(dt, terrain){
+		this.x = this.futureX;
+		this.y = this.futureY;
+
+		for (let b of this.behaviours){
+			b.reactToNewPosition(this, dt, terrain);
+		}
+	}
+}
+
+//Composable behaviors
+class RespectsTerrain {
+	computeFuturePosition(moveable, dt, terrain){
+		let tDiagonal = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, moveable.dx, moveable.dy, dt, moveable.collisionPoints);
+		let x = moveable.x + moveable.dx * tDiagonal;
+		let y = moveable.y + moveable.dy * tDiagonal;
 		
 		if (isNaN(x) || isNaN(y)){
 			debugger;
 		}	
 		//check if mario can move stricly in dx or dy for the remainder of the distance
-		let tHorizontal = terrain.getMultipointCollisionDistance(x, y, this.dx, 0.0, dt - tDiagonal, this.collisionPoints);
-		x = x + this.dx * tHorizontal;	
+		let tHorizontal = terrain.getMultipointCollisionDistance(x, y, moveable.dx, 0.0, dt - tDiagonal, moveable.collisionPoints);
+		x = x + moveable.dx * tHorizontal;	
 		if (isNaN(x) || isNaN(y)){
 			debugger;
 		}	
 
-		let tVertical = terrain.getMultipointCollisionDistance(x, y, 0.0, this.dy, dt - tDiagonal, this.collisionPoints);
-		y = y + this.dy * tVertical;
+		let tVertical = terrain.getMultipointCollisionDistance(x, y, 0.0, moveable.dy, dt - tDiagonal, moveable.collisionPoints);
+		y = y + moveable.dy * tVertical;
 		
 		if (isNaN(x) || isNaN(y)){
 			debugger;
 		}		
 		
-		this.futureX = x;
-		this.futureY = y;
+		moveable.futureX = x;
+		moveable.futureY = y;
 	}
 
-	applyPosition(dt, terrain, enemies){
-		this.x = this.futureX;
-		this.y = this.futureY;
 
-		this.isTouchingGround = terrain.getMultipointCollisionDistance(this.x, this.y, 0.0,  1.0, 2.0, this.collisionPoints) <= 1.0;
-		this.isBumpingCeiling = terrain.getMultipointCollisionDistance(this.x, this.y, 0.0, -1.0, 2.0, this.collisionPoints) <= 1.0;
+	reactToNewPosition(moveable, dt, terrain){
+		moveable.isTouchingGround = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, 0.0,  1.0, 2.0, moveable.collisionPoints) <= 1.0;
+		moveable.isBumpingCeiling = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, 0.0, -1.0, 2.0, moveable.collisionPoints) <= 1.0;
 		
-		if (!this.isTouchingGround)
-			this.dy = Math.min(this.dy + this.ay * dt, this.dyTerminal);
+		if (!moveable.isTouchingGround)
+			moveable.dy = Math.min(moveable.dy + moveable.ay * dt, moveable.dyTerminal);
 		else
-			this.dy = 0.0;
+			moveable.dy = 0.0;
 
-		if (this.isBumpingCeiling && this.dy < 0.0)
-			this.dy = 0.0;
+		if (moveable.isBumpingCeiling && moveable.dy < 0.0)
+			moveable.dy = 0.0;
 	}
 }
 
-//Composable behaviors. Respects background, avoids edges, emerges, ignores terrain
+class ChangesDirectionWhenHittingWalls{
+	computeFuturePosition(moveable, dt, terrain){}
+	
+	reactToNewPosition(moveable, dt, terrain){
+		let isHittingLeftWall  = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, -1.0, 0.0, 2.0, moveable.collisionPoints) <= 1.0;
+		let isHittingRightWall = terrain.getMultipointCollisionDistance(moveable.x, moveable.y,  1.0, 0.0, 2.0, moveable.collisionPoints) <= 1.0;
+
+		if (isHittingLeftWall && !isHittingRightWall){
+			moveable.dx = Math.abs(moveable.dx);
+		}
+		if (!isHittingLeftWall && isHittingRightWall){
+			moveable.dx = -Math.abs(moveable.dx);
+		}
+	}
+}
+
+class AvoidsCliffs{
+	computeFuturePosition(moveable, dt, terrain){}
+	
+	reactToNewPosition(moveable, dt, terrain){
+		let isLeftFootOnAir  = terrain.getPointCollisonDistance(moveable.x + moveable.collisionPoints[0].x, moveable.y + moveable.collisionPoints[0].y, 0.0, 1.0, 2.0, false) > 1.0;
+		let isRightFootOnAir = terrain.getPointCollisonDistance(moveable.x + moveable.collisionPoints[1].x, moveable.y + moveable.collisionPoints[1].y, 0.0, 1.0, 2.0, false) > 1.0;
+
+		if (moveable.isTouchingGround && isLeftFootOnAir){
+			moveable.dx = Math.abs(moveable.dx);
+		}
+
+		if (moveable.isTouchingGround && isRightFootOnAir){
+			moveable.dx = -Math.abs(moveable.dx);
+		}
+	}
+}
+
 
 class Mario extends Moveable{
 	constructor(x,y,dx,dy){
@@ -255,6 +305,8 @@ class Mario extends Moveable{
 			{x:-26, y:-25}, 
 			{x: 26, y:-25},
 		];
+
+		this.behaviours = [new RespectsTerrain()];
 	}
 
 	collidesWith(other){
@@ -277,6 +329,8 @@ class Goomba extends Moveable{
 			{x:  4, y:-41}, 
 			{x: 56, y:-41},
 		];
+
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls()];
 	}
 
 	collidesWith(other){
@@ -289,19 +343,6 @@ class Goomba extends Moveable{
 		}else if (relativeLocation.left || relativeLocation.right){
 			this.dx = -this.dx;
 			this.futureX = this.x;			
-		}
-	}
-
-	applyPosition(dt, terrain, enemies){
-		super.applyPosition(dt,terrain, enemies);
-		let isHittingLeftWall  = terrain.getMultipointCollisionDistance(this.x, this.y, -1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
-		let isHittingRightWall = terrain.getMultipointCollisionDistance(this.x, this.y, 1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
-
-		if (isHittingLeftWall && !isHittingRightWall){
-			this.dx = Math.abs(this.dx);
-		}
-		if (!isHittingLeftWall && isHittingRightWall){
-			this.dx = -Math.abs(this.dx);
 		}
 	}
 
@@ -319,6 +360,8 @@ class Koopa extends Moveable{
 			{x:  4, y:-41}, 
 			{x: 56, y:-41},
 		];
+
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls()];
 	}
 
 	collidesWith(other){
@@ -330,19 +373,6 @@ class Koopa extends Moveable{
 		if (relativeLocation.above){
 			this.dy = 0;
 			this.futureY = this.y;
-		}
-	}
-
-	applyPosition(dt, terrain, enemies){
-		super.applyPosition(dt,terrain, enemies);
-		let isHittingLeftWall  = terrain.getMultipointCollisionDistance(this.x, this.y, -1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
-		let isHittingRightWall = terrain.getMultipointCollisionDistance(this.x, this.y,  1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
-
-		if (isHittingLeftWall && !isHittingRightWall){
-			this.dx = Math.abs(this.dx);
-		}
-		if (!isHittingLeftWall && isHittingRightWall){
-			this.dx = -Math.abs(this.dx);
 		}
 	}
 }
@@ -356,6 +386,8 @@ class RedKoopa extends Moveable{
 			{x:  4, y:-41}, 
 			{x: 56, y:-41},
 		];
+
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AvoidsCliffs()];
 	}
 
 	collidesWith(other){
@@ -367,23 +399,6 @@ class RedKoopa extends Moveable{
 		if (relativeLocation.above){
 			this.dy = 0;
 			this.futureY = this.y;
-		}
-	}
-
-	applyPosition(dt, terrain, enemies){
-		super.applyPosition(dt,terrain, enemies);
-		let isHittingLeftWall  = terrain.getMultipointCollisionDistance(this.x, this.y, -1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
-		let isHittingRightWall = terrain.getMultipointCollisionDistance(this.x, this.y,  1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
-
-		let isLeftFootOnAir  = terrain.getPointCollisonDistance(this.x + this.collisionPoints[0].x, this.y + this.collisionPoints[0].y, 0.0, 1.0, 2.0, false) > 1.0;
-		let isRightFootOnAir = terrain.getPointCollisonDistance(this.x + this.collisionPoints[1].x, this.y + this.collisionPoints[1].y, 0.0, 1.0, 2.0, false) > 1.0;
-
-		if (isHittingLeftWall || (this.isTouchingGround && isLeftFootOnAir)){
-			this.dx = Math.abs(this.dx);
-		}
-
-		if (isHittingRightWall || (this.isTouchingGround && isRightFootOnAir)){
-			this.dx = -Math.abs(this.dx);
 		}
 	}
 }
