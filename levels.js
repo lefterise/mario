@@ -7,9 +7,9 @@ var level1 = [
     "    Mo o  à     o o            o           *       à     oo o               o            @‰  @  o  …             …          oo           …    o        *******    Mo   o   Mo o     ",
     "    oo o ??     o o        ‰   o           *     01?     oo o   ?J ?J       o            @@@@@  o                   í   à   oo ****           o       @     € @   oo   o   oo o     ",
     "    oo o        o o       01   o  JJ       *     23      oo o               o   @  ‰@           o  01 $$$$$01   K01 ? JJJ   oo           01   o       @@@@@@@@@   oo   E   oo o 01  ",
-    "    oo o     01 o o  **   23   o               0123      oo o               o   @@@@@        à  o  23      23    23         oo           23   o                   oo   o   oo o 23  ",
+    "    oo o     01 o o  *€   23   o               0123      oo o               o   @@@@@        à  o  23      23    23         oo           23   o                   oo   o   oo o 23  ",
     "    oo o     23 o o       23   o               2323      oo o               o                $  o  23 €    23    23         oo           23   o                   oo   o   ooˆo 23  ",
-    "w   oo o  €  23 o o   €ww 23   owww€€        ‰ 2323 ww   oo o ˆ    €   €    o                 wwo  23 ww € 23 wwˆ23  ww I   oo  wwˆ  ˆww 23 wwo      www          oww ˆo   wwwo 23ww",
+    "w   oo o     23 o o € €ww 23   owww€€        ‰ 2323 ww   oo o ˆ    €   €    o                 wwo  23 ww € 23 wwˆ23  ww I   oo  wwˆ  ˆww 23 wwo      www          oww ˆo   wwwo 23ww",
     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWFFFFFWWWWWWWWWWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFWWFFFFFFFFFFFFFFFFFFFFFWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWFFFFFWWWWWWWWWWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFWWFFFFFFFFFFFFFFFFFFFFFWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
     ];

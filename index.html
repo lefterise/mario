@@ -1,6 +1,7 @@
 <!DOCTYPE html>”
 <html>
 <head>
+<meta name="apple-mobile-web-app-capable" content="yes">
 <script src="graphics.js"></script>
 <script src="levels.js"></script>
 <script src="keyboard.js"></script>
@@ -127,7 +128,26 @@ class Terrain{
         }
         return tMax;
     }
+
+	getMultipointCollisionDistance(x, y, dx, dy, tMax, collisionPoints){
+		let minT = tMax;
+		for (let p of collisionPoints){
+			let t = this.getPointCollisonDistance(x + p.x, y + p.y, dx, dy, tMax, false);
+			minT = Math.min(minT, t);
+		}
+		return minT;
+	}
 }
+
+const States = {
+	Idle: 0,
+	Walking: 1,
+	Cowering: 2,
+	Spinning: 3,
+	Dying: 4,
+	Dead: 5
+}
+
 
 class Moveable{
 	constructor(x, y, dx, dy){
@@ -140,33 +160,77 @@ class Moveable{
 		this.isTouchingGround = false;
 		this.isBumpingCeiling = false;
 		this.collisionPoints = [];
+		this.futureX = x;
+		this.futureY = y;
 	}
 
-	getCollisionDistance(terrain, x,y,dx,dy,dt){
-		let minT = 99999999999;
-		for (let p of this.collisionPoints){
-			let t = terrain.getPointCollisonDistance(x + p.x, y + p.y, dx, dy, dt, false);
-			minT = Math.min(minT, t);
-		}
-		return minT;
+
+	getRelativeLocationTo(other){
+		let al = this.x + this.collisionPoints[0].x;
+		let ar = this.x + this.collisionPoints[3].x;
+		let at = this.y + this.collisionPoints[3].y;
+		let ab = this.y + this.collisionPoints[0].y;
+
+		let bl = other.x + other.collisionPoints[0].x;
+		let br = other.x + other.collisionPoints[3].x;
+		let bt = other.y + other.collisionPoints[3].y;
+		let bb = other.y + other.collisionPoints[0].y;
+
+		return {above: ab < bt, below: at > bb, left: ar < bl, right: al > br };
 	}
 
-	update(dt, terrain){
-		let tDiagonal = this.getCollisionDistance(terrain, this.x, this.y, this.dx, this.dy, dt);
-		this.x = this.x + this.dx * tDiagonal;
-		this.y = this.y + this.dy * tDiagonal;
-		//check if mario can move stricly in dx or dy for the remainder of the distance
-		let tHorizontal = this.getCollisionDistance(terrain, this.x, this.y, this.dx, 0.0, dt - tDiagonal);
-		this.x = this.x + this.dx * tHorizontal;		
-		let tVertical = this.getCollisionDistance(terrain, this.x, this.y, 0.0, this.dy, dt - tDiagonal);
-		this.y = this.y + this.dy * tVertical;
+
+	getDistanceFromOtherMoveable(other){
+		let al = this.futureX + this.collisionPoints[0].x;
+		let ar = this.futureX + this.collisionPoints[3].x;
+		let at = this.futureY + this.collisionPoints[3].y;
+		let ab = this.futureY + this.collisionPoints[0].y;
+
+		let bl = other.futureX + other.collisionPoints[0].x;
+		let br = other.futureX + other.collisionPoints[3].x;
+		let bt = other.futureY + other.collisionPoints[3].y;
+		let bb = other.futureY + other.collisionPoints[0].y;
+
+		let dx1 = al - br;
+		let dx2 = bl - ar;
+		let dy1 = at - bb;
+		let dy2 = bt - ab;
+
+		return {dx: Math.max(dx1,dx2), dy: Math.max(dy1,dy2)};
+	}
+
+	calculateFuturePosition(dt, terrain, enemies){
+		let tDiagonal = terrain.getMultipointCollisionDistance(this.x, this.y, this.dx, this.dy, dt, this.collisionPoints);
+		let x = this.x + this.dx * tDiagonal;
+		let y = this.y + this.dy * tDiagonal;
 		
-		if (isNaN(this.x) || isNaN(this.y)){
+		if (isNaN(x) || isNaN(y)){
 			debugger;
-		}
+		}	
+		//check if mario can move stricly in dx or dy for the remainder of the distance
+		let tHorizontal = terrain.getMultipointCollisionDistance(x, y, this.dx, 0.0, dt - tDiagonal, this.collisionPoints);
+		x = x + this.dx * tHorizontal;	
+		if (isNaN(x) || isNaN(y)){
+			debugger;
+		}	
 
-		this.isTouchingGround = this.getCollisionDistance(terrain, this.x, this.y, 0.0,  1.0, 2.0) <= 1.0;
-		this.isBumpingCeiling = this.getCollisionDistance(terrain, this.x, this.y, 0.0, -1.0, 2.0) <= 1.0;
+		let tVertical = terrain.getMultipointCollisionDistance(x, y, 0.0, this.dy, dt - tDiagonal, this.collisionPoints);
+		y = y + this.dy * tVertical;
+		
+		if (isNaN(x) || isNaN(y)){
+			debugger;
+		}		
+		
+		this.futureX = x;
+		this.futureY = y;
+	}
+
+	applyPosition(dt, terrain, enemies){
+		this.x = this.futureX;
+		this.y = this.futureY;
+
+		this.isTouchingGround = terrain.getMultipointCollisionDistance(this.x, this.y, 0.0,  1.0, 2.0, this.collisionPoints) <= 1.0;
+		this.isBumpingCeiling = terrain.getMultipointCollisionDistance(this.x, this.y, 0.0, -1.0, 2.0, this.collisionPoints) <= 1.0;
 		
 		if (!this.isTouchingGround)
 			this.dy = Math.min(this.dy + this.ay * dt, this.dyTerminal);
@@ -177,6 +241,8 @@ class Moveable{
 			this.dy = 0.0;
 	}
 }
+
+//Composable behaviors. Respects background, avoids edges, emerges, ignores terrain
 
 class Mario extends Moveable{
 	constructor(x,y,dx,dy){
@@ -190,11 +256,21 @@ class Mario extends Moveable{
 			{x: 26, y:-25},
 		];
 	}
+
+	collidesWith(other){
+		if (other.state == States.Dead) return;
+		let relativeLocation = this.getRelativeLocationTo(other);
+		if (relativeLocation.above){
+			this.dy = -1.1;
+			other.stomp();
+		}
+	}
 }
 
 class Goomba extends Moveable{
-	constructor(x,y,dx,dy){
+	constructor(x,y,dx,dy){		
 		super(x,y,dx,dy);
+		this.state = States.Walking;
 		this.collisionPoints = [
 			{x:  4, y:  0}, 
 			{x: 56, y:  0},
@@ -203,10 +279,23 @@ class Goomba extends Moveable{
 		];
 	}
 
-	update(dt, terrain){
-		super.update(dt,terrain);
-		let isHittingLeftWall = this.getCollisionDistance(terrain, this.x, this.y, -1.0, 0.0, 2.0) <= 1.0;
-		let isHittingRightWall = this.getCollisionDistance(terrain, this.x, this.y, 1.0, 0.0, 2.0) <= 1.0;
+	collidesWith(other){
+		if (this.state == States.Dead) return;
+
+		let relativeLocation = this.getRelativeLocationTo(other);
+		if (relativeLocation.above){
+			this.dy = 0;
+			this.futureY = this.y;
+		}else if (relativeLocation.left || relativeLocation.right){
+			this.dx = -this.dx;
+			this.futureX = this.x;			
+		}
+	}
+
+	applyPosition(dt, terrain, enemies){
+		super.applyPosition(dt,terrain, enemies);
+		let isHittingLeftWall  = terrain.getMultipointCollisionDistance(this.x, this.y, -1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
+		let isHittingRightWall = terrain.getMultipointCollisionDistance(this.x, this.y, 1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
 
 		if (isHittingLeftWall && !isHittingRightWall){
 			this.dx = Math.abs(this.dx);
@@ -214,6 +303,10 @@ class Goomba extends Moveable{
 		if (!isHittingLeftWall && isHittingRightWall){
 			this.dx = -Math.abs(this.dx);
 		}
+	}
+
+	stomp(){
+		this.state = States.Dying;
 	}
 }
 
@@ -228,10 +321,22 @@ class Koopa extends Moveable{
 		];
 	}
 
-	update(dt, terrain){
-		super.update(dt,terrain);
-		let isHittingLeftWall = this.getCollisionDistance(terrain, this.x, this.y, -1.0, 0.0, 2.0) <= 1.0;
-		let isHittingRightWall = this.getCollisionDistance(terrain, this.x, this.y, 1.0, 0.0, 2.0) <= 1.0;
+	collidesWith(other){
+		let relativeLocation = this.getRelativeLocationTo(other);
+		if (relativeLocation.left || relativeLocation.right){
+			this.dx = -this.dx;
+			this.futureX = this.x;			
+		}
+		if (relativeLocation.above){
+			this.dy = 0;
+			this.futureY = this.y;
+		}
+	}
+
+	applyPosition(dt, terrain, enemies){
+		super.applyPosition(dt,terrain, enemies);
+		let isHittingLeftWall  = terrain.getMultipointCollisionDistance(this.x, this.y, -1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
+		let isHittingRightWall = terrain.getMultipointCollisionDistance(this.x, this.y,  1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
 
 		if (isHittingLeftWall && !isHittingRightWall){
 			this.dx = Math.abs(this.dx);
@@ -253,10 +358,22 @@ class RedKoopa extends Moveable{
 		];
 	}
 
-	update(dt, terrain){
-		super.update(dt,terrain);
-		let isHittingLeftWall  = this.getCollisionDistance(terrain, this.x, this.y, -1.0, 0.0, 2.0) <= 1.0;
-		let isHittingRightWall = this.getCollisionDistance(terrain, this.x, this.y, 1.0, 0.0, 2.0) <= 1.0;
+	collidesWith(other){
+		let relativeLocation = this.getRelativeLocationTo(other);
+		if (relativeLocation.left || relativeLocation.right){
+			this.dx = -this.dx;
+			this.futureX = this.x;			
+		}
+		if (relativeLocation.above){
+			this.dy = 0;
+			this.futureY = this.y;
+		}
+	}
+
+	applyPosition(dt, terrain, enemies){
+		super.applyPosition(dt,terrain, enemies);
+		let isHittingLeftWall  = terrain.getMultipointCollisionDistance(this.x, this.y, -1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
+		let isHittingRightWall = terrain.getMultipointCollisionDistance(this.x, this.y,  1.0, 0.0, 2.0, this.collisionPoints) <= 1.0;
 
 		let isLeftFootOnAir  = terrain.getPointCollisonDistance(this.x + this.collisionPoints[0].x, this.y + this.collisionPoints[0].y, 0.0, 1.0, 2.0, false) > 1.0;
 		let isRightFootOnAir = terrain.getPointCollisonDistance(this.x + this.collisionPoints[1].x, this.y + this.collisionPoints[1].y, 0.0, 1.0, 2.0, false) > 1.0;
@@ -300,7 +417,7 @@ class Game{
 		this.treeAnimation.update(dt);
 		this.coinAnimation.update(dt);
 		this.turtleAnimation.update(dt);
-		this.mario.update(dt, this.terrain);
+		
 		this.updateEnemies(dt);
 
 		this.frame = this.frame-2;
@@ -386,10 +503,38 @@ class Game{
 		}
 	}
 
+	checkEnemiesCollisions(){		
+		this.enemies = this.enemies.filter((e)=>e.y < 1000);
+		
+		for (let i = 0; i < this.enemies.length - 1; i++) {
+			for (let j = i + 1; j < this.enemies.length; j++) {
+				let distance = this.enemies[i].getDistanceFromOtherMoveable(this.enemies[j]);
+				if (distance.dx < 0 && distance.dy < 0){
+					this.enemies[i].collidesWith(this.enemies[j]);
+					this.enemies[j].collidesWith(this.enemies[i]);
+				}
+			}
+    	}
+	}
+
 	updateEnemies(dt){
+		this.mario.calculateFuturePosition(dt, this.terrain, this.enemies);
+		
 		for (let e of this.enemies){
-			e.update(dt, this.terrain)
+			e.calculateFuturePosition(dt, this.terrain, this.enemies);
+
+			let distance = this.mario.getDistanceFromOtherMoveable(e);
+				if (distance.dx < 0 && distance.dy < 0){
+					this.mario.collidesWith(e);
+				}
 		}
+		
+		this.checkEnemiesCollisions();
+
+		for (let e of this.enemies){
+			e.applyPosition(dt, this.terrain, this.enemies);
+		}		
+		this.mario.applyPosition(dt, this.terrain, this.enemies);
 	}
 
 	drawEnemies(){
