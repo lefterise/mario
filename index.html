@@ -156,7 +156,8 @@ const States = {
 	Cowering: 2,
 	Spinning: 3,
 	Dying: 4,
-	Dead: 5
+	Dead: 5,
+	Collectable: 6
 }
 
 
@@ -403,6 +404,12 @@ class Mario extends Moveable{
 
 	collidesWith(other){
 		if (other.state == States.Dead || other.state == States.Dying) return;
+
+		if (other.state == States.Collectable) {
+			other.collect(this);
+			return;
+		}
+
 		let relativeLocation = this.getRelativeLocationTo(other);
 		if (relativeLocation.above){
 			this.dy = -1.1;
@@ -458,8 +465,8 @@ class Goomba extends Moveable{
 	}
 
 	collidesWith(other){
-		if (this.state == States.Dead || this.state == States.Dying || other.state == States.Dead || other.state == States.Dying) return;
-
+		if (this.state == States.Dead || this.state == States.Dying || other.state == States.Dead || other.state == States.Dying || other.state == States.Collectable) return;
+		
 		if (other.state == States.Spinning){
 			this.wipe();
 			return;
@@ -510,7 +517,7 @@ class Koopa extends Moveable{
 	}
 
 	collidesWith(other){
-		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying || other.state == States.Collectable) return;
 
 		if (other.state == States.Spinning){
 			this.wipe();
@@ -592,6 +599,52 @@ class RedKoopa extends Koopa{
 	walk(){
 		this.state = States.Walking;
 		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AvoidsCliffs(), new AnimationBehavior(0,2,300)];
+	}
+}
+
+class Coin extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+		{x: 10, y: 40},	
+		{x: 51, y: 40},
+		{x: 10, y:  0}, 
+		{x: 51, y:  0}			
+		];
+		this.behaviours = [];
+		this.state = States.Collectable;
+	}
+	
+	collect(mario){
+		sound.coin.play();
+		this.state = States.Dead;
+	}
+
+	collidesWith(other){
+		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+	}
+}
+
+class Mushroom extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+		{x: 0, y: 40},	
+		{x: 60, y: 40},
+		{x: 0, y:  0}, 
+		{x: 60, y:  0}			
+		];
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls()];
+		this.state = States.Collectable;
+	}
+	
+	collect(mario){
+		sound.powerup.play();
+		this.state = States.Dead;
+	}
+
+	collidesWith(other){
+		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
 	}
 }
 
@@ -707,6 +760,14 @@ class Game{
 					let koopa = new RedKoopa(60 * (x+tileOffset),42*y+41,-0.1,0.0);
 					this.enemies.push(koopa);
 					this.level[x+tileOffset][y] = 255;
+				}else if (tileId == 101+8){
+					let coin = new Coin(60 * (x+tileOffset),42 * y, 0.0, 0.0);
+					this.enemies.push(coin);
+					this.level[x+tileOffset][y] = 255;
+				}else if (tileId == 107+8){
+					let mushroom = new Mushroom(60 * (x+tileOffset),42 * y, 0.1, 0.0);
+					this.enemies.push(mushroom);
+					this.level[x+tileOffset][y] = 255;
 				}
 			}
 		}
@@ -754,6 +815,10 @@ class Game{
 				this.gfx.drawTurtle(e.x - this.screenX, e.y, e.frame, 0, e.dx > 0 ? 1 : 0);
 			}else if (e.constructor.name == "RedKoopa"){
 				this.gfx.drawTurtle(e.x - this.screenX, e.y, e.frame, 1, e.dx > 0 ? 1 : 0);
+			}else if (e.constructor.name == "Coin"){
+				this.gfx.drawCoin(e.x - this.screenX, e.y, this.coinAnimation.frame); //All coins use same frame so that glares are aligned
+			}else if (e.constructor.name == "Mushroom"){
+				this.gfx.drawMushroom(e.x - this.screenX, e.y);
 			}
 		}
 	}
@@ -768,7 +833,7 @@ class Game{
 			   let tileId = this.level[x+tileOffset][y];
 			   if (tileId != 255){				   				  
 		           if (tileId == 101+8){
-					  this.gfx.drawCoin(60 * x - screenOffset, 42 * y + 16, this.coinAnimation.frame);
+					  //this.gfx.drawCoin(60 * x - screenOffset, 42 * y + 16, this.coinAnimation.frame);
 				   }else if (tileId == 102+8){
 					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 100+8){
@@ -847,6 +912,7 @@ class Game{
 	}
 }
 
+var gGame;
 function initGame(){
 	var canvas = document.getElementById("MyCanvas");
 	var ctx = canvas.getContext("2d");
@@ -870,6 +936,7 @@ function initGame(){
 	
 	var game = new Game(graphics, controls);
 	setInterval(()=>window.requestAnimationFrame((time)=>game.update(time)), 16);
+	gGame = game;
 }
 </script>
 </head>

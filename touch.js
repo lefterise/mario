@@ -165,9 +165,9 @@ class Touch{
         return (p.x - cx) * (p.x - cx) + (p.y - cy) * (p.y - cy) < r * r;
     }
 
-    draw(gfx){
-        gfx.drawButton(this.joystick.x-49,  this.joystick.y+30, 0);
+    draw(gfx){        
         gfx.drawJoystick(50,  this.joystick.y+70);
+        gfx.drawButton(this.joystick.x-49,  this.joystick.y+30, 0);
 		gfx.drawButton(this.jumpButton.x,  this.jumpButton.y, 2);
 
         gfx.ctx.fillStyle = "black";

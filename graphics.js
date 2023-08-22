@@ -46,6 +46,10 @@ class Graphics{
       this.ctx.drawImage(this.enemies, 63 * frame, 579, 60, 40, x, y, 60, 40);
     }
   
+    drawMushroom(x,y){    
+      this.ctx.drawImage(this.enemies, 0, 531, 60, 42, x, y, 60, 42);
+    }
+
     drawGoomba(x,y, frame, color){    
       this.ctx.drawImage(this.enemies, 63 * frame + 3 * color,0, 60, 42, x, y-41, 60, 42);
     }

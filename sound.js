@@ -21,7 +21,7 @@ class Sound{
 var sound = {	
     die:        new Sound('sounds/die.wav', 0.2, 1),
     bump:       new Sound('sounds/bump.wav', 0.2, 3),
-    coin:       new Sound('sounds/coin.wav', 0.2, 3),
+    coin:       new Sound('sounds/coin.wav', 0.1, 5),
     life:       new Sound('sounds/life.wav', 0.2, 1),    
     jump:       new Sound('sounds/jump.wav', 0.2, 3),
     kick:       new Sound('sounds/kick.wav', 0.2, 3),
