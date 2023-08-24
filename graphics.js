@@ -18,7 +18,7 @@ class Graphics{
     }
   
     drawMario(x, y, frame, size, direction){
-       this.ctx.drawImage(this.mario, frame * 63 + direction * 252, size * 88, 60, 84, x, y, 60, 84); 
+       this.ctx.drawImage(this.mario, frame * 63 + direction * 252, size * 87, 60, 84, x, y, 60, 84); 
     }
     
     drawTile(x,y,id, type){
@@ -29,6 +29,10 @@ class Graphics{
         this.ctx.drawImage(this.terrain, (id % 6) * 60, Math.floor(id / 6) * 42, 60, 42, x, y, 60, 42);
     }
     
+    drawBrickParticle(x,y){
+      this.ctx.drawImage(this.terrain, 99, 3, 18, 18, x, y, 18, 18);
+    }
+
     drawWater(x,y, frame){
         this.ctx.drawImage(this.terrain, 4 * 60, 12 * 42 + frame, 60, 42 - frame, x, y, 60, 42 - frame);
         this.ctx.drawImage(this.terrain, 4 * 60, 12 * 42, 60, frame, x, y + 42  - frame, 60, frame);
@@ -46,8 +50,8 @@ class Graphics{
       this.ctx.drawImage(this.enemies, 63 * frame, 579, 60, 40, x, y, 60, 40);
     }
   
-    drawMushroom(x,y){    
-      this.ctx.drawImage(this.enemies, 0, 531, 60, 42, x, y, 60, 42);
+    drawMushroom(x,y, frame, type){
+      this.ctx.drawImage(this.enemies, type * 63, 531, 60, frame, x, y + 42 - frame, 60, frame);
     }
 
     drawGoomba(x,y, frame, color){    

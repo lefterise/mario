@@ -34,9 +34,10 @@ class Animation{
   }
   
   update(dt){
-     this.t = this.t + dt;
-     this.frame = (this.frame + Math.floor(this.t / this.transitionTime)) % this.frames;
-	 this.t = this.t > this.transitionTime ? this.t - this.transitionTime : this.t;
+	 this.t = this.t + dt;
+     let framesToAdvance = Math.floor(this.t / this.transitionTime);
+	 this.frame = (this.frame + framesToAdvance) % this.frames;	
+	 this.t = this.t - framesToAdvance * this.transitionTime;
   }
   
 }
@@ -46,12 +47,14 @@ function noNaN(x){
 		return 0;
 	return x;
 }
-	
+
 class Terrain{
-	constructor(tiles){
+	constructor(tiles, world){
 		this.tiles = tiles;
 		this.tileWidth = 60;
 		this.tileHeight = 42;
+		this.bumpedBricks = [];
+		this.world = world;
 	}
 
 	inBounds(X,Y){
@@ -59,7 +62,11 @@ class Terrain{
 	}
 
 	isSolid(X,Y){
-		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || [9,20,26,27,32,33,67].includes(this.tiles[X][Y]));
+		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || [9,20,21,26,27,32,33,67].includes(this.tiles[X][Y]));
+	}
+
+	isBumpable(X, Y){
+		return this.inBounds(X,Y) && [9, 10,11, 20].includes(this.tiles[X][Y]);
 	}
 	
 	getPointCollisonDistance(x, y, dx, dy, tMax, wantNonSolid){		
@@ -114,6 +121,11 @@ class Terrain{
             if(tNextVertical < tNextHorizontal){
                 t = tNextVertical;
                 tNextVertical += tVertical;
+
+				if (isNaN(tNextVertical)){
+					debugger; //ading positive and negative infinity
+				}
+
                 X += stepX;
 
 				if (this.isSolid(X, Y) ^ wantNonSolid) {
@@ -126,6 +138,11 @@ class Terrain{
             }else{
                 t = tNextHorizontal;
                 tNextHorizontal += tHorizontal;
+
+				if (isNaN(tNextHorizontal)){
+					debugger; //ading positive and negative infinity
+				}
+
                 Y += stepY;
 
 				if (this.isSolid(X, Y) ^ wantNonSolid) {
@@ -148,6 +165,44 @@ class Terrain{
 		}
 		return minT;
 	}
+
+	bumpBrick(bumpedBricks, moveable){
+		this.bumpedBricks = bumpedBricks;
+		for (let b of bumpedBricks){
+			if (this.tiles[b.x][b.y] == 20){
+				if (this.tiles[b.x][b.y - 1] == 115){
+
+					if (this.world.mario.size == 0){
+						let mushroom = new Mushroom(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
+						this.world.enemies.push(mushroom);
+					}else{
+						let flower = new Flower(60 * (b.x),42 * (b.y - 1), 0.0, 0.0);
+						this.world.enemies.push(flower);
+					}
+					this.tiles[b.x][b.y] = 21;
+					this.tiles[b.x][b.y - 1] = 255;
+
+					sound.sprout.play();
+				}else{
+					this.tiles[b.x][b.y] = 21;
+					sound.coin.play();
+				}
+			}else if (this.tiles[b.x][b.y] == 9){				
+				if (moveable.size == 0){
+					sound.bump.play(); //small mario
+				}else{
+					sound.break.play(); //large mario or koopa
+					this.tiles[b.x][b.y] = 255;
+					this.world.enemies.push(new BrickParticle(60 * b.x,42 * b.y ,  0.2, -0.5));
+					this.world.enemies.push(new BrickParticle(60 * b.x,42 * b.y , -0.2, -0.5));
+					this.world.enemies.push(new BrickParticle(60 * b.x,42 * b.y , 0.15, -0.75));
+					this.world.enemies.push(new BrickParticle(60 * b.x,42 * b.y , -0.15, -0.75));
+					this.world.enemies.push(new BrickParticle(60 * b.x,42 * b.y , 0.1, -0.8));
+					this.world.enemies.push(new BrickParticle(60 * b.x,42 * b.y , -0.1, -0.8));
+				}
+			}
+		}
+	}
 }
 
 const States = {
@@ -157,9 +212,17 @@ const States = {
 	Spinning: 3,
 	Dying: 4,
 	Dead: 5,
-	Collectable: 6
+	Collectable: 6,
+	Solid: 7,
+	Sprouting: 8
 }
 
+const CollisionPoints = {
+	BottomLeft: 0,
+	BottomRight: 1,
+	TopLeft: 2,
+	TopRight: 3
+};
 
 class Moveable{
 	constructor(x, y, dx, dy){
@@ -171,39 +234,38 @@ class Moveable{
 		this.dyTerminal = 1.0; //in pixels per millisecond
 		this.isTouchingGround = false;
 		this.isBumpingCeiling = false;
-		this.collisionPoints = []; //The first four must be the corners: bottom-left, bottom-right, top-left, top-right 
+		this.collisionPoints = []; //The first four must be the corners: bottom-left, bottom-right, top-left, top-right (see CollisionPoints enum)
 		this.futureX = x; //in pixels
-		this.futureY = y; //in pixels
-
+		this.futureY = y; //in pixels		
 		this.behaviours = [];
 	}
 
 
 	getRelativeLocationTo(other){
-		let al = this.x + this.collisionPoints[0].x;
-		let ar = this.x + this.collisionPoints[3].x;
-		let at = this.y + this.collisionPoints[3].y;
-		let ab = this.y + this.collisionPoints[0].y;
+		let al = this.x + this.collisionPoints[CollisionPoints.BottomLeft].x;
+		let ar = this.x + this.collisionPoints[CollisionPoints.TopRight].x;
+		let at = this.y + this.collisionPoints[CollisionPoints.TopRight].y;
+		let ab = this.y + this.collisionPoints[CollisionPoints.BottomLeft].y;
 
-		let bl = other.x + other.collisionPoints[0].x;
-		let br = other.x + other.collisionPoints[3].x;
-		let bt = other.y + other.collisionPoints[3].y;
-		let bb = other.y + other.collisionPoints[0].y;
+		let bl = other.x + other.collisionPoints[CollisionPoints.BottomLeft].x;
+		let br = other.x + other.collisionPoints[CollisionPoints.TopRight].x;
+		let bt = other.y + other.collisionPoints[CollisionPoints.TopRight].y;
+		let bb = other.y + other.collisionPoints[CollisionPoints.BottomLeft].y;
 
 		return {above: ab < bt, below: at > bb, left: ar < bl, right: al > br };
 	}
 
 
 	getDistanceFromOtherMoveable(other){
-		let al = this.futureX + this.collisionPoints[0].x;
-		let ar = this.futureX + this.collisionPoints[3].x;
-		let at = this.futureY + this.collisionPoints[3].y;
-		let ab = this.futureY + this.collisionPoints[0].y;
+		let al = this.futureX + this.collisionPoints[CollisionPoints.BottomLeft].x;
+		let ar = this.futureX + this.collisionPoints[CollisionPoints.TopRight].x;
+		let at = this.futureY + this.collisionPoints[CollisionPoints.TopRight].y;
+		let ab = this.futureY + this.collisionPoints[CollisionPoints.BottomLeft].y;
 
-		let bl = other.futureX + other.collisionPoints[0].x;
-		let br = other.futureX + other.collisionPoints[3].x;
-		let bt = other.futureY + other.collisionPoints[3].y;
-		let bb = other.futureY + other.collisionPoints[0].y;
+		let bl = other.futureX + other.collisionPoints[CollisionPoints.BottomLeft].x;
+		let br = other.futureX + other.collisionPoints[CollisionPoints.TopRight].x;
+		let bt = other.futureY + other.collisionPoints[CollisionPoints.TopRight].y;
+		let bb = other.futureY + other.collisionPoints[CollisionPoints.BottomLeft].y;
 
 		let dx1 = al - br;
 		let dx2 = bl - ar;
@@ -232,10 +294,15 @@ class Moveable{
 //Composable behaviors
 class RespectsTerrain {
 	computeFuturePosition(moveable, dt, terrain){
+		if (isNaN(moveable.x) || isNaN(moveable.y)){
+			debugger;
+		}
+
 		let tDiagonal = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, moveable.dx, moveable.dy, dt, moveable.collisionPoints);
 		
 		if (isNaN(tDiagonal)){
 			debugger;
+			let runAgain = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, moveable.dx, moveable.dy, dt, moveable.collisionPoints);
 		}	
 
 		let x = moveable.x + moveable.dx * tDiagonal;
@@ -246,6 +313,7 @@ class RespectsTerrain {
 		
 		if (isNaN(tHorizontal)){
 			debugger;
+			let runAgain = terrain.getMultipointCollisionDistance(x, y, moveable.dx, 0.0, dt - tDiagonal, moveable.collisionPoints);
 		}	
 
 		x = x + moveable.dx * tHorizontal;	
@@ -254,26 +322,54 @@ class RespectsTerrain {
 		
 		if (isNaN(tVertical)){
 			debugger;
+			let runAgain = terrain.getMultipointCollisionDistance(x, y, 0.0, moveable.dy, dt - tDiagonal, moveable.collisionPoints);
 		}		
 
 		y = y + moveable.dy * tVertical;
 		
+
+		if (isNaN(x) || isNaN(y)){
+			debugger;
+		}
+
 		moveable.futureX = x;
 		moveable.futureY = y;
 	}
 
 
 	reactToNewPosition(moveable, dt, terrain){
-		moveable.isTouchingGround = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, 0.0,  1.0, 2.0, moveable.collisionPoints) <= 1.0;
-		moveable.isBumpingCeiling = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, 0.0, -1.0, 2.0, moveable.collisionPoints) <= 1.0;
+		moveable.isTouchingGround = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, 0.0,  1.0, 2.0, moveable.collisionPoints) <= 1.0 || moveable.isStandingOnSolid;
+		moveable.isBumpingCeiling = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, 0.0, -1.0, 2.0, moveable.collisionPoints) <= 1.0 || moveable.isBumpingSolid;
 		
+		moveable.isStandingOnSolid = false;
+		moveable.isBumpingSolid = false;
+
 		if (!moveable.isTouchingGround)
 			moveable.dy = Math.min(moveable.dy + moveable.ay * dt, moveable.dyTerminal);
-		else
+		else if (moveable.dy > 0.0)
 			moveable.dy = 0.0;
 
-		if (moveable.isBumpingCeiling && moveable.dy < 0.0)
+		if (moveable.isBumpingCeiling && moveable.dy < 0.0){
 			moveable.dy = 0.0;
+			terrain.bumpBrick(this.getBumpedBricks(moveable, terrain), moveable);//todo this should be moved to different behavior
+		}
+	}
+
+	getBumpedBricks(moveable, terrain){
+		let x1 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.TopLeft].x) / terrain.tileWidth);
+		let x2 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.TopRight].x) / terrain.tileWidth);
+	    let y  = Math.floor((moveable.y + moveable.collisionPoints[CollisionPoints.TopRight].y - 2.0) / terrain.tileHeight);
+
+		let bumpedBricks = [];
+		if (terrain.isBumpable(x1, y)){
+			bumpedBricks.push({x:x1, y:y});
+		}
+		
+		if (x1 != x2 && terrain.isBumpable(x2, y)){
+			bumpedBricks.push({x:x2, y:y});
+		}
+
+		return bumpedBricks;
 	}
 }
 
@@ -301,6 +397,33 @@ class ChangesDirectionWhenHittingWalls{
 		if (!isHittingLeftWall && isHittingRightWall){
 			moveable.dx = -Math.abs(moveable.dx);
 		}
+	}
+}
+
+class CanBumpBricksHorizontaly{
+	computeFuturePosition(moveable, dt, terrain){}
+	
+	reactToNewPosition(moveable, dt, terrain){
+		let bumpedBricks = this.getBumpedBricks(moveable, terrain);
+		if (bumpedBricks.length > 0)
+			terrain.bumpBrick(bumpedBricks, moveable);
+	}
+
+	getBumpedBricks(moveable, terrain){
+		let x1 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.TopLeft].x - 2.0) / terrain.tileWidth);
+		let x2 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.TopRight].x + 2.0) / terrain.tileWidth);
+	    let y  = Math.floor((moveable.y + moveable.collisionPoints[CollisionPoints.TopRight].y) / terrain.tileHeight);
+
+		let bumpedBricks = [];
+		if (terrain.isBumpable(x1, y)){
+			bumpedBricks.push({x:x1, y:y});
+		}
+		
+		if (x1 != x2 && terrain.isBumpable(x2, y)){
+			bumpedBricks.push({x:x2, y:y});
+		}
+
+		return bumpedBricks;
 	}
 }
 
@@ -385,10 +508,22 @@ class MaximumX{
 	reactToNewPosition(moveable, dt, terrain){}
 }
 
+class HasFriction{
+	computeFuturePosition(moveable, dt, terrain){}
+	
+	reactToNewPosition(moveable, dt, terrain){
+		moveable.isTouchingGround = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, 0.0,  1.0, 2.0, moveable.collisionPoints) <= 1.0 || moveable.isStandingOnSolid;
+
+		if (Math.abs(moveable.dx) > 0.001 && moveable.isTouchingGround){
+			moveable.dx = moveable.dx * 0.97;
+		}
+	}
+}
+
 class Mario extends Moveable{
 	constructor(x,y,dx,dy){
 		super(x,y,dx,dy);
-		this.collisionPoints = [
+		this.smallCollisionPoints = [
 			{x:-26, y:  0}, 
 			{x: 26, y:  0},
 			{x:-26, y:-50}, 
@@ -396,10 +531,20 @@ class Mario extends Moveable{
 			{x:-26, y:-25}, 
 			{x: 26, y:-25},
 		];
+		this.bigCollisionPoints = [
+			{x:-26, y:  0}, 
+			{x: 26, y:  0},
+			{x:-26, y:-78}, 
+			{x: 26, y:-78},
+			{x:-26, y:-39}, 
+			{x: 26, y:-39},
+		];
+		this.collisionPoints = this.smallCollisionPoints;
 		this.animation = new AnimationBehavior(0,1,250);
 		this.behaviours = [new RespectsTerrain(), new MinimumX(30), new MaximumX(179*60-30), this.animation];
 		this.facing = 1;
 		this.direction = Directions.Idle;
+		this.size = 0;
 	}
 
 	collidesWith(other){
@@ -411,6 +556,31 @@ class Mario extends Moveable{
 		}
 
 		let relativeLocation = this.getRelativeLocationTo(other);
+
+		if (other.state == States.Solid) {
+			if (this.dy > 0 && relativeLocation.above){
+				this.dy = 0.0;
+				this.futureY = this.y;
+				this.isStandingOnSolid = true;
+			}
+
+			if (this.dy < 0 && relativeLocation.below){
+				this.dy = 0.0;
+				this.futureY = this.y;
+				this.isBumpingSolid = true;
+				other.bump(this);
+			}
+
+			if (relativeLocation.left || relativeLocation.right){
+				this.dx = 0.0;
+				if (isNaN(this.x)){
+					debugger;
+				}
+				this.futureX = this.x;
+			}
+			return;
+		}
+		
 		if (relativeLocation.above){
 			this.dy = -1.1;
 			other.stomp(this);
@@ -423,6 +593,21 @@ class Mario extends Moveable{
 	jump(){
 		this.dy = -1;
 		sound.jump.play();
+	}
+
+	grow(){
+		this.size = 1;
+		this.collisionPoints = this.bigCollisionPoints;
+	}
+
+	flower(){
+		this.size = 2;
+		this.collisionPoints = this.bigCollisionPoints;
+	}
+
+	shrink(){
+		this.size = 0;
+		this.collisionPoints = this.smallCollisionPoints;
 	}
 
 	setDirection(direction, running){	
@@ -572,7 +757,7 @@ class Koopa extends Moveable{
 	}
 
 	kick(mario){
-		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(2,3,75)];
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(2,3,75), new CanBumpBricksHorizontaly()];
 		this.dx = 0.3 * (mario.futureX < this.x) ? 1 : -1;
 		this.state = States.Spinning;
 		sound.kick.play();
@@ -629,22 +814,128 @@ class Mushroom extends Moveable{
 	constructor(x,y,dx,dy){
 		super(x,y,dx,dy);
 		this.collisionPoints = [
+		{x:  1, y: 40},	
+		{x: 59, y: 40},
+		{x:  1, y:  0}, 
+		{x: 59, y:  0}			
+		];				
+		this.state = States.Sprouting;		
+		this.behaviours = [new AlarmBehavior(500, "BecomeCollectable"), new AnimationBehavior(0,42,12)];
+	}
+	
+	becomeCollectable(){
+		this.state = States.Collectable;
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls()];
+		this.frame = 42;
+		this.dy = -0.3;
+	}
+
+	collect(mario){		
+		sound.powerup.play();
+		this.state = States.Dead;
+		if (mario.size == 0){
+			mario.grow();
+		}
+	}
+
+	collidesWith(other){
+		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+	}
+
+	alarm(name){
+		if (name == "BecomeCollectable"){
+			this.becomeCollectable();
+		}
+	}
+}
+
+class Flower extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
 		{x: 0, y: 40},	
 		{x: 60, y: 40},
 		{x: 0, y:  0}, 
 		{x: 60, y:  0}			
-		];
-		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls()];
+		];				
+		this.state = States.Sprouting;		
+		this.behaviours = [new AlarmBehavior(500, "BecomeCollectable"), new AnimationBehavior(0,42,12)];
+	}
+	
+	becomeCollectable(){
 		this.state = States.Collectable;
+		this.behaviours = [];
+		this.frame = 42;
+		this.dy = -0.3;
+	}
+
+	collect(mario){		
+		sound.powerup.play();
+		this.state = States.Dead;
+		mario.flower();
+	}
+
+	collidesWith(other){
+		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+	}
+
+	alarm(name){
+		if (name == "BecomeCollectable"){
+			this.becomeCollectable();
+		}
+	}
+}
+
+class Brick extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+		{x:  0, y: 42},
+		{x: 60, y: 42},
+		{x:  0, y:  0}, 
+		{x: 60, y:  0}			
+		];
+		this.behaviours = [];
+		this.state = States.Solid;
 	}
 	
 	collect(mario){
-		sound.powerup.play();
+
+	}
+
+	bump(mario){
+		sound.break.play();
 		this.state = States.Dead;
 	}
 
 	collidesWith(other){
 		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+
+		if (other.state == States.Spinning){
+			sound.break.play();
+			this.state = States.Dead;
+		}
+	}
+}
+
+class BrickParticle extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+		{x:  0, y: 18},
+		{x: 18, y: 18},
+		{x:  0, y:  0}, 
+		{x: 18, y:  0}			
+		];
+		this.behaviours = [new RespectsTerrain(), new HasFriction(0.1), new AlarmBehavior(2000, "Vanish")];
+		this.state = States.Dying;
+	}
+	collidesWith(other){}
+
+	alarm(name){
+		if (name == "Vanish"){
+			this.state = States.Dead;
+		}
 	}
 }
 
@@ -660,7 +951,7 @@ class Game{
 		this.screenX = 0;
 		this.screenPan = 360;
 		this.level = parseLevel();
-		this.terrain = new Terrain(this.level);
+		this.terrain = new Terrain(this.level, this);
 		this.skyGradient = gfx.createBlueSkyGradient();
 		this.mario = new Mario(360, 461, 0.0, 0.0);
 		this.enemies = [];
@@ -730,9 +1021,9 @@ class Game{
 		}
 
 		if ((this.controls.debug % 3) < 2){
-			this.drawTerrain();
+			this.drawTerrain(dt);
 			this.drawEnemies();
-			this.gfx.drawMario(this.mario.x - this.screenX - 30, this.mario.y - 83, this.mario.frame, 0, this.mario.facing);
+			this.gfx.drawMario(this.mario.x - this.screenX - 30, this.mario.y - 83, this.mario.frame, this.mario.size, this.mario.facing);
 		}
 		if ((this.controls.debug % 3) > 0){
 			this.drawDebug(dt);
@@ -765,9 +1056,13 @@ class Game{
 					this.enemies.push(coin);
 					this.level[x+tileOffset][y] = 255;
 				}else if (tileId == 107+8){
-					let mushroom = new Mushroom(60 * (x+tileOffset),42 * y, 0.1, 0.0);
-					this.enemies.push(mushroom);
-					this.level[x+tileOffset][y] = 255;
+					//let mushroom = new Mushroom(60 * (x+tileOffset),42 * y, 0.1, 0.0);
+					//this.enemies.push(mushroom);
+					//this.level[x+tileOffset][y] = 255;
+				}else if (tileId == 9){
+					//let brick = new Brick(60 * (x+tileOffset),42 * y, 0.0, 0.0);
+					//this.enemies.push(brick);
+					//this.level[x+tileOffset][y] = 255;
 				}
 			}
 		}
@@ -818,12 +1113,18 @@ class Game{
 			}else if (e.constructor.name == "Coin"){
 				this.gfx.drawCoin(e.x - this.screenX, e.y, this.coinAnimation.frame); //All coins use same frame so that glares are aligned
 			}else if (e.constructor.name == "Mushroom"){
-				this.gfx.drawMushroom(e.x - this.screenX, e.y);
+				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 0);
+			}else if (e.constructor.name == "Flower"){
+				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 4);			
+			}else if (e.constructor.name == "BrickParticle"){
+				this.gfx.drawBrickParticle(e.x - this.screenX, e.y);				
+			}else if (e.constructor.name == "Brick"){
+				this.gfx.drawTileOld(e.x - this.screenX, e.y, 1);
 			}
 		}
 	}
 
-	drawTerrain(){
+	drawTerrain(dt){
 		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
 		let tileOffset = Math.floor(this.screenX / 60);
 		for (let x=-2; x<21 +1;++x){
@@ -838,7 +1139,7 @@ class Game{
 					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 100+8){
 					  this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
-				   }else if (tileId == 13+8){
+				   }else if (tileId == 76+8){
 					  this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame);
 				   }else if (tileId < 8){
 				     this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId, 0);
@@ -846,11 +1147,23 @@ class Game{
 					 this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 					 this.gfx.drawTileOld(60 * x - screenOffset, 42*y, 9);
                    }else{
-				     this.gfx.drawTileOld(60 * x - screenOffset, 42*y, tileId-8);
+					
+					let bumpY = 0;
+					for(let b of this.terrain.bumpedBricks){
+						if (b.x == x + tileOffset && b.y == y){
+							if (!b.t){
+								b.t = 0;
+							}
+							b.t += dt;
+							bumpY = -Math.sin(b.t / 200 * Math.PI) * 10;
+						}
+					}					 					
+				     this.gfx.drawTileOld(60 * x - screenOffset, 42*y + bumpY, tileId-8);
                    }				   
 			   }
 		   }
 		}
+		this.terrain.bumpedBricks = this.terrain.bumpedBricks.filter((b)=> (b.t ?? 0) < 200);
 		//this.gfx.drawSpiney(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame, 1);
 		//this.gfx.drawFish(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame, 1);
 	}
