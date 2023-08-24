@@ -350,26 +350,8 @@ class RespectsTerrain {
 			moveable.dy = 0.0;
 
 		if (moveable.isBumpingCeiling && moveable.dy < 0.0){
-			moveable.dy = 0.0;
-			terrain.bumpBrick(this.getBumpedBricks(moveable, terrain), moveable);//todo this should be moved to different behavior
+			moveable.dy = 0.0;			
 		}
-	}
-
-	getBumpedBricks(moveable, terrain){
-		let x1 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.TopLeft].x) / terrain.tileWidth);
-		let x2 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.TopRight].x) / terrain.tileWidth);
-	    let y  = Math.floor((moveable.y + moveable.collisionPoints[CollisionPoints.TopRight].y - 2.0) / terrain.tileHeight);
-
-		let bumpedBricks = [];
-		if (terrain.isBumpable(x1, y)){
-			bumpedBricks.push({x:x1, y:y});
-		}
-		
-		if (x1 != x2 && terrain.isBumpable(x2, y)){
-			bumpedBricks.push({x:x2, y:y});
-		}
-
-		return bumpedBricks;
 	}
 }
 
@@ -397,6 +379,33 @@ class ChangesDirectionWhenHittingWalls{
 		if (!isHittingLeftWall && isHittingRightWall){
 			moveable.dx = -Math.abs(moveable.dx);
 		}
+	}
+}
+
+class CanBumpBricksAbove{
+	computeFuturePosition(moveable, dt, terrain){}
+	
+	reactToNewPosition(moveable, dt, terrain){
+		let bumpedBricks = this.getBumpedBricks(moveable, terrain);
+		if (bumpedBricks.length > 0)
+			terrain.bumpBrick(bumpedBricks, moveable);
+	}
+
+	getBumpedBricks(moveable, terrain){
+		let x1 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.TopLeft].x) / terrain.tileWidth);
+		let x2 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.TopRight].x) / terrain.tileWidth);
+	    let y  = Math.floor((moveable.y + moveable.collisionPoints[CollisionPoints.TopRight].y - 2.0) / terrain.tileHeight);
+
+		let bumpedBricks = [];
+		if (terrain.isBumpable(x1, y)){
+			bumpedBricks.push({x:x1, y:y});
+		}
+		
+		if (x1 != x2 && terrain.isBumpable(x2, y)){
+			bumpedBricks.push({x:x2, y:y});
+		}
+
+		return bumpedBricks;
 	}
 }
 
@@ -541,7 +550,7 @@ class Mario extends Moveable{
 		];
 		this.collisionPoints = this.smallCollisionPoints;
 		this.animation = new AnimationBehavior(0,1,250);
-		this.behaviours = [new RespectsTerrain(), new MinimumX(30), new MaximumX(179*60-30), this.animation];
+		this.behaviours = [new RespectsTerrain(), new CanBumpBricksAbove(), new MinimumX(30), new MaximumX(179*60-30), this.animation];
 		this.facing = 1;
 		this.direction = Directions.Idle;
 		this.size = 0;
@@ -820,7 +829,7 @@ class Mushroom extends Moveable{
 		{x: 59, y:  0}			
 		];				
 		this.state = States.Sprouting;		
-		this.behaviours = [new AlarmBehavior(500, "BecomeCollectable"), new AnimationBehavior(0,42,12)];
+		this.behaviours = [new AnimationBehavior(0,42,12), new AlarmBehavior(500, "BecomeCollectable")];
 	}
 	
 	becomeCollectable(){
@@ -859,7 +868,7 @@ class Flower extends Moveable{
 		{x: 60, y:  0}			
 		];				
 		this.state = States.Sprouting;		
-		this.behaviours = [new AlarmBehavior(500, "BecomeCollectable"), new AnimationBehavior(0,42,12)];
+		this.behaviours = [new AnimationBehavior(0,42,12), new AlarmBehavior(500, "BecomeCollectable")];
 	}
 	
 	becomeCollectable(){
