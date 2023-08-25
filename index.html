@@ -185,6 +185,10 @@ class Terrain{
 					sound.sprout.play();
 				}else{
 					this.tiles[b.x][b.y] = 21;
+					
+					let coin = new PopupCoin(60 * b.x, 42 * (b.y-1), 0.0, -0.6);
+					this.world.enemies.push(coin);
+					
 					sound.coin.play();
 				}
 			}else if (this.tiles[b.x][b.y] == 9){				
@@ -593,7 +597,8 @@ class Mario extends Moveable{
 		}
 		
 		if (relativeLocation.above){
-			this.dy = this.isJumpPressed ? -1.02 : -0.7;
+			this.dy = this.isJumpPressed ? -1.1 : -0.7;
+			this.futureY = this.futureY - 3;
 			other.stomp(this);
 		}else{
 			if (other.touch)
@@ -608,14 +613,14 @@ class Mario extends Moveable{
 
 	setJumpPressed(value){
 		this.isJumpPressed = value;
-		if (!value && this.dy < -0.6){
-			this.dy = -0.6;
+		if (!value && this.dy < -0.7){
+			this.dy = -0.7;
 		}
 	}
 
 	grow(){
 		this.size = 1;
-		this.collisionPoints = this.bigCollisionPoints;
+		this.collisionPoints = this.bigCollisionPoints; //This may be an issue because new collision points may fall inside a block
 	}
 
 	flower(){
@@ -822,6 +827,30 @@ class Coin extends Moveable{
 	collect(mario){
 		sound.coin.play();
 		this.state = States.Dead;
+	}
+
+	collidesWith(other){
+		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+	}
+}
+
+class PopupCoin extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+		{x: 10, y: 40},	
+		{x: 51, y: 40},
+		{x: 10, y:  0}, 
+		{x: 51, y:  0}			
+		];
+		this.behaviours = [new IgnoresTerrain(), new AlarmBehavior(500, "Disappear")];
+		this.state = States.Dying;
+	}
+	
+	alarm(name){
+		if (name == "Disappear"){
+			this.state = States.Dead;
+		}
 	}
 
 	collidesWith(other){
@@ -1131,7 +1160,7 @@ class Game{
 				this.gfx.drawTurtle(e.x - this.screenX, e.y, e.frame, 0, e.dx > 0 ? 1 : 0);
 			}else if (e.constructor.name == "RedKoopa"){
 				this.gfx.drawTurtle(e.x - this.screenX, e.y, e.frame, 1, e.dx > 0 ? 1 : 0);
-			}else if (e.constructor.name == "Coin"){
+			}else if (e.constructor.name == "Coin" || e.constructor.name == "PopupCoin"){
 				this.gfx.drawCoin(e.x - this.screenX, e.y, this.coinAnimation.frame); //All coins use same frame so that glares are aligned
 			}else if (e.constructor.name == "Mushroom"){
 				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 0);
