@@ -554,6 +554,8 @@ class Mario extends Moveable{
 		this.facing = 1;
 		this.direction = Directions.Idle;
 		this.size = 0;
+		this.isJumpPressed = false;
+		this.isRunning = false;
 	}
 
 	collidesWith(other){
@@ -591,7 +593,7 @@ class Mario extends Moveable{
 		}
 		
 		if (relativeLocation.above){
-			this.dy = -1.1;
+			this.dy = this.isJumpPressed ? -1.02 : -0.7;
 			other.stomp(this);
 		}else{
 			if (other.touch)
@@ -600,8 +602,15 @@ class Mario extends Moveable{
 	}
 
 	jump(){
-		this.dy = -1;
+		this.dy = this.isRunning ? -1.02 : -0.9;
 		sound.jump.play();
+	}
+
+	setJumpPressed(value){
+		this.isJumpPressed = value;
+		if (!value && this.dy < -0.6){
+			this.dy = -0.6;
+		}
 	}
 
 	grow(){
@@ -641,6 +650,7 @@ class Mario extends Moveable{
 		this.dx = 0.2 * direction * (running ? 2 : 1);
 
 		this.direction = direction;
+		this.isRunning = running;
 	}
 }
 
@@ -988,8 +998,10 @@ class Game{
 		let direction = this.controls.direction;
 		
 		if (this.controls.jump && this.mario.isTouchingGround){
-			this.mario.jump();			
+			this.mario.jump();
 		}
+
+		this.mario.setJumpPressed(this.controls.jump);
 
 		this.mario.setDirection(this.controls.direction, this.controls.run);
 
