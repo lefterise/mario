@@ -996,11 +996,15 @@ class Game{
 		this.coinAnimation = new Animation(3, 333);
 		this.turtleAnimation = new Animation(2, 300);
 		
+		this.startLevel();
+	}
+	
+	startLevel(){
 		this.screenX = 0;
 		this.screenPan = 360;
 		this.level = parseLevel();
 		this.terrain = new Terrain(this.level, this);
-		this.skyGradient = gfx.createBlueSkyGradient();
+		this.skyGradient = this.gfx.createBlueSkyGradient();
 		this.mario = new Mario(360, 461, 0.0, 0.0);
 		this.enemies = [];
 
@@ -1008,7 +1012,7 @@ class Game{
 		this.perfIndex = 0;
 		this.spawnEnemies();
 	}
-	
+
 	update(time){
 	    let dt = time - (this.prevTime ?? time);
 	    this.prevTime = time;
@@ -1045,6 +1049,8 @@ class Game{
 		if (this.mario.y > 42*14) { //mario fell off screen
 			this.mario.y = 0;
 			sound.die.play();
+
+			this.startLevel();
 		}
 
 		this.screenX = Math.floor(this.mario.x) - this.screenPan;
@@ -1285,20 +1291,14 @@ function initGame(){
 	var touch = new Touch(canvas);
 	var controls;
 
-	if (navigator.userAgent.match(/Android/i)
-         || navigator.userAgent.match(/webOS/i)
-         || navigator.userAgent.match(/iPhone/i)
-         || navigator.userAgent.match(/iPad/i)
-         || navigator.userAgent.match(/iPod/i)
-         || navigator.userAgent.match(/BlackBerry/i)
-         || navigator.userAgent.match(/Windows Phone/i)) {
+	if (navigator.userAgent.match(/(Android)|(webOS)|(iPhone)|(iPad)|(BlackBerry)|(Windows Phone)/i)) {
 		controls = touch;
 	} else {
 		controls = keyboard;
 	}
 	
 	var game = new Game(graphics, controls);
-	setInterval(()=>window.requestAnimationFrame((time)=>game.update(time)), 16);
+	setInterval(()=>window.requestAnimationFrame((time)=>game.update(time)), 15);
 	gGame = game;
 }
 </script>
