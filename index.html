@@ -69,7 +69,7 @@ class Terrain{
 		return this.inBounds(X,Y) && [9, 10,11, 20].includes(this.tiles[X][Y]);
 	}
 	
-	getPointCollisonDistance(x, y, dx, dy, tMax, wantNonSolid){		
+	getPointCollisionDistance(x, y, dx, dy, tMax, wantNonSolid){		
         //Ref: A fast voxel traversal algorithm J.Amanatides, A. Woo      
 		//(x,y) the location of the point. 
 		//(dx, dy) the normalized speed of the point in pixels per second. 
@@ -89,8 +89,13 @@ class Terrain{
 
 		let tNextVertical, tNextHorizontal; //The distance in seconds to the next line
         let stepX, stepY;                   //The direction we move across tiles        
+		
+		let beforeOrAfter = wantNonSolid ? 1 : -1;
 
-        if (dx >= 0.0){
+		if (dx == 0.0){
+			stepX = 0;
+			tNextVertical = Infinity;
+        }else if (dx > 0.0){
             stepX = 1;
             tNextVertical = ((X+1) * this.tileWidth - x) / dx;
         }else{
@@ -98,7 +103,10 @@ class Terrain{
             tNextVertical = (X * this.tileWidth - x) / dx;
         }
 
-        if (dy >= 0.0){
+		if (dy == 0.0){
+			stepY = 0;
+			tNextHorizontal = Infinity;
+        }else if (dy > 0.0){
             stepY = 1;
             tNextHorizontal = ((Y+1) * this.tileHeight - y) / dy;
         }else{
@@ -106,51 +114,29 @@ class Terrain{
             tNextHorizontal = (Y * this.tileHeight - y) / dy;
         }
 
-		if (isNaN(tNextVertical) || isNaN(tNextHorizontal)){
-			debugger;
-		}
-
         if (this.isSolid(X, Y) && !wantNonSolid) {
 			//this tries to solve the problem if mario happens to be inside a solid block.
 			//the idea is to flip the direction and call the inverse of this function to find the first non-solid
-            return this.getPointCollisonDistance(x,y,-dx,-dy, 10000, true); 
+            return this.getPointCollisionDistance(x,y,-dx,-dy, 10000, true); 
         }
 
         let t = 0.0;
         while ((X != endX || Y !=endY) && (t < tMax)){
             if(tNextVertical < tNextHorizontal){
                 t = tNextVertical;
-                tNextVertical += tVertical;
-
-				if (isNaN(tNextVertical)){
-					debugger; //ading positive and negative infinity
-				}
-
+                tNextVertical += tVertical;	
                 X += stepX;
 
 				if (this.isSolid(X, Y) ^ wantNonSolid) {
-					if (!wantNonSolid){
-                		return t - noNaN(stepX / dx); //Return t at one pixel before the collision with the solid vertical line
-					} else {
-						return t + noNaN(stepX / dx); //Return t at one pixel after the collision with the non-solid vertical line
-					}
+					return t + beforeOrAfter * (stepX / dx);
 				}
             }else{
                 t = tNextHorizontal;
                 tNextHorizontal += tHorizontal;
-
-				if (isNaN(tNextHorizontal)){
-					debugger; //ading positive and negative infinity
-				}
-
                 Y += stepY;
 
-				if (this.isSolid(X, Y) ^ wantNonSolid) {
-					if (!wantNonSolid){
-                		return t - noNaN(stepY / dy); //Return t at one pixel before the collision with the vertical line
-					} else {
-						return t + noNaN(stepY / dy);
-					}
+				if (this.isSolid(X, Y) ^ wantNonSolid) {                		
+					return t + beforeOrAfter * (stepY / dy);
 				}
             }
         }
@@ -160,7 +146,7 @@ class Terrain{
 	getMultipointCollisionDistance(x, y, dx, dy, tMax, collisionPoints){
 		let minT = tMax;
 		for (let p of collisionPoints){
-			let t = this.getPointCollisonDistance(x + p.x, y + p.y, dx, dy, tMax, false);
+			let t = this.getPointCollisionDistance(x + p.x, y + p.y, dx, dy, tMax, false);
 			minT = Math.min(minT, t);
 		}
 		return minT;
@@ -444,8 +430,8 @@ class AvoidsCliffs{
 	computeFuturePosition(moveable, dt, terrain){}
 	
 	reactToNewPosition(moveable, dt, terrain){
-		let isLeftFootOnAir  = terrain.getPointCollisonDistance(moveable.x + moveable.collisionPoints[0].x, moveable.y + moveable.collisionPoints[0].y, 0.0, 1.0, 2.0, false) > 1.0;
-		let isRightFootOnAir = terrain.getPointCollisonDistance(moveable.x + moveable.collisionPoints[1].x, moveable.y + moveable.collisionPoints[1].y, 0.0, 1.0, 2.0, false) > 1.0;
+		let isLeftFootOnAir  = terrain.getPointCollisionDistance(moveable.x + moveable.collisionPoints[0].x, moveable.y + moveable.collisionPoints[0].y, 0.0, 1.0, 2.0, false) > 1.0;
+		let isRightFootOnAir = terrain.getPointCollisionDistance(moveable.x + moveable.collisionPoints[1].x, moveable.y + moveable.collisionPoints[1].y, 0.0, 1.0, 2.0, false) > 1.0;
 
 		if (moveable.isTouchingGround && isLeftFootOnAir){
 			moveable.dx = Math.abs(moveable.dx);
@@ -560,10 +546,11 @@ class Mario extends Moveable{
 		this.size = 0;
 		this.isJumpPressed = false;
 		this.isRunning = false;
+		this.state = States.Walking;
 	}
 
 	collidesWith(other){
-		if (other.state == States.Dead || other.state == States.Dying) return;
+		if (other.state == States.Dead || other.state == States.Dying || this.state == States.Dying) return;
 
 		if (other.state == States.Collectable) {
 			other.collect(this);
@@ -587,10 +574,7 @@ class Mario extends Moveable{
 			}
 
 			if (relativeLocation.left || relativeLocation.right){
-				this.dx = 0.0;
-				if (isNaN(this.x)){
-					debugger;
-				}
+				this.dx = 0.0;	
 				this.futureX = this.x;
 			}
 			return;
@@ -601,17 +585,30 @@ class Mario extends Moveable{
 			this.futureY = this.futureY - 3;
 			other.stomp(this);
 		}else{
-			if (other.touch)
+			if (other.state == States.Walking || other.state == States.Spinning){
+				sound.die.play();
+				this.state = States.Dying;
+				this.behaviours = [new IgnoresTerrain()];
+				this.dx =  0.0;
+				this.dy = -0.7;	
+			}
+
+			if (other.touch){
 				other.touch(this);
+				this.futureX = this.x;
+				this.futureY = this.y;
+			}
 		}
 	}
 
 	jump(){
+		if (this.state == States.Dying) return;
 		this.dy = this.isRunning ? -1.02 : -0.9;
 		sound.jump.play();
 	}
 
 	setJumpPressed(value){
+		if (this.state == States.Dying) return;
 		this.isJumpPressed = value;
 		if (!value && this.dy < -0.7){
 			this.dy = -0.7;
@@ -633,7 +630,9 @@ class Mario extends Moveable{
 		this.collisionPoints = this.smallCollisionPoints;
 	}
 
-	setDirection(direction, running){	
+	setDirection(direction, running){
+		if (this.state == States.Dying) return;
+
 		if (direction != Directions.Idle){
 			this.facing = direction == Directions.Left ? 0 : 1;
 		}
@@ -782,7 +781,8 @@ class Koopa extends Moveable{
 
 	kick(mario){
 		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(2,3,75), new CanBumpBricksHorizontaly()];
-		this.dx = 0.3 * (mario.futureX < this.x) ? 1 : -1;
+		this.dx = 0.5 * ((mario.futureX < this.x) ? 1 : -1);
+		this.futureX = this.x;
 		this.state = States.Spinning;
 		sound.kick.play();
 	}
@@ -993,9 +993,7 @@ class Game{
 		this.controls = controls;
 		this.frame = 0;
 		this.treeAnimation = new Animation(3, 500);
-		this.coinAnimation = new Animation(3, 333);
-		this.turtleAnimation = new Animation(2, 300);
-		
+		this.coinAnimation = new Animation(3, 333);		
 		this.startLevel();
 	}
 	
@@ -1021,7 +1019,6 @@ class Game{
 
 		this.treeAnimation.update(dt);
 		this.coinAnimation.update(dt);
-		this.turtleAnimation.update(dt);
 		
 		this.updateEnemies(dt);
 
@@ -1047,10 +1044,10 @@ class Game{
 		}
 
 		if (this.mario.y > 42*14) { //mario fell off screen
-			this.mario.y = 0;
-			sound.die.play();
-
-			this.startLevel();
+			if (this.mario.state != States.Dying){
+				sound.die.play();
+			}
+			this.fadeOut();
 		}
 
 		this.screenX = Math.floor(this.mario.x) - this.screenPan;
@@ -1067,14 +1064,15 @@ class Game{
 		this.performance[this.perfIndex] = dt;
 		this.perfIndex = (this.perfIndex + 1) % 40;
 
-		this.gfx.ctx.fillStyle = this.skyGradient;		
+		this.gfx.ctx.fillStyle = this.skyGradient;
 		this.gfx.ctx.fillRect(0, 0, 1200, 546);
-		this.gfx.ctx.fillStyle = "black";
-		let txtx = 10;
-		for (let m of this.performance){
-			this.gfx.ctx.fillText(m.toFixed(0), txtx, 50);
-			txtx += 20;
-		}
+		
+		//this.gfx.ctx.fillStyle = "black";
+		//let txtx = 10;
+		//for (let m of this.performance){
+		//	this.gfx.ctx.fillText(m.toFixed(0), txtx, 50);
+		//	txtx += 20;
+		//}
 
 		if ((this.controls.debug % 3) < 2){
 			this.drawTerrain(dt);
@@ -1085,7 +1083,43 @@ class Game{
 			this.drawDebug(dt);
 		}
 
+		if (this.state == "FadingOut"){
+			this.fadeAnimation.update(dt);		
+			this.gfx.ctx.fillStyle = "rgba(0,0,0," + (this.fadeAnimation.frame / 50) + ")";
+			this.gfx.ctx.fillRect(0, 0, 1200, 546);
+
+			console.log(this.fadeAnimation.frame);
+			if (this.fadeAnimation.frame == 49){				
+				this.startLevel();
+				this.fadeIn();
+			}
+		}
+		if (this.state == "FadingIn"){
+			this.fadeAnimation.update(dt);		
+			this.gfx.ctx.fillStyle = "rgba(0,0,0," + (1 - this.fadeAnimation.frame / 50) + ")";
+			this.gfx.ctx.fillRect(0, 0, 1200, 546);
+
+			console.log(this.fadeAnimation.frame);
+			if (this.fadeAnimation.frame == 49){				
+				this.state = "Playing";
+			}
+		}
+
 		this.controls.draw(this.gfx);
+	}
+
+	fadeOut(){
+		if (this.state != "FadingOut"){
+			this.state = "FadingOut";
+			this.fadeAnimation = new Animation(50, 33);
+		}
+	}
+
+	fadeIn(){
+		if (this.state != "FadingIn"){
+			this.state = "FadingIn";
+			this.fadeAnimation = new Animation(50, 33);
+		}
 	}
 
 	spawnEnemies(){

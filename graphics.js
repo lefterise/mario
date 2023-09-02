@@ -87,7 +87,16 @@ class Graphics{
       const grd = this.ctx.createLinearGradient(0, 0, 0, 546);
       grd.addColorStop(0,   "#48ACE8");
       grd.addColorStop(0.75,"#C0E8E8");
-      grd.addColorStop(1,   "#C0E8E8");
+      grd.addColorStop(1,   "#C0E8E8");      
+      return grd;
+    }
+
+    createNightGradient(){
+      const grd = this.ctx.createLinearGradient(0, 0, 0, 546);
+      grd.addColorStop(0,   "#245674");
+      grd.addColorStop(0.75,"#607474");
+      grd.addColorStop(1,   "#607474");
+
       return grd;
     }
   }
