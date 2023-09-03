@@ -62,7 +62,7 @@ class Terrain{
 	}
 
 	isBumpable(X, Y){
-		return this.inBounds(X,Y) && [9, 10,11,12, 20].includes(this.tiles[X][Y]);
+		return this.inBounds(X,Y) && [9, 10,11,12, 20, 254].includes(this.tiles[X][Y]);
 	}
 	
 	getPointCollisionDistance(x, y, dx, dy, tMax, wantNonSolid){		
@@ -151,7 +151,8 @@ class Terrain{
 	bumpBrick(bumpedBricks, moveable){
 		this.bumpedBricks = bumpedBricks;
 		for (let b of bumpedBricks){
-			if (this.tiles[b.x][b.y] == 20 || (this.tiles[b.x][b.y] == 9 && this.tiles[b.x][b.y - 1] == 115)){
+			//20 = [?]   9=breakable brick 254=invisibrick 115=shroom
+			if ((this.tiles[b.x][b.y] == 20 || (this.tiles[b.x][b.y] == 254 && moveable.dy < 0)) || (this.tiles[b.x][b.y] == 9 && this.tiles[b.x][b.y - 1] == 115)){
 				if (this.tiles[b.x][b.y - 1] == 115){
 
 					if (this.world.mario.size == 0){
@@ -165,6 +166,15 @@ class Terrain{
 					this.tiles[b.x][b.y - 1] = 255;
 
 					sound.sprout.play();
+				} else if (this.tiles[b.x][b.y - 1] >= 250 && this.tiles[b.x][b.y - 1] <= 253){//253=5 multicoins, 252=4 multicons .. 249 = 0
+					moveable.dy = 0.3;
+					this.tiles[b.x][b.y] = 20;
+					this.tiles[b.x][b.y - 1]--;
+
+					let coin = new PopupCoin(60 * b.x, 42 * (b.y-1), 0.0, -0.6);
+					this.world.enemies.push(coin);
+					
+					sound.coin.play();
 				}else{
 					this.tiles[b.x][b.y] = 21;
 					

@@ -52,6 +52,10 @@
      if (c == "∩") return 104+8;
      if (c == "₼") return 105+8;
      if (c == "♠") return 107+8;
+
+     
+     if (c == "●") return 253; //253-249 reserved for multicoin brick
+     if (c == "□") return 254;
      
      
      return 255;

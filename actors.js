@@ -223,9 +223,9 @@ class Mario extends Moveable{
 		if (this.size == 2){
 			sound.fireball.play();
 			if (this.facing == 1)
-				enemies.push(new Fireball(this.x + 20, this.y - 30,  0.5, -0.45));
+				enemies.push(new Fireball(this.x + 20, this.y - 30,  0.5, 0.0));
 			else
-				enemies.push(new Fireball(this.x - 20, this.y - 30, -0.5, -0.45));
+				enemies.push(new Fireball(this.x - 20, this.y - 30, -0.5, 0.0));
 		}
 	}
 
