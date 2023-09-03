@@ -256,7 +256,7 @@ class ActsWhenSteppingOnBrick{
 	    let y = Math.floor((moveable.y + moveable.collisionPoints[CollisionPoints.BottomRight].y + 2.0) / terrain.tileHeight);
 
         if (terrain.inBounds(x,y) && terrain.tiles[x][y] == this.brick){
-            this.action();
+            this.action(x,y,terrain);
         }
 	}
 }

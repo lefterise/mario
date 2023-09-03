@@ -107,7 +107,7 @@ class Mario extends Moveable{
 		];
 		this.collisionPoints = this.smallCollisionPoints;
 		this.animation = new AnimationBehavior(0,1,250);
-		this.behaviours = [new RespectsTerrain(), new CanBumpBricksAbove(), new MinimumX(30), new MaximumX(179*60-30), this.animation, new ActsWhenSteppingOnBrick(16, ()=>this.takeDamage())];
+		this.behaviours = [new RespectsTerrain(), new CanBumpBricksAbove(), new MinimumX(30), new MaximumX(179*60-30), this.animation, new ActsWhenSteppingOnBrick(16, ()=>this.takeDamage()), new ActsWhenSteppingOnBrick(12, (x,y,terrain)=>this.jumpOnNote(x,y,terrain))];
 		this.facing = 1;
 		this.direction = Directions.Idle;
 		this.size = 0;
@@ -175,15 +175,23 @@ class Mario extends Moveable{
             this.dx =  0.0;
             this.dy = -0.7;
         }else{
-            this.size = 0;
+            this.shrink();
             sound.powerdown.play();
             this.state = States.Invulnerable;
-            this.behaviours = [new RespectsTerrain(), new CanBumpBricksAbove(), new MinimumX(30), new MaximumX(179*60-30), this.animation, new ActsWhenSteppingOnBrick(16, ()=>this.takeDamage()), new AlarmBehavior(1500, "MakeVulnerable")];
+            this.behaviours = [new RespectsTerrain(), new CanBumpBricksAbove(), new MinimumX(30), new MaximumX(179*60-30), this.animation, new ActsWhenSteppingOnBrick(16, ()=>this.takeDamage()), new ActsWhenSteppingOnBrick(12, (x,y,terrain)=>this.jumpOnNote(x,y,terrain)), new AlarmBehavior(1500, "MakeVulnerable")];
         }
     }
 
-	jump(){
+	jumpOnNote(x,y,terrain){
 		if (this.state == States.Dying) return;
+		this.dy = -1.20;
+		sound.bump.play();
+
+		terrain.bumpBrick([{x:x,y:y}], this);
+	}
+
+	jump(){
+		if (this.state == States.Dying || this.dy < -1.02) return;
 		this.dy = this.isRunning ? -1.02 : -0.9;
 		sound.jump.play();
 	}

@@ -58,11 +58,11 @@ class Terrain{
 	}
 
 	isSolid(X,Y){
-		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || [9,16,20,21,26,27,32,33,67].includes(this.tiles[X][Y]));
+		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || [9,12,16,20,21,26,27,32,33,67].includes(this.tiles[X][Y]));
 	}
 
 	isBumpable(X, Y){
-		return this.inBounds(X,Y) && [9, 10,11, 20].includes(this.tiles[X][Y]);
+		return this.inBounds(X,Y) && [9, 10,11,12, 20].includes(this.tiles[X][Y]);
 	}
 	
 	getPointCollisionDistance(x, y, dx, dy, tMax, wantNonSolid){		
@@ -151,7 +151,7 @@ class Terrain{
 	bumpBrick(bumpedBricks, moveable){
 		this.bumpedBricks = bumpedBricks;
 		for (let b of bumpedBricks){
-			if (this.tiles[b.x][b.y] == 20){
+			if (this.tiles[b.x][b.y] == 20 || (this.tiles[b.x][b.y] == 9 && this.tiles[b.x][b.y - 1] == 115)){
 				if (this.tiles[b.x][b.y - 1] == 115){
 
 					if (this.world.mario.size == 0){
