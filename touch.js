@@ -72,6 +72,9 @@ class Touch{
 		this.pan = Directions.Idle;
         this.jumpTouchIdentifier =-1;       
         this.jumpButton  = {x: 1040, y:430, w: 98, h: 98};
+        this.shootButton = {x: 1040, y:320, w: 98, h: 98};
+        this.fire = false;
+        this.fireTouchIdentifier =-1;
         this.joystick = new Joystick();
         this.touchPosition ={ x:0, y:0};
         
@@ -96,6 +99,11 @@ class Touch{
                 if (this.overlaps(pt, this.jumpButton)){
                     this.jump = true;
                     this.jumpTouchIdentifier = touchobj.identifier;
+                }
+
+                if (this.overlaps(pt, this.shootButton)){
+                    this.fire = true;
+                    this.fireTouchIdentifier = touchobj.identifier;
                 } 
             }
 			e.preventDefault();
@@ -126,8 +134,12 @@ class Touch{
                     this.run = state.run;
                 }          
 
-                if (this.jumpTouchIdentifier == touchobj.identifier){
+                if (touchobj.identifier == this.jumpTouchIdentifier){
                     this.jump = false;
+                }
+
+                if (touchobj.identifier == this.fireTouchIdentifier){
+                    this.fire = false;
                 }
             }
 			e.preventDefault();
@@ -169,6 +181,8 @@ class Touch{
         gfx.drawJoystick(50,  this.joystick.y+70);
         gfx.drawButton(this.joystick.x-49,  this.joystick.y+30, 0);
 		gfx.drawButton(this.jumpButton.x,  this.jumpButton.y, 2);
+        
+        gfx.drawButton(this.shootButton.x,  this.shootButton.y, 3);
 
         gfx.ctx.fillStyle = "black";
         gfx.ctx.fillRect(this.touchPosition.x - 2, this.touchPosition.y - 2, 4, 4);        

@@ -10,6 +10,7 @@ class Keyboard{
 		this.direction = Directions.Idle;
 		this.jump = false;
 		this.run = false;
+		this.fire = false;
 		this.debug = 0;
 		this.pan = Directions.Idle;
 
@@ -29,12 +30,16 @@ class Keyboard{
 				this.pan = Directions.Right;
 			}
 
-			if (ev.code == "Space"){
+			if (ev.code == "AltLeft"){
 				this.jump = true;
 			}
 			
 			if (ev.code == "ControlLeft"){
 				this.run = true;
+			}
+
+			if (ev.code == "Space"){
+				this.fire = true;
 			}
 
 			if (ev.code == "KeyD"){
@@ -66,7 +71,7 @@ class Keyboard{
 				this.pan = Directions.Idle;
 			}
 
-			if (this.jump && ev.code == "Space"){
+			if (this.jump && ev.code == "AltLeft"){
 				this.jump = false;
 			}
 

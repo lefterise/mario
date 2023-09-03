@@ -42,12 +42,6 @@ class Animation{
   
 }
 
-function noNaN(x){
-	if (isNaN(x))
-		return 0;
-	return x;
-}
-
 class Terrain{
 	constructor(tiles, world){
 		this.tiles = tiles;
@@ -204,7 +198,9 @@ const States = {
 	Dead: 5,
 	Collectable: 6,
 	Solid: 7,
-	Sprouting: 8
+	Sprouting: 8,
+	EnemyKilling: 9,
+	Invulnerable: 10
 }
 
 const CollisionPoints = {
@@ -284,43 +280,20 @@ class Moveable{
 //Composable behaviors
 class RespectsTerrain {
 	computeFuturePosition(moveable, dt, terrain){
-		if (isNaN(moveable.x) || isNaN(moveable.y)){
-			debugger;
-		}
 
 		let tDiagonal = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, moveable.dx, moveable.dy, dt, moveable.collisionPoints);
-		
-		if (isNaN(tDiagonal)){
-			debugger;
-			let runAgain = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, moveable.dx, moveable.dy, dt, moveable.collisionPoints);
-		}	
 
 		let x = moveable.x + moveable.dx * tDiagonal;
 		let y = moveable.y + moveable.dy * tDiagonal;
 				
 		//check if mario can move stricly in dx or dy for the remainder of the distance
-		let tHorizontal = terrain.getMultipointCollisionDistance(x, y, moveable.dx, 0.0, dt - tDiagonal, moveable.collisionPoints);
+		let tHorizontal = terrain.getMultipointCollisionDistance(x, y, moveable.dx, 0.0, dt - tDiagonal, moveable.collisionPoints);	
 		
-		if (isNaN(tHorizontal)){
-			debugger;
-			let runAgain = terrain.getMultipointCollisionDistance(x, y, moveable.dx, 0.0, dt - tDiagonal, moveable.collisionPoints);
-		}	
-
 		x = x + moveable.dx * tHorizontal;	
 
 		let tVertical = terrain.getMultipointCollisionDistance(x, y, 0.0, moveable.dy, dt - tDiagonal, moveable.collisionPoints);
-		
-		if (isNaN(tVertical)){
-			debugger;
-			let runAgain = terrain.getMultipointCollisionDistance(x, y, 0.0, moveable.dy, dt - tDiagonal, moveable.collisionPoints);
-		}		
 
 		y = y + moveable.dy * tVertical;
-		
-
-		if (isNaN(x) || isNaN(y)){
-			debugger;
-		}
 
 		moveable.futureX = x;
 		moveable.futureY = y;
@@ -519,6 +492,38 @@ class HasFriction{
 	}
 }
 
+class BouncesOnTouchGround{
+	constructor(bounceSpeed){
+		this.bounceSpeed = bounceSpeed;
+	}
+
+	computeFuturePosition(moveable, dt, terrain){}
+	
+	reactToNewPosition(moveable, dt, terrain){
+		moveable.isTouchingGround = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, 0.0,  1.0, 2.0, moveable.collisionPoints) <= 1.0 || moveable.isStandingOnSolid;
+		if (moveable.isTouchingGround){
+			moveable.dy = this.bounceSpeed;
+		}
+	}
+}
+
+class ChangesStateWhenHittingWalls{
+	constructor(state){
+		this.state = state;
+	}
+
+	computeFuturePosition(moveable, dt, terrain){}
+	
+	reactToNewPosition(moveable, dt, terrain){
+		let isHittingLeftWall  = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, -1.0, 0.0, 2.0, moveable.collisionPoints) <= 1.0;
+		let isHittingRightWall = terrain.getMultipointCollisionDistance(moveable.x, moveable.y,  1.0, 0.0, 2.0, moveable.collisionPoints) <= 1.0;
+
+		if (isHittingLeftWall || isHittingRightWall){
+			moveable.state = this.state;
+		}
+	}
+}
+
 class Mario extends Moveable{
 	constructor(x,y,dx,dy){
 		super(x,y,dx,dy);
@@ -549,17 +554,17 @@ class Mario extends Moveable{
 		this.state = States.Walking;
 	}
 
-	collidesWith(other){
-		if (other.state == States.Dead || other.state == States.Dying || this.state == States.Dying) return;
+	collidesWith(other, otherState){
+		if (otherState == States.Dead || otherState == States.Dying || this.state == States.Dying) return;
 
-		if (other.state == States.Collectable) {
+		if (otherState == States.Collectable) {
 			other.collect(this);
 			return;
 		}
 
 		let relativeLocation = this.getRelativeLocationTo(other);
 
-		if (other.state == States.Solid) {
+		if (otherState == States.Solid) {
 			if (this.dy > 0 && relativeLocation.above){
 				this.dy = 0.0;
 				this.futureY = this.y;
@@ -585,12 +590,21 @@ class Mario extends Moveable{
 			this.futureY = this.futureY - 3;
 			other.stomp(this);
 		}else{
-			if (other.state == States.Walking || other.state == States.Spinning){
-				sound.die.play();
-				this.state = States.Dying;
-				this.behaviours = [new IgnoresTerrain()];
-				this.dx =  0.0;
-				this.dy = -0.7;	
+			if (otherState == States.Walking || otherState == States.Spinning){
+				if (this.state != States.Invulnerable){
+					if (this.size == 0){
+						sound.die.play();
+						this.state = States.Dying;
+						this.behaviours = [new IgnoresTerrain()];
+						this.dx =  0.0;
+						this.dy = -0.7;
+					}else{
+						this.size = 0;
+						sound.powerdown.play();
+						this.state = States.Invulnerable;
+						this.behaviours = [new RespectsTerrain(), new CanBumpBricksAbove(), new MinimumX(30), new MaximumX(179*60-30), this.animation, new AlarmBehavior(1500, "MakeVulnerable")];
+					}
+				}
 			}
 
 			if (other.touch){
@@ -630,6 +644,16 @@ class Mario extends Moveable{
 		this.collisionPoints = this.smallCollisionPoints;
 	}
 
+	shoot(enemies){
+		if (this.size == 2){
+			sound.fireball.play();
+			if (this.facing == 1)
+				enemies.push(new Fireball(this.x + 20, this.y - 30,  0.5, -0.45));
+			else
+				enemies.push(new Fireball(this.x - 20, this.y - 30, -0.5, -0.45));
+		}
+	}
+
 	setDirection(direction, running){
 		if (this.state == States.Dying) return;
 
@@ -656,6 +680,12 @@ class Mario extends Moveable{
 		this.direction = direction;
 		this.isRunning = running;
 	}
+
+	alarm(name){
+		if (name == "MakeVulnerable"){
+			this.state = States.Walking;
+		}
+	}
 }
 
 class Goomba extends Moveable{
@@ -672,10 +702,10 @@ class Goomba extends Moveable{
 		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(0,2,300)];		
 	}
 
-	collidesWith(other){
-		if (this.state == States.Dead || this.state == States.Dying || other.state == States.Dead || other.state == States.Dying || other.state == States.Collectable) return;
+	collidesWith(other, otherState){
+		if (this.state == States.Dead || this.state == States.Dying || otherState == States.Dead || otherState == States.Dying || otherState == States.Collectable) return;
 		
-		if (other.state == States.Spinning){
+		if (otherState == States.Spinning || otherState == States.EnemyKilling){
 			this.wipe();
 			return;
 		}
@@ -691,7 +721,7 @@ class Goomba extends Moveable{
 	}
 
 	stomp(mario){
-		this.state = States.Dying;		
+		this.state = States.Dying;
 		this.behaviours = [new AlarmBehavior(1000, "CleanupCorpse")];
 		this.frame = 2;
 		sound.stomp.play();
@@ -724,10 +754,10 @@ class Koopa extends Moveable{
 		this.walk();
 	}
 
-	collidesWith(other){
-		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying || other.state == States.Collectable) return;
+	collidesWith(other, otherState){
+		if (this.state == States.Dead || otherState == States.Dead || otherState == States.Dying || otherState == States.Collectable) return;
 
-		if (other.state == States.Spinning){
+		if (otherState == States.Spinning || otherState == States.EnemyKilling){
 			this.wipe();
 		}
 
@@ -829,8 +859,8 @@ class Coin extends Moveable{
 		this.state = States.Dead;
 	}
 
-	collidesWith(other){
-		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+	collidesWith(other, otherState){
+		if (this.state == States.Dead || otherState == States.Dead || otherState == States.Dying) return;
 	}
 }
 
@@ -853,8 +883,8 @@ class PopupCoin extends Moveable{
 		}
 	}
 
-	collidesWith(other){
-		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+	collidesWith(other, otherState){
+		if (this.state == States.Dead || otherState == States.Dead || otherState == States.Dying) return;
 	}
 }
 
@@ -886,8 +916,8 @@ class Mushroom extends Moveable{
 		}
 	}
 
-	collidesWith(other){
-		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+	collidesWith(other, otherState){
+		if (this.state == States.Dead || otherState == States.Dead || otherState == States.Dying) return;
 	}
 
 	alarm(name){
@@ -923,8 +953,8 @@ class Flower extends Moveable{
 		mario.flower();
 	}
 
-	collidesWith(other){
-		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+	collidesWith(other, otherState){
+		if (this.state == States.Dead || otherState == States.Dead || otherState == States.Dying) return;
 	}
 
 	alarm(name){
@@ -956,10 +986,10 @@ class Brick extends Moveable{
 		this.state = States.Dead;
 	}
 
-	collidesWith(other){
-		if (this.state == States.Dead || other.state == States.Dead || other.state == States.Dying) return;
+	collidesWith(other, otherState){
+		if (this.state == States.Dead || otherState == States.Dead || otherState == States.Dying) return;
 
-		if (other.state == States.Spinning){
+		if (otherState == States.Spinning){
 			sound.break.play();
 			this.state = States.Dead;
 		}
@@ -978,10 +1008,30 @@ class BrickParticle extends Moveable{
 		this.behaviours = [new RespectsTerrain(), new HasFriction(0.1), new AlarmBehavior(2000, "Vanish")];
 		this.state = States.Dying;
 	}
-	collidesWith(other){}
+	collidesWith(other, otherState){}
 
 	alarm(name){
 		if (name == "Vanish"){
+			this.state = States.Dead;
+		}
+	}
+}
+
+class Fireball extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+		{x: -13, y:  10},
+		{x:  13, y:  10},
+		{x: -13, y: -10}, 
+		{x:  13, y: -10}			
+		];
+		this.behaviours = [new RespectsTerrain(), new BouncesOnTouchGround(-0.45), new ChangesStateWhenHittingWalls(States.Dead)]; 
+		this.state = States.EnemyKilling;
+	}
+
+	collidesWith(other, otherState){
+		if (otherState == States.Walking || otherState == States.Cowering || otherState == States.Spinning){
 			this.state = States.Dead;
 		}
 	}
@@ -993,7 +1043,9 @@ class Game{
 		this.controls = controls;
 		this.frame = 0;
 		this.treeAnimation = new Animation(3, 500);
-		this.coinAnimation = new Animation(3, 333);		
+		this.coinAnimation = new Animation(3, 333);
+
+		this.fireballAnimation = new Animation(2, 100);
 		this.startLevel();
 	}
 	
@@ -1019,6 +1071,7 @@ class Game{
 
 		this.treeAnimation.update(dt);
 		this.coinAnimation.update(dt);
+		this.fireballAnimation.update(dt);
 		
 		this.updateEnemies(dt);
 
@@ -1034,6 +1087,11 @@ class Game{
 		this.mario.setJumpPressed(this.controls.jump);
 
 		this.mario.setDirection(this.controls.direction, this.controls.run);
+
+		if (this.controls.fire){
+			this.mario.shoot(this.enemies);
+			this.controls.fire = false;
+		}
 
 		if (this.controls.pan != Directions.Idle){
 			this.screenPan += Math.round((this.controls.pan == Directions.Left ? 1: -1) * dt * 0.3);
@@ -1083,12 +1141,13 @@ class Game{
 			this.drawDebug(dt);
 		}
 
+		
+
 		if (this.state == "FadingOut"){
 			this.fadeAnimation.update(dt);		
 			this.gfx.ctx.fillStyle = "rgba(0,0,0," + (this.fadeAnimation.frame / 50) + ")";
 			this.gfx.ctx.fillRect(0, 0, 1200, 546);
 
-			console.log(this.fadeAnimation.frame);
 			if (this.fadeAnimation.frame == 49){				
 				this.startLevel();
 				this.fadeIn();
@@ -1099,7 +1158,6 @@ class Game{
 			this.gfx.ctx.fillStyle = "rgba(0,0,0," + (1 - this.fadeAnimation.frame / 50) + ")";
 			this.gfx.ctx.fillRect(0, 0, 1200, 546);
 
-			console.log(this.fadeAnimation.frame);
 			if (this.fadeAnimation.frame == 49){				
 				this.state = "Playing";
 			}
@@ -1145,14 +1203,6 @@ class Game{
 					let coin = new Coin(60 * (x+tileOffset),42 * y, 0.0, 0.0);
 					this.enemies.push(coin);
 					this.level[x+tileOffset][y] = 255;
-				}else if (tileId == 107+8){
-					//let mushroom = new Mushroom(60 * (x+tileOffset),42 * y, 0.1, 0.0);
-					//this.enemies.push(mushroom);
-					//this.level[x+tileOffset][y] = 255;
-				}else if (tileId == 9){
-					//let brick = new Brick(60 * (x+tileOffset),42 * y, 0.0, 0.0);
-					//this.enemies.push(brick);
-					//this.level[x+tileOffset][y] = 255;
 				}
 			}
 		}
@@ -1165,8 +1215,9 @@ class Game{
 			for (let j = i + 1; j < this.enemies.length; j++) {
 				let distance = this.enemies[i].getDistanceFromOtherMoveable(this.enemies[j]);
 				if (distance.dx < 0 && distance.dy < 0){
-					this.enemies[i].collidesWith(this.enemies[j]);
-					this.enemies[j].collidesWith(this.enemies[i]);
+					let stateBeforeCollision = this.enemies[i].state;
+					this.enemies[i].collidesWith(this.enemies[j], this.enemies[j].state);
+					this.enemies[j].collidesWith(this.enemies[i], stateBeforeCollision);
 				}
 			}
     	}
@@ -1180,7 +1231,7 @@ class Game{
 
 			let distance = this.mario.getDistanceFromOtherMoveable(e);
 				if (distance.dx < 0 && distance.dy < 0){
-					this.mario.collidesWith(e);
+					this.mario.collidesWith(e, e.state);
 				}
 		}
 		
@@ -1210,6 +1261,8 @@ class Game{
 				this.gfx.drawBrickParticle(e.x - this.screenX, e.y);				
 			}else if (e.constructor.name == "Brick"){
 				this.gfx.drawTileOld(e.x - this.screenX, e.y, 1);
+			}else if (e.constructor.name == "Fireball"){
+				this.gfx.drawFireball(e.x - this.screenX, e.y, this.fireballAnimation.frame);
 			}
 		}
 	}
@@ -1333,11 +1386,11 @@ function initGame(){
 	
 	var game = new Game(graphics, controls);
 	setInterval(()=>window.requestAnimationFrame((time)=>game.update(time)), 15);
-	gGame = game;
+	gGame = game;//parallax color #5080A0
 }
 </script>
 </head>
 <body onload="initGame()">
-   <canvas id="MyCanvas" width="1200" height="546" style="border:1px solid #000000; background-color:#5080A0;"></canvas>
+   <canvas id="MyCanvas" width="1200" height="546" style="border:1px solid #000000; background-color:#000000;"></canvas>
 </body>
 </html>

@@ -74,6 +74,9 @@ class Graphics{
       }
     }
     
+    drawFireball(x, y, frame){
+      this.ctx.drawImage(this.enemies, 39 * frame, 621, 27, 21, x - 13, y - 10, 27, 21);
+    }
 
     drawButton(x,y, id){
       this.ctx.drawImage(this.buttons, 98 * id, 0, 98, 98, x, y, 98, 98);
