@@ -10,7 +10,7 @@ var level1 = [
     "    oo o     01 o o ***** 23   o               0123      oo o               o   @@@@@        à  o  23      23    23         oo           23   o                   oo   o   oo o 23  ",
     "    oo o     23 o o       23   o               2323      oo o               o                $  o  23 €    23    23         oo           23   o                   oo   o   ooˆo 23  ",
     "w   oo o     23 o o €w w  23   owww€€        ‰ 2323 ww   oo o ˆ    €   €    o                 wwo  23 ww € 23 wwˆ23  ww I   oo  wwˆ  ˆww 23 wwo      www          oww ˆo   wwwo 23ww",
-    "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWFFFFFWWWWWWWWWWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFWWFFFFFFFFFFFFFFFFFFFFFWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+    "FFFFFFFFFF^FFFFFFFFFFFFFFFFFFFFFFFFFFFWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWFFFFFWWWWWWWWWWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFWWFFFFFFFFFFFFFFFFFFFFFWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFWFFFFFWWWWWWWWWWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFWWFFFFFFFFFFFFFFFFFFFFFWWWWWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
     ];
     
@@ -40,6 +40,8 @@ var level1 = [
      if (c == "E") return 10+8;
      if (c == "?") return 12+8;
      if (c == "J") return 1+8;
+     if (c == "^") return 8+8;
+
      if (c == "*") return 101+8;
      if (c == "w") {
         if (u == 'o')
