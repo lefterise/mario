@@ -502,6 +502,68 @@ class Mushroom extends Moveable{
 	}
 }
 
+class PoisonousMushroom extends Mushroom{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);		
+	}		
+
+	collect(mario){		
+		this.state = States.Dead;
+		mario.takeDamage();
+	}
+}
+
+class LifeMushroom extends Mushroom{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);		
+	}		
+
+	collect(mario){		
+		this.state = States.Dead;
+		sound.life.play();
+	}
+}
+
+class Star extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+		{x:  1, y: 40},	
+		{x: 59, y: 40},
+		{x:  1, y:  0}, 
+		{x: 59, y:  0}			
+		];				
+		this.state = States.Sprouting;		
+		this.behaviours = [new AnimationBehavior(0,42,12), new AlarmBehavior(500, "BecomeCollectable")];
+	}
+	
+	becomeCollectable(){
+		this.state = States.Collectable;
+		this.behaviours = [new RespectsTerrain(), new BouncesOnTouchGround(-0.8), new ChangesDirectionWhenHittingWalls()];
+		this.frame = 42;
+		this.dy = -0.3;
+		this.dx = 0.2;
+	}
+
+	collect(mario){		
+		sound.powerup.play();
+		this.state = States.Dead;
+		if (mario.size == 0){
+			mario.grow();
+		}
+	}
+
+	collidesWith(other, otherState){
+		if (this.state == States.Dead || otherState == States.Dead || otherState == States.Dying) return;
+	}
+
+	alarm(name){
+		if (name == "BecomeCollectable"){
+			this.becomeCollectable();
+		}
+	}
+}
+
 class Flower extends Moveable{
 	constructor(x,y,dx,dy){
 		super(x,y,dx,dy);

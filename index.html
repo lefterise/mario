@@ -175,6 +175,30 @@ class Terrain{
 					this.world.enemies.push(coin);
 					
 					sound.coin.play();
+				}else if (this.tiles[b.x][b.y - 1] == 116){					
+					let poisonousMushroom = new PoisonousMushroom(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
+					this.world.enemies.push(poisonousMushroom);
+					
+					this.tiles[b.x][b.y] = 21;
+					this.tiles[b.x][b.y - 1] = 255;
+
+					sound.sprout.play();
+				}else if (this.tiles[b.x][b.y - 1] == 117){					
+					let lifeMushroom = new LifeMushroom(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
+					this.world.enemies.push(lifeMushroom);
+					
+					this.tiles[b.x][b.y] = 21;
+					this.tiles[b.x][b.y - 1] = 255;
+
+					sound.sprout.play();
+				}else if (this.tiles[b.x][b.y - 1] == 118){					
+					let star = new Star(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
+					this.world.enemies.push(star);
+					
+					this.tiles[b.x][b.y] = 21;
+					this.tiles[b.x][b.y - 1] = 255;
+
+					sound.sprout.play();
 				}else{
 					this.tiles[b.x][b.y] = 21;
 					
@@ -421,8 +445,14 @@ class Game{
 				this.gfx.drawCoin(e.x - this.screenX, e.y, this.coinAnimation.frame); //All coins use same frame so that glares are aligned
 			}else if (e.constructor.name == "Mushroom"){
 				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 0);
+			}else if (e.constructor.name == "PoisonousMushroom"){
+				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 3);
+			}else if (e.constructor.name == "LifeMushroom"){
+				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 2);
 			}else if (e.constructor.name == "Flower"){
-				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 4);			
+				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 4);	
+			}else if (e.constructor.name == "Star"){
+				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 5);	
 			}else if (e.constructor.name == "BrickParticle"){
 				this.gfx.drawBrickParticle(e.x - this.screenX, e.y);				
 			}else if (e.constructor.name == "Brick"){
