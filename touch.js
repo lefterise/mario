@@ -25,6 +25,9 @@ class Joystick {
                 if (state.direction == Directions.Idle){
                     this.y = this.clamp(pt.y, this.yDefault-30, this.yDefault+30);
                     this.x = (this.areas[2].x1 + this.areas[2].x2)*0.5;
+
+                    if (this.y < this.yDefault - 20) state.wantUp = true;
+                    if (this.y > this.yDefault + 20) state.wantDown = true;                    
                 }
             }
             return state;
@@ -50,7 +53,11 @@ class Joystick {
                 }
                 if (state.direction == Directions.Idle){
                     this.y = this.clamp(pt.y, this.yDefault-30, this.yDefault+30);
-                    if (Math.abs(this.y - this.yDefault) > 11){
+
+                    if (this.y < this.yDefault - 20) state.wantUp = true;
+                    if (this.y > this.yDefault + 20) state.wantDown = true;
+                    
+                    if (Math.abs(this.y - this.yDefault) > 11){ //Snap x to middle if in idle position and y goes outside the horizontal bar
                         this.x = (this.areas[2].x1 + this.areas[2].x2)*0.5;
                     }
                 }
@@ -58,11 +65,11 @@ class Joystick {
             }else if (pt.x > this.areas[4].x2){
                 this.x = this.areas[4].x2;
                 this.y = this.yDefault;
-                return {direction: Directions.Right, run: true};
+                return {direction: Directions.Right, run: true, wantUp: false, wantDown: false};
             }else if (pt.x < this.areas[0].x1){
                 this.x = this.areas[0].x1;
                 this.y = this.yDefault;
-                return {direction: Directions.Left, run: true};
+                return {direction: Directions.Left, run: true, wantUp: false, wantDown: false};
             }
         }
         return null;
@@ -73,14 +80,14 @@ class Joystick {
             this.id = null;
             this.x = (this.areas[2].x1 + this.areas[2].x2)*0.5;
             this.y = this.yDefault;
-            return {direction: Directions.Idle, run: false};
+            return {direction: Directions.Idle, run: false, wantUp: false, wantDown: false};
         }
     }
 
     getState(pt){
         for (let a of this.areas){
             if (pt.x >= a.x1 && pt.x < a.x2 ){
-                return {direction: a.direction, run: a.run};
+                return {direction: a.direction, run: a.run, wantUp: false, wantDown: false};
             }
         }        
         return null;
@@ -101,7 +108,9 @@ class Touch{
         this.fireTouchIdentifier =-1;
         this.joystick = new Joystick();
         this.touchPosition ={ x:0, y:0};
-        
+        this.wantDown = false;
+		this.wantUp = false;
+
 		canvas.addEventListener('touchstart', (e)=>{
             
             if (canvas.requestFullscreen && document.fullscreenElement != canvas){                
@@ -118,6 +127,8 @@ class Touch{
                 if (state){
                     this.direction = state.direction;
                     this.run = state.run;
+                    this.wantDown = state.wantDown;
+                    this.wantUp = state.wantUp;
                 }
 
                 if (this.overlaps(pt, this.jumpButton)){
@@ -144,6 +155,8 @@ class Touch{
                 if (state){
                     this.direction = state.direction;
                     this.run = state.run;
+                    this.wantDown = state.wantDown;
+                    this.wantUp = state.wantUp;
                 }
             }
 			e.preventDefault();
@@ -156,6 +169,8 @@ class Touch{
                 if (state){
                     this.direction = state.direction;
                     this.run = state.run;
+                    this.wantDown = state.wantDown;
+                    this.wantUp = state.wantUp;
                 }          
 
                 if (touchobj.identifier == this.jumpTouchIdentifier){

@@ -291,6 +291,10 @@ class Game{
 			if (this.screenPan > 21 * 60 - 200) this.screenPan = 21 * 60 - 200;
 		}
 
+		if (this.controls.wantUp || this.controls.wantDown){
+			//sound.pipe.play();
+		}
+
 		if (this.mario.y > 42*14) { //mario fell off screen
 			if (this.mario.state != States.Dying){
 				sound.die.play();

@@ -789,7 +789,8 @@ class Piranha extends Moveable{
 		{x: 36, y: -54}			
 		];				
 		this.state = States.EmergingSubmerging;
-		this.behaviours = [new EmergesSubmerges(51, 40, 2000, 4000), new AnimationBehavior(2, 2, 200)];
+		this.emergeSubmergeBehavior = new EmergesSubmerges(51, 40, 2000, 4000);
+		this.behaviours = [this.emergeSubmergeBehavior, new AnimationBehavior(2, 2, 200)];
 	}
 
 
@@ -803,10 +804,13 @@ class Piranha extends Moveable{
 	}
 
 	wipe(){
-		this.behaviours = [new AlarmBehavior(500, "CleanupCorpse"), new AnimationBehavior(2, 2, 100)];
+		this.behaviours = [this.emergeSubmergeBehavior, new AlarmBehavior(500, "CleanupCorpse")];
 		this.state = States.Dying;
 		sound.kick.play();
 		gGame.enemies.push(new WhiteFlash(this.x, this.y - 21, 0.0, 0.0));
+		this.emergeSubmergeBehavior.state = EmergeStates.submerging;
+		this.emergeSubmergeBehavior.t = 0;
+		this.emergeSubmergeBehavior.timeToGrowByOnePixel = 5;
 	}
 
 	alarm(name){
