@@ -75,11 +75,15 @@ class Graphics{
     }
 
     drawPiranha(x,y, frame, type){
-      this.ctx.drawImage(this.enemies, type * 75, 429, 72, frame, x, y - frame+1, 72, frame);
+      this.ctx.drawImage(this.enemies, type * 75, 429, 72, frame, x-36, y - frame+1, 72, frame);
     }
     
     drawFireball(x, y, frame){
       this.ctx.drawImage(this.enemies, 39 * frame, 621, 27, 21, x - 13, y - 10, 27, 21);
+    }
+
+    drawWhiteFlash(x,y){
+       this.ctx.drawImage(this.enemies, 315, 486, 60, 42, x - 30, y - 21, 60, 42);
     }
 
     drawButton(x,y, id){
@@ -105,5 +109,26 @@ class Graphics{
       grd.addColorStop(1,   "#607474");
 
       return grd;
+    }
+
+    drawStar(x, y, r, spikes) {
+      this.ctx.save();      
+        this.ctx.fillStyle = "#fff";
+        this.ctx.translate(x, y);
+        this.ctx.save();
+          this.ctx.beginPath();
+          this.ctx.moveTo(r, 0);
+          for (let i = 0; i < spikes * 2 - 1; i++) {
+            this.ctx.rotate(Math.PI / spikes);
+            if (i % 2 === 0) {
+              this.ctx.lineTo((r / 0.525731) * 0.200811, 0);
+            } else {
+              this.ctx.lineTo(r, 0);
+            }
+          }
+          this.ctx.closePath();
+          this.ctx.fill();
+        this.ctx.restore();
+      this.ctx.restore();
     }
   }

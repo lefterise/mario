@@ -108,13 +108,25 @@ class Mario extends Moveable{
 		];
 		this.collisionPoints = this.smallCollisionPoints;
 		this.animation = new AnimationBehavior(0,1,250);
-		this.behaviours = [new RespectsTerrain(), new CanBumpBricksAbove(), new MinimumX(30), new MaximumX(179*60-30), this.animation, new ActsWhenSteppingOnBrick(16, ()=>this.takeDamage()), new ActsWhenSteppingOnBrick(12, (x,y,terrain)=>this.jumpOnNote(x,y,terrain))];
+		this.sparkleBehavior = new SpawnsSparkles(-26, -50, 52, 50, 10, 500, 25, false);
+		this.behaviours = [
+			new RespectsTerrain(), 
+			new CanBumpBricksAbove(), 
+			new MinimumX(30), 
+			new MaximumX(179*60-30), 
+			this.animation, 
+			new ActsWhenSteppingOnBrick(16, ()=>this.takeDamage()), 
+			new ActsWhenSteppingOnBrick(12, (x,y,terrain)=>this.jumpOnNote(x,y,terrain)),			
+			new Sparkling(),
+			this.sparkleBehavior
+		];
 		this.facing = 1;
 		this.direction = Directions.Idle;
 		this.size = 0;
 		this.isJumpPressed = false;
 		this.isRunning = false;
 		this.state = States.Walking;
+		this.sparkles = [];
 	}
 
 	collidesWith(other, otherState){
@@ -185,7 +197,7 @@ class Mario extends Moveable{
             this.shrink();
             sound.powerdown.play();
             this.state = States.Invulnerable;
-            this.behaviours = [new RespectsTerrain(), new CanBumpBricksAbove(), new MinimumX(30), new MaximumX(179*60-30), this.animation, new ActsWhenSteppingOnBrick(16, ()=>this.takeDamage()), new ActsWhenSteppingOnBrick(12, (x,y,terrain)=>this.jumpOnNote(x,y,terrain)), new AlarmBehavior(1500, "MakeVulnerable")];
+            this.behaviours = [new RespectsTerrain(), new CanBumpBricksAbove(), new MinimumX(30), new MaximumX(179*60-30), this.animation, new ActsWhenSteppingOnBrick(16, ()=>this.takeDamage()), new ActsWhenSteppingOnBrick(12, (x,y,terrain)=>this.jumpOnNote(x,y,terrain)), new AlarmBehavior(1500, "MakeVulnerable"), new Sparkling(), this.sparkleBehavior];
         }
     }
 
@@ -211,19 +223,27 @@ class Mario extends Moveable{
 		}
 	}
 
+	star(){
+		this.sparkleBehavior.setEnable(true);
+		this.behaviours.push(new AlarmBehavior(12000, "ExpireStar"));
+	}
+
 	grow(){
 		this.size = 1;
-		this.collisionPoints = this.bigCollisionPoints; //This may be an issue because new collision points may fall inside a block
+		this.collisionPoints = this.bigCollisionPoints;
+		this.sparkleBehavior.resize(-26, -78, 52, 78);
 	}
 
 	flower(){
 		this.size = 2;
 		this.collisionPoints = this.bigCollisionPoints;
+		this.sparkleBehavior.resize(-26, -78, 52, 78);
 	}
 
 	shrink(){
 		this.size = 0;
 		this.collisionPoints = this.smallCollisionPoints;
+		this.sparkleBehavior.resize(-26, -50, 52, 50);
 	}
 
 	shoot(enemies){
@@ -266,6 +286,8 @@ class Mario extends Moveable{
 	alarm(name){
 		if (name == "MakeVulnerable"){
 			this.state = States.Walking;
+		}else if (name == "ExpireStar"){
+			this.sparkleBehavior.setEnable(false);
 		}
 	}
 }
@@ -315,6 +337,7 @@ class Goomba extends Moveable{
 		this.frame = 3;
 		this.dy = -0.5;
 		sound.kick.play();
+		gGame.enemies.push(new WhiteFlash(this.x + 30, this.y - 21, 0.0, 0.0));
 	}
 
 	alarm(name){
@@ -360,6 +383,7 @@ class Koopa extends Moveable{
 		this.frame = 3;
 		this.dy = -0.5;
 		sound.kick.play();
+		gGame.enemies.push(new WhiteFlash(this.x + 30, this.y - 21, 0.0, 0.0));
 	}
 
 	stomp(mario){
@@ -392,7 +416,7 @@ class Koopa extends Moveable{
 	}
 
 	kick(mario){
-		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(2,3,75), new CanBumpBricksHorizontaly()];
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(2,3,75), new CanBumpBricksHorizontaly(), new FlashesWhenHittingWalls(0,-21)];
 		this.dx = 0.5 * ((mario.futureX < this.x) ? 1 : -1);
 		this.futureX = this.x;
 		this.state = States.Spinning;
@@ -555,6 +579,7 @@ class Star extends Moveable{
 	collect(mario){		
 		sound.star.play();
 		this.state = States.Dead;
+		mario.star();
 	}
 
 	collidesWith(other, otherState){
@@ -715,6 +740,7 @@ class Fish extends Moveable{
 		this.frame = 3;
 		this.dy = -0.5;
 		sound.kick.play();
+		gGame.enemies.push(new WhiteFlash(this.x + 30, this.y - 21, 0.0, 0.0));
 	}
 
 	alarm(name){
@@ -729,13 +755,13 @@ class Piranha extends Moveable{
 	constructor(x,y,dx,dy){
 		super(x,y,dx,dy);
 		this.collisionPoints = [
-		{x:  0, y:   0},	
-		{x: 72, y:   0},
-		{x:  0, y: -54}, 
-		{x: 72, y: -54}			
+		{x:-36, y:   0},	
+		{x: 36, y:   0},
+		{x:-36, y: -54}, 
+		{x: 36, y: -54}			
 		];				
 		this.state = States.EmergingSubmerging;
-		this.behaviours = [new EmergesSubmerges(51, 40, 2000, 4000), new AnimationBehavior(2, 2, 400)];
+		this.behaviours = [new EmergesSubmerges(51, 40, 2000, 4000), new AnimationBehavior(2, 2, 200)];
 	}
 
 
@@ -744,6 +770,7 @@ class Piranha extends Moveable{
 
 		if (otherState == States.Spinning || otherState == States.EnemyKilling){
 			this.wipe();
+			gGame.enemies.push(new WhiteFlash(this.x, this.y - 21, 0.0, 0.0));
 			return;
 		}
 	}
@@ -753,6 +780,34 @@ class Piranha extends Moveable{
 		this.state = States.Dying;
 		sound.kick.play();
 	}
+
+	alarm(name){
+		if (name == "CleanupCorpse"){
+			this.state = States.Dead;
+		}
+	}
+
+	stomp(mario){}
+}
+
+
+class WhiteFlash extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+		{x:  0, y:   0},	
+		{x: 72, y:   0},
+		{x:  0, y: -54}, 
+		{x: 72, y: -54}			
+		];				
+		this.state = States.Dying;
+		this.behaviours = [new AlarmBehavior(100, "CleanupCorpse")];
+	}
+
+
+	collidesWith(other, otherState){ }
+
+	wipe(){ }
 
 	alarm(name){
 		if (name == "CleanupCorpse"){

@@ -326,6 +326,11 @@ class Game{
 			this.drawTerrain(dt);
 			this.drawEnemies();
 			this.gfx.drawMario(this.mario.x - this.screenX - 30, this.mario.y - 83, this.mario.frame, this.mario.size, this.mario.facing);
+
+			for(let s of this.mario.sparkles){
+				this.gfx.drawStar(s.x - this.screenX, s.y, s.size, s.spikes);
+			}
+
 		}
 		if ((this.controls.debug % 3) > 0){
 			this.drawDebug(dt);
@@ -398,7 +403,7 @@ class Game{
 					this.enemies.push(coin);
 					this.level[x+tileOffset][y] = 255;
 				}else if (tileId == 112+8){
-					let piranha = new Piranha(60 * (x+tileOffset) + 24 ,42*y+41,0.0, 0.0);
+					let piranha = new Piranha(60 * (x+tileOffset) + 60 ,42*y+41,0.0, 0.0);
 					this.enemies.push(piranha);
 					this.level[x+tileOffset][y] = 255;
 				}
@@ -473,9 +478,12 @@ class Game{
 				this.gfx.drawFireball(e.x - this.screenX, e.y, this.fireballAnimation.frame);
 			}else if (e.constructor.name == "Piranha"){
 				this.gfx.drawPiranha(e.x - this.screenX, e.y, e.height, e.frame);
+			}else if (e.constructor.name == "WhiteFlash"){
+				this.gfx.drawWhiteFlash(e.x - this.screenX, e.y);
 			}
 		}
 
+		
 		
 	}
 

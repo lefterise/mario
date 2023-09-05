@@ -65,6 +65,27 @@ class ChangesDirectionWhenHittingWalls{
 	}
 }
 
+class FlashesWhenHittingWalls{
+	constructor(offsetX, offsetY){
+		this.offsetX = offsetX;
+		this.offsetY = offsetY;
+	}
+	computeFuturePosition(moveable, dt, terrain){}
+	
+	reactToNewPosition(moveable, dt, terrain){
+		let isHittingLeftWall  = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, -1.0, 0.0, 2.0, moveable.collisionPoints) <= 1.0;
+		let isHittingRightWall = terrain.getMultipointCollisionDistance(moveable.x, moveable.y,  1.0, 0.0, 2.0, moveable.collisionPoints) <= 1.0;
+
+		if (isHittingLeftWall){
+			gGame.enemies.push(new WhiteFlash(moveable.x + moveable.collisionPoints[0].x + this.offsetX, moveable.y + moveable.collisionPoints[0].y + this.offsetY, 0.0, 0.0));
+		}
+		if (isHittingRightWall){
+			gGame.enemies.push(new WhiteFlash(moveable.x + moveable.collisionPoints[1].x + this.offsetX, moveable.y + moveable.collisionPoints[1].y + this.offsetY, 0.0, 0.0));
+		}
+	}
+}
+
+
 class CanBumpBricksAbove{
 	computeFuturePosition(moveable, dt, terrain){}
 	
@@ -171,7 +192,12 @@ class AlarmBehavior{
 	computeFuturePosition(moveable, dt, terrain){		
 		this.timeElapsed += dt;
 		if (this.timeElapsed > this.delay){
-			moveable.alarm(this.name)
+			//Remove the alarm behavior
+			const behaviorIndex = moveable.behaviours.indexOf(this);
+			if (behaviorIndex == -1) debugger;
+			moveable.behaviours.splice(behaviorIndex, 1);
+
+			moveable.alarm(this.name);
 		}
 	}
 	
@@ -350,5 +376,58 @@ class EmergesSubmerges{
 		moveable.collisionPoints[3].y = -this.height;
 	}
 	
+	reactToNewPosition(moveable, dt, terrain){}
+}
+
+class SpawnsSparkles{
+	constructor(offsetX, offsetY, width, height, maxSize, duration, sparkleSpawnInterval, enabled){
+		this.resize(offsetX, offsetY, width, height);
+		this.reconfigure(maxSize, duration, sparkleSpawnInterval);
+		this.setEnable(enabled);
+	}
+
+	setEnable(enabled){
+		this.enabled = enabled;
+	}
+
+	resize(offsetX, offsetY, width, height){
+		this.offsetX = offsetX;
+		this.offsetY = offsetY;
+		this.width = width;
+		this.height = height;
+	}
+
+	reconfigure(maxSize, duration, sparkleSpawnInterval){		
+		this.maxSize = maxSize;
+		this.duration= duration;
+		this.t = 0;
+		this.sparkleSpawnInterval = sparkleSpawnInterval;
+	}
+
+
+	computeFuturePosition(moveable, dt, terrain){
+		if (!this.enabled)
+			return;
+
+		this.t += dt;		
+		let sparklesToAdd = Math.floor(this.t / this.sparkleSpawnInterval);		
+		this.t = this.t - sparklesToAdd * this.sparkleSpawnInterval;
+
+		for (let i=0; i < sparklesToAdd; ++i){
+			moveable.sparkles.push({x: moveable.x + this.offsetX + Math.random() * this.width, y: moveable.y + this.offsetY + Math.random() * this.height, size: this.maxSize, spikes: 4, t: 0, maxSize: this.maxSize, duration: this.duration});
+		}
+	}
+	reactToNewPosition(moveable, dt, terrain){}
+}
+
+class Sparkling{
+	computeFuturePosition(moveable, dt, terrain){		
+		for (let s of moveable.sparkles){
+			s.size = Math.random() * s.maxSize * (s.duration - s.t)/s.duration;
+			s.t = s.t + dt;
+		}
+
+		moveable.sparkles = moveable.sparkles.filter(s => s.t < s.duration);
+	}
 	reactToNewPosition(moveable, dt, terrain){}
 }
