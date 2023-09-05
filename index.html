@@ -407,8 +407,6 @@ class Game{
 					this.enemies.push(piranha);
 					this.level[x+tileOffset][y] = 255;
 				}
-
-				
 			}
 		}
 	}
@@ -480,6 +478,12 @@ class Game{
 				this.gfx.drawPiranha(e.x - this.screenX, e.y, e.height, e.frame);
 			}else if (e.constructor.name == "WhiteFlash"){
 				this.gfx.drawWhiteFlash(e.x - this.screenX, e.y);
+			}
+			
+			if (e.sparkles){
+				for(let s of e.sparkles){
+					this.gfx.drawStar(s.x - this.screenX, s.y, s.size, s.spikes);
+				}
 			}
 		}
 

@@ -128,6 +128,7 @@ class Mario extends Moveable{
 		this.state = States.Walking;
 		this.sparkles = [];
 		this.activeSparkleEvents = 0;
+		this.starIsActive = false;
 	}
 
 	collidesWith(other, otherState){
@@ -161,6 +162,13 @@ class Mario extends Moveable{
 			return;
 		}
 
+		if (this.starIsActive){
+			if (other.wipe){
+				other.wipe();
+			}
+			return;
+		}
+		
 		if (otherState == States.EmergingSubmerging){
 			this.takeDamage();
 			return;
@@ -228,6 +236,8 @@ class Mario extends Moveable{
 		this.sparkleBehavior.setEnable(true);
 		++this.activeSparkleEvents;
 		this.behaviours.push(new AlarmBehavior(12000, "ExpireSparkles"));
+		this.behaviours.push(new AlarmBehavior(12000, "ExpireStar"));
+		this.starIsActive = true;
 	}
 
 	grow(){
@@ -302,6 +312,8 @@ class Mario extends Moveable{
 			if (this.activeSparkleEvents == 0){
 				this.sparkleBehavior.setEnable(false);
 			}
+		}else if (name == "ExpireStar"){
+			this.starIsActive = false;
 		}
 	}
 }
@@ -493,7 +505,8 @@ class PopupCoin extends Moveable{
 		{x: 10, y:  0}, 
 		{x: 51, y:  0}			
 		];
-		this.behaviours = [new IgnoresTerrain(), new AlarmBehavior(500, "Disappear")];
+		this.sparkles = [];		
+		this.behaviours = [new IgnoresTerrain(), new AlarmBehavior(500, "Disappear"), new SpawnsSparkles(10, 0, 41, 40, 10, 500, 50, true), new Sparkling()];
 		this.state = States.Dying;
 	}
 	
@@ -578,13 +591,14 @@ class Star extends Moveable{
 		{x:  1, y:  0}, 
 		{x: 59, y:  0}			
 		];				
-		this.state = States.Sprouting;		
-		this.behaviours = [new AnimationBehavior(0,42,12), new AlarmBehavior(500, "BecomeCollectable")];
+		this.state = States.Sprouting;
+		this.sparkles = [];
+		this.behaviours = [new AnimationBehavior(0,42,12), new AlarmBehavior(500, "BecomeCollectable"),new SpawnsSparkles(1, 0, 58, 40, 10, 200, 30, true), new Sparkling()];
 	}
 	
 	becomeCollectable(){
 		this.state = States.Collectable;
-		this.behaviours = [new RespectsTerrain(), new BouncesOnTouchGround(-0.8), new ChangesDirectionWhenHittingWalls()];
+		this.behaviours = [new RespectsTerrain(), new BouncesOnTouchGround(-0.8), new ChangesDirectionWhenHittingWalls(), new SpawnsSparkles(1, 0, 58, 40, 10, 1000, 30, true), new Sparkling()];
 		this.frame = 42;
 		this.dy = -0.3;
 		this.dx = 0.2;
@@ -783,8 +797,7 @@ class Piranha extends Moveable{
 		if (this.state == States.Dead || otherState == States.Dead || otherState == States.Dying) return;
 
 		if (otherState == States.Spinning || otherState == States.EnemyKilling){
-			this.wipe();
-			gGame.enemies.push(new WhiteFlash(this.x, this.y - 21, 0.0, 0.0));
+			this.wipe();			
 			return;
 		}
 	}
@@ -793,6 +806,7 @@ class Piranha extends Moveable{
 		this.behaviours = [new AlarmBehavior(500, "CleanupCorpse"), new AnimationBehavior(2, 2, 100)];
 		this.state = States.Dying;
 		sound.kick.play();
+		gGame.enemies.push(new WhiteFlash(this.x, this.y - 21, 0.0, 0.0));
 	}
 
 	alarm(name){
