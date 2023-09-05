@@ -127,6 +127,7 @@ class Mario extends Moveable{
 		this.isRunning = false;
 		this.state = States.Walking;
 		this.sparkles = [];
+		this.activeSparkleEvents = 0;
 	}
 
 	collidesWith(other, otherState){
@@ -197,7 +198,7 @@ class Mario extends Moveable{
             this.shrink();
             sound.powerdown.play();
             this.state = States.Invulnerable;
-            this.behaviours = [new RespectsTerrain(), new CanBumpBricksAbove(), new MinimumX(30), new MaximumX(179*60-30), this.animation, new ActsWhenSteppingOnBrick(16, ()=>this.takeDamage()), new ActsWhenSteppingOnBrick(12, (x,y,terrain)=>this.jumpOnNote(x,y,terrain)), new AlarmBehavior(1500, "MakeVulnerable"), new Sparkling(), this.sparkleBehavior];
+            this.behaviours.push(new AlarmBehavior(1500, "MakeVulnerable"));		
         }
     }
 
@@ -225,25 +226,35 @@ class Mario extends Moveable{
 
 	star(){
 		this.sparkleBehavior.setEnable(true);
-		this.behaviours.push(new AlarmBehavior(12000, "ExpireStar"));
+		++this.activeSparkleEvents;
+		this.behaviours.push(new AlarmBehavior(12000, "ExpireSparkles"));
 	}
 
 	grow(){
 		this.size = 1;
 		this.collisionPoints = this.bigCollisionPoints;
 		this.sparkleBehavior.resize(-26, -78, 52, 78);
+		this.sparkleBehavior.setEnable(true);
+		++this.activeSparkleEvents;
+		this.behaviours.push(new AlarmBehavior(500, "ExpireSparkles"));
 	}
 
 	flower(){
 		this.size = 2;
 		this.collisionPoints = this.bigCollisionPoints;
 		this.sparkleBehavior.resize(-26, -78, 52, 78);
+		this.sparkleBehavior.setEnable(true);
+		++this.activeSparkleEvents;
+		this.behaviours.push(new AlarmBehavior(500, "ExpireSparkles"));
 	}
 
 	shrink(){
 		this.size = 0;
 		this.collisionPoints = this.smallCollisionPoints;
 		this.sparkleBehavior.resize(-26, -50, 52, 50);
+		this.sparkleBehavior.setEnable(true);
+		++this.activeSparkleEvents;
+		this.behaviours.push(new AlarmBehavior(500, "ExpireSparkles"));
 	}
 
 	shoot(enemies){
@@ -286,8 +297,11 @@ class Mario extends Moveable{
 	alarm(name){
 		if (name == "MakeVulnerable"){
 			this.state = States.Walking;
-		}else if (name == "ExpireStar"){
-			this.sparkleBehavior.setEnable(false);
+		}else if (name == "ExpireSparkles"){
+			--this.activeSparkleEvents;
+			if (this.activeSparkleEvents == 0){
+				this.sparkleBehavior.setEnable(false);
+			}
 		}
 	}
 }
