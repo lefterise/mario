@@ -91,7 +91,7 @@ class Graphics{
     }
 
     drawJoystick(x,y){
-      this.ctx.drawImage(this.joystick, 0, 0, 200, 20, x, y, 200, 20);
+      this.ctx.drawImage(this.joystick, 0, 0, 200, 70, x, y, 200, 70);
     }
     
     createBlueSkyGradient(){

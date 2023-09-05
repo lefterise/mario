@@ -2,6 +2,7 @@ class Joystick {
     constructor() {
         this.y1 = 400;
         this.y2 = 546;
+        this.yDefault = 473;
         this.areas = [
             {x1:  50,  x2:  90, direction: Directions.Left,  run: true },
             {x1:  90,  x2: 130, direction: Directions.Left,  run: false},
@@ -9,34 +10,58 @@ class Joystick {
             {x1: 170,  x2: 210, direction: Directions.Right, run: false},
             {x1: 210,  x2: 250, direction: Directions.Right, run: true }
         ];
-        this.y = this.y1;
+        this.y = this.yDefault;
         this.x = (this.areas[2].x1 + this.areas[2].x2)*0.5;
         this.id = null;
     }
 
     touchDown(pt, id){        
-        let state = this.getState(pt);
-        if (state){
-            this.id = id;
-            this.x = pt.x;
+        if (pt.y >= this.y1 && pt.y <= this.y2){
+            let state = this.getState(pt);
+            if (state){
+                this.id = id;
+                this.x = pt.x;
+                this.y = this.yDefault;
+                if (state.direction == Directions.Idle){
+                    this.y = this.clamp(pt.y, this.yDefault-30, this.yDefault+30);
+                    this.x = (this.areas[2].x1 + this.areas[2].x2)*0.5;
+                }
+            }
+            return state;
+        }else{
+            return null;
         }
-        return state;
+    }
+
+    clamp(v,min,max){
+        if (v < min) return min;
+        if (v > max) return max;
+        return v;
     }
 
     touchMove(pt, id){
-        if (id == this.id){            
+        if (id == this.id){
             let state = this.getState(pt);
             if (state){
                 this.x = pt.x;
+                this.y = this.yDefault;
                 if (pt.x > this.areas[4].x2){
-                    this.x = this.areas[4].x2;
+                    this.x = this.areas[4].x2;                    
+                }
+                if (state.direction == Directions.Idle){
+                    this.y = this.clamp(pt.y, this.yDefault-30, this.yDefault+30);
+                    if (Math.abs(this.y - this.yDefault) > 11){
+                        this.x = (this.areas[2].x1 + this.areas[2].x2)*0.5;
+                    }
                 }
                 return state;
             }else if (pt.x > this.areas[4].x2){
                 this.x = this.areas[4].x2;
+                this.y = this.yDefault;
                 return {direction: Directions.Right, run: true};
             }else if (pt.x < this.areas[0].x1){
                 this.x = this.areas[0].x1;
+                this.y = this.yDefault;
                 return {direction: Directions.Left, run: true};
             }
         }
@@ -47,18 +72,17 @@ class Joystick {
         if (id == this.id){
             this.id = null;
             this.x = (this.areas[2].x1 + this.areas[2].x2)*0.5;
+            this.y = this.yDefault;
             return {direction: Directions.Idle, run: false};
         }
     }
 
-    getState(pt){        
-        if (pt.y >= this.y1 && pt.y <= this.y2){
-            for (let a of this.areas){
-                if (pt.x >= a.x1 && pt.x < a.x2 ){
-                    return {direction: a.direction, run: a.run};
-                }
+    getState(pt){
+        for (let a of this.areas){
+            if (pt.x >= a.x1 && pt.x < a.x2 ){
+                return {direction: a.direction, run: a.run};
             }
-        }
+        }        
         return null;
     }
 }
@@ -178,8 +202,8 @@ class Touch{
     }
 
     draw(gfx){        
-        gfx.drawJoystick(50,  this.joystick.y+70);
-        gfx.drawButton(this.joystick.x-49,  this.joystick.y+30, 0);
+        gfx.drawJoystick(50,  this.joystick.yDefault-35);
+        gfx.drawButton(this.joystick.x-49,  this.joystick.y-49, 0);
 		gfx.drawButton(this.jumpButton.x,  this.jumpButton.y, 2);
         
         gfx.drawButton(this.shootButton.x,  this.shootButton.y, 3);
