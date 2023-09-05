@@ -260,3 +260,95 @@ class ActsWhenSteppingOnBrick{
         }
 	}
 }
+
+class BouncesWhenReachingY{
+	constructor(y, bounceSpeed, delay){
+		this.y = y;
+		this.bounceSpeed = bounceSpeed;
+		this.delay = delay;
+		this.waiting = false;
+		this.timeElapsed = 0;
+	}
+
+	computeFuturePosition(moveable, dt, terrain){}
+	
+	reactToNewPosition(moveable, dt, terrain){		
+		if (moveable.y > this.y){
+			moveable.y = this.y;
+			if (!this.waiting){
+				this.waiting = true;
+				this.timeElapsed = 0;
+			}
+			
+		}
+		if (this.waiting){
+			this.timeElapsed += dt;
+			if (this.timeElapsed >= this.delay){
+				moveable.dy = this.bounceSpeed;
+				this.waiting = false;
+			}
+		}
+	}
+}
+
+const EmergeStates = {
+	emerging: 0,
+	emerged: 1,
+	submerging: 2,
+	submerged: 3
+};
+
+class EmergesSubmerges{
+	constructor(maxHeight, timeToGrowByOnePixel, timeToStayEmerged, timeToStaySubmerged){
+		this.maxHeight = maxHeight; 
+		this.height = 0;
+		this.timeToGrowByOnePixel = timeToGrowByOnePixel;
+		this.t = 0;
+		this.state = EmergeStates.emerging;
+		this.timeToStayEmerged = timeToStayEmerged;
+		this.timeToStaySubmerged = timeToStaySubmerged;
+	}
+
+	computeFuturePosition(moveable, dt, terrain){
+		this.t = this.t + dt;
+
+		if (this.state == EmergeStates.emerging){			
+			let pixelsToGrow = Math.floor(this.t / this.timeToGrowByOnePixel);
+			this.height = this.height + pixelsToGrow;
+			this.t = this.t - pixelsToGrow * this.timeToGrowByOnePixel;
+			
+			if (this.height >= this.maxHeight){
+				this.height = this.maxHeight;
+				this.state = EmergeStates.emerged;
+				this.t = 0;
+			}
+		}else if (this.state == EmergeStates.emerged){
+			if (this.t >= this.timeToStayEmerged){
+				this.state = EmergeStates.submerging;
+				this.t = 0;
+			}
+		}else if (this.state == EmergeStates.submerging){
+			let pixelsToShrink = Math.floor(this.t / this.timeToGrowByOnePixel);
+			this.height = this.height - pixelsToShrink;
+			this.t = this.t - pixelsToShrink * this.timeToGrowByOnePixel;
+			
+			if (this.height <= 0){
+				this.height = 0;
+				this.state = EmergeStates.submerged;
+				this.t = 0;
+			}
+		}else if (this.state == EmergeStates.submerged){
+			if (this.t >= this.timeToStaySubmerged){
+				this.state = EmergeStates.emerging;
+				this.t = 0;
+			}
+		}
+
+		moveable.height = this.height;
+
+		moveable.collisionPoints[2].y = -this.height;
+		moveable.collisionPoints[3].y = -this.height;
+	}
+	
+	reactToNewPosition(moveable, dt, terrain){}
+}

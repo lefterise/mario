@@ -63,7 +63,7 @@ class Graphics{
     }
     
     drawFish(x,y, frame, direction){    
-      this.ctx.drawImage(this.enemies, 63 * (frame + 2 * direction),135, 60, 45, x, y - 14, 60, 45);
+      this.ctx.drawImage(this.enemies, 63 * (frame + 2 * direction),135, 60, 45, x, y-41, 60, 45);
     }
     
     drawTurtle(x,y, frame, color, direction){
@@ -72,6 +72,10 @@ class Graphics{
       }else{
         this.ctx.drawImage(this.enemies, 63 * (frame-2), 183 + 120 * color, 60, 42, x, y-41, 60, 42); //cowering
       }
+    }
+
+    drawPiranha(x,y, frame, type){
+      this.ctx.drawImage(this.enemies, type * 75, 429, 72, frame, x, y - frame+1, 72, frame);
     }
     
     drawFireball(x, y, frame){

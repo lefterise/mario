@@ -9,7 +9,8 @@ const States = {
 	Solid: 7,
 	Sprouting: 8,
 	EnemyKilling: 9,
-	Invulnerable: 10
+	Invulnerable: 10,
+	EmergingSubmerging: 11
 }
 
 const CollisionPoints = {
@@ -146,6 +147,11 @@ class Mario extends Moveable{
 			}
 			return;
 		}
+
+		if (otherState == States.EmergingSubmerging){
+			this.takeDamage();
+			return;
+		}
 		
 		if (relativeLocation.above){
 			this.dy = this.isJumpPressed ? -1.1 : -0.7;
@@ -156,8 +162,9 @@ class Mario extends Moveable{
                 this.takeDamage();
 			}
 
-			if (other.touch){
+			if (other.touch && this.state != States.Invulnerable){
 				other.touch(this);
+
 				this.futureX = this.x;
 				this.futureY = this.y;
 			}
@@ -546,11 +553,8 @@ class Star extends Moveable{
 	}
 
 	collect(mario){		
-		sound.powerup.play();
+		sound.star.play();
 		this.state = States.Dead;
-		if (mario.size == 0){
-			mario.grow();
-		}
 	}
 
 	collidesWith(other, otherState){
@@ -668,8 +672,93 @@ class Fireball extends Moveable{
 	}
 
 	collidesWith(other, otherState){
-		if (otherState == States.Walking || otherState == States.Cowering || otherState == States.Spinning){
+		if (otherState == States.Walking || otherState == States.Cowering || otherState == States.Spinning || otherState == States.EmergingSubmerging){
 			this.state = States.Dead;
 		}
 	}
+}
+
+class Fish extends Moveable{
+	constructor(x,y,dx,dy){		
+		super(x,y,dx,dy);
+		this.state = States.Walking;
+		this.collisionPoints = [
+			{x:  4, y:  0}, 
+			{x: 56, y:  0},
+			{x:  4, y:-41}, 
+			{x: 56, y:-41},
+		];
+		this.frame = 0;
+		this.behaviours = [new IgnoresTerrain(), new BouncesWhenReachingY(14 * 42, -1.2, 1500)];		
+	}
+
+	collidesWith(other, otherState){
+		if (this.state == States.Dead || this.state == States.Dying || otherState == States.Dead || otherState == States.Dying || otherState == States.Collectable) return;
+		
+		if (otherState == States.Spinning || otherState == States.EnemyKilling){
+			this.wipe();
+			return;
+		}
+	}
+
+	stomp(mario){
+		this.state = States.Dying;
+		this.behaviours = [new IgnoresTerrain(), new AlarmBehavior(1000, "CleanupCorpse")];
+		this.frame = 2;
+		this.dy = -0.0;
+		sound.stomp.play();
+	}
+
+	wipe(){
+		this.state = States.Dying;		
+		this.behaviours = [new IgnoresTerrain()];
+		this.frame = 3;
+		this.dy = -0.5;
+		sound.kick.play();
+	}
+
+	alarm(name){
+		if (name == "CleanupCorpse"){
+			this.state = States.Dead;
+		}
+	}
+}
+
+
+class Piranha extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+		{x:  0, y:   0},	
+		{x: 72, y:   0},
+		{x:  0, y: -54}, 
+		{x: 72, y: -54}			
+		];				
+		this.state = States.EmergingSubmerging;
+		this.behaviours = [new EmergesSubmerges(51, 40, 2000, 4000), new AnimationBehavior(2, 2, 400)];
+	}
+
+
+	collidesWith(other, otherState){
+		if (this.state == States.Dead || otherState == States.Dead || otherState == States.Dying) return;
+
+		if (otherState == States.Spinning || otherState == States.EnemyKilling){
+			this.wipe();
+			return;
+		}
+	}
+
+	wipe(){
+		this.behaviours = [new AlarmBehavior(500, "CleanupCorpse"), new AnimationBehavior(2, 2, 100)];
+		this.state = States.Dying;
+		sound.kick.play();
+	}
+
+	alarm(name){
+		if (name == "CleanupCorpse"){
+			this.state = States.Dead;
+		}
+	}
+
+	stomp(mario){}
 }
