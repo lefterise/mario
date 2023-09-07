@@ -45,12 +45,13 @@ class Animation{
 }
 
 class Terrain{
-	constructor(tiles, world){
+	constructor(tiles, world, terrainType){
 		this.tiles = tiles;
 		this.tileWidth = 60;
 		this.tileHeight = 42;
 		this.bumpedBricks = [];
 		this.world = world;
+		this.terrainType = terrainType;
 	}
 
 	inBounds(X,Y){
@@ -58,7 +59,7 @@ class Terrain{
 	}
 
 	isSolid(X,Y){
-		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || [9,12,16,20,21,26,27,32,33,67].includes(this.tiles[X][Y]));
+		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || [8,9,10,11,12,13,14,15,16,19,20,21,22,23,25,27,28,29].includes(this.tiles[X][Y]) || (this.tiles[X][Y] >= 38 && this.tiles[X][Y] <= 74));
 	}
 
 	isBumpable(X, Y){
@@ -242,15 +243,15 @@ class Game{
 	startLevel(){
 		this.screenX = 0;
 		this.screenPan = 360;
-		this.level = parseLevel();
-		this.terrain = new Terrain(this.level, this);
-		this.skyGradient = this.gfx.createBlueSkyGradient();
+		let level = parseLevel(level1);
+		this.terrain = new Terrain(level.grid, this, level.terrainType);
+		this.skyGradient = this.gfx.blueSkyGradient;
 		this.mario = new Mario(360, 461, 0.0, 0.0);
 		this.enemies = [];
 
 		this.performance = [];
 		this.perfIndex = 0;
-		this.spawnEnemies();
+		this.spawnEnemies();		
 	}
 
 	update(time){
@@ -305,7 +306,7 @@ class Game{
 		this.screenX = Math.floor(this.mario.x) - this.screenPan;
 
 		//Clip screen X to the level size
-		if (this.screenX > 60 * (this.level.length-21)) this.screenX = 60 * (this.level.length-21); //21 visible tiles
+		if (this.screenX > 60 * (this.terrain.tiles.length-21)) this.screenX = 60 * (this.terrain.tiles.length-21); //21 visible tiles
 		if (this.screenX < 0) this.screenX = 0;
 
 		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
@@ -380,36 +381,38 @@ class Game{
 	}
 
 	spawnEnemies(){
+		let tiles = this.terrain.tiles;
+
 		let tileOffset = Math.floor(this.screenX / 60);
 		for (let x=0; x<21;++x){
 		    if (x+tileOffset < 0) continue;
-			if (x+tileOffset >= this.level.length-1) break;
+			if (x+tileOffset >= tiles.length-1) break;
 			for (let y=0; y<13;++y){
-				let tileId = this.level[x+tileOffset][y];
+				let tileId = tiles[x+tileOffset][y];
 				if (tileId == 103+8){
 					let goomba = new Goomba(60 * (x+tileOffset),42*y+41,-0.1,0.0);
 					this.enemies.push(goomba);
-					this.level[x+tileOffset][y] = 255;
+					tiles[x+tileOffset][y] = 255;
 				}else if (tileId == 104+8){
 					let koopa = new Koopa(60 * (x+tileOffset),42*y+41,-0.1,0.0);
 					this.enemies.push(koopa);
-					this.level[x+tileOffset][y] = 255;
+					tiles[x+tileOffset][y] = 255;
 				}else if (tileId == 105+8){
 					let koopa = new RedKoopa(60 * (x+tileOffset),42*y+41,-0.1,0.0);
 					this.enemies.push(koopa);
-					this.level[x+tileOffset][y] = 255;
+					tiles[x+tileOffset][y] = 255;
 				}else if (tileId == 111+8){
 					let fish = new Fish(60 * (x+tileOffset),42*y+41,0.0,-1.0);
 					this.enemies.push(fish);
-					this.level[x+tileOffset][y] = 255;
+					tiles[x+tileOffset][y] = 255;
 				}else if (tileId == 101+8){
 					let coin = new Coin(60 * (x+tileOffset),42 * y, 0.0, 0.0);
 					this.enemies.push(coin);
-					this.level[x+tileOffset][y] = 255;
+					tiles[x+tileOffset][y] = 255;
 				}else if (tileId == 112+8){
 					let piranha = new Piranha(60 * (x+tileOffset) + 60 ,42*y+41,0.0, 0.0);
 					this.enemies.push(piranha);
-					this.level[x+tileOffset][y] = 255;
+					tiles[x+tileOffset][y] = 255;
 				}
 			}
 		}
@@ -500,9 +503,9 @@ class Game{
 		let tileOffset = Math.floor(this.screenX / 60);
 		for (let x=-2; x<21 +1;++x){
 		    if (x+tileOffset < 0) continue;
-			if (x+tileOffset >= this.level.length-1) break;
+			if (x+tileOffset >= this.terrain.tiles.length-1) break;
 			for (let y=0; y<13;++y){
-			   let tileId = this.level[x+tileOffset][y];
+			   let tileId = this.terrain.tiles[x+tileOffset][y];
 			   if (tileId != 255){				   				  
 		           if (tileId == 101+8){
 					  //this.gfx.drawCoin(60 * x - screenOffset, 42 * y + 16, this.coinAnimation.frame);
@@ -510,10 +513,10 @@ class Game{
 					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 100+8){
 					  this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
-				   }else if (tileId == 76+8){
+				   }else if (tileId == 22+8){
 					  this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame);
 				   }else if (tileId < 8){
-				     this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId, 0);
+				     this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId, this.terrain.terrainType);
                    }else if (tileId == 106+8){
 					 this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 					 this.gfx.drawTileOld(60 * x - screenOffset, 42*y, 9);
@@ -561,7 +564,7 @@ class Game{
 		this.gfx.ctx.strokeStyle = "red";
 		for (let x=0; x<21;++x){
 		    if (x+tileOffset < 0) continue;
-			if (x+tileOffset >= this.level.length-1) break;
+			if (x+tileOffset >= this.terrain.tiles.length-1) break;
 			for (let y=0; y<13;++y){
 			   if (this.terrain.isSolid(x+tileOffset,y)){
 				   this.gfx.ctx.strokeRect(x * 60 - screenOffset, y * 42, 60, 42);

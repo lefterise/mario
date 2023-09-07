@@ -9,6 +9,9 @@ class Graphics{
        this.loadImage("graphics/grass.png",   (img)=>{this.grass = img;});
        this.loadImage("graphics/buttons.png", (img)=>{this.buttons = img;});
        this.loadImage("graphics/joystick.png", (img)=>{this.joystick = img;});
+       this.loadImage("graphics/brickPattern.png", (img)=>{this.brickPattern = this.ctx.createPattern(img, "repeat"); });
+       this.blueSkyGradient = this.createBlueSkyGradient();
+       this.nightGradient = this.createNightGradient();
     }
     
     loadImage(file, callback){
@@ -34,8 +37,8 @@ class Graphics{
     }
 
     drawWater(x,y, frame){
-        this.ctx.drawImage(this.terrain, 4 * 60, 12 * 42 + frame, 60, 42 - frame, x, y, 60, 42 - frame);
-        this.ctx.drawImage(this.terrain, 4 * 60, 12 * 42, 60, frame, x, y + 42  - frame, 60, frame);
+        this.ctx.drawImage(this.terrain, 4 * 60, 3 * 42 + frame, 60, 42 - frame, x, y, 60, 42 - frame);
+        this.ctx.drawImage(this.terrain, 4 * 60, 3 * 42, 60, frame, x, y + 42  - frame, 60, frame);
     }
     
     drawTree(x,y, frame){
