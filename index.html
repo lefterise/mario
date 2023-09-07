@@ -63,11 +63,15 @@ class Terrain{
 		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || SolidTiles.includes(this.tiles[X][Y]) || (this.tiles[X][Y] >= Tile.PipeFirst && this.tiles[X][Y] <= Tile.PipeLast));
 	}
 
+	isSolidOnFall(X,Y){
+		return this.inBounds(X,Y) && [8,9,13].includes(this.tiles[X][Y]);
+	}
+
 	isBumpable(X, Y){
 		return this.inBounds(X,Y) && [Tile.Breakable1, Tile.Breakable2, Tile.Breakable3, Tile.BouncyNote, Tile.QuestionMark, Tile.Invisible].includes(this.tiles[X][Y]);
 	}
 	
-	getPointCollisionDistance(x, y, dx, dy, tMax, wantNonSolid){		
+	getPointCollisionDistance(x, y, dx, dy, tMax, wantNonSolid, shouldConsiderSolidOnFall){		
         //Ref: A fast voxel traversal algorithm J.Amanatides, A. Woo      
 		//(x,y) the location of the point. 
 		//(dx, dy) the normalized speed of the point in pixels per second. 
@@ -115,7 +119,7 @@ class Terrain{
         if (this.isSolid(X, Y) && !wantNonSolid) {
 			//this tries to solve the problem if mario happens to be inside a solid block.
 			//the idea is to flip the direction and call the inverse of this function to find the first non-solid
-            return this.getPointCollisionDistance(x,y,-dx,-dy, 10000, true); 
+            return this.getPointCollisionDistance(x,y,-dx,-dy, 10000, true, false); 
         }
 
         let t = 0.0;
@@ -133,7 +137,7 @@ class Terrain{
                 tNextHorizontal += tHorizontal;
                 Y += stepY;
 
-				if (this.isSolid(X, Y) ^ wantNonSolid) {                		
+				if ((this.isSolid(X, Y) ^ wantNonSolid) || (shouldConsiderSolidOnFall && stepY == 1 && this.isSolidOnFall(X,Y))) {                		
 					return t + beforeOrAfter * (stepY / dy);
 				}
             }
@@ -142,10 +146,13 @@ class Terrain{
     }
 
 	getMultipointCollisionDistance(x, y, dx, dy, tMax, collisionPoints){
+		let i = 0;
 		let minT = tMax;
 		for (let p of collisionPoints){
-			let t = this.getPointCollisionDistance(x + p.x, y + p.y, dx, dy, tMax, false);
+			let isFeet = (i == CollisionPoints.BottomLeft || i == CollisionPoints.BottomRight);
+			let t = this.getPointCollisionDistance(x + p.x, y + p.y, dx, dy, tMax, false, isFeet);
 			minT = Math.min(minT, t);
+			++i;
 		}
 		return minT;
 	}
