@@ -115,8 +115,8 @@ class Mario extends Moveable{
 			new MinimumX(30), 
 			new MaximumX(179*60-30), 
 			this.animation, 
-			new ActsWhenSteppingOnBrick(16, ()=>this.takeDamage()), 
-			new ActsWhenSteppingOnBrick(12, (x,y,terrain)=>this.jumpOnNote(x,y,terrain)),			
+			new ActsWhenSteppingOnBrick(Tile.Spike, ()=>this.takeDamage()), 
+			new ActsWhenSteppingOnBrick(Tile.BouncyNote, (x,y,terrain)=>this.jumpOnNote(x,y,terrain)),			
 			new Sparkling(),
 			this.sparkleBehavior
 		];

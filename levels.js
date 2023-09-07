@@ -84,6 +84,53 @@ var level2 = {
           return tile;
     }    
 
+    const Tile ={
+        CobbleStone: 0+16,
+        Breakable1:  1+16,
+        Breakable2:  2+16,
+        Breakable3:  3+16,
+        BouncyNote:  4+16,
+        GreyBlock:   5+16,
+        CollapsibleBlock: 6+16,
+        CollapsibleBlockActive: 7+16,
+        Spike: 8+16,
+        PalmTrunk: 9+16,
+        ExitSign: 10+16,
+        WoodSpike: 11+16,
+        QuestionMark: 12+16,
+        UsedQuestionMark: 13+16,
+        Wood1: 14+16,
+        Metal1: 15+16,
+        ExitPole: 16+16,
+        WoodPike: 17+16,        
+        SpikeDown: 19+16,
+        Wood2: 20+16,
+        Metal2: 21+16,
+        PipeFirst: 30+16,
+        PipeLast: 66+16,    
+        Goomba: 200,
+        Koopa: 201,
+        RedKoopa: 202,
+        Fish: 203,
+        Piranha: 204,
+        Coin: 205,
+        Mushroom: 206,
+        PoisonousMushroom: 207,
+        Life: 208,
+        Star: 209,        
+        OneCoinLeft: 210,
+        TenCoinsLeft: 219,
+        Weed: 230,
+        WeedAndPalmTrumk: 231,
+        PalmTree: 232,
+        Water: 233,
+        Lava: 234,
+        Invisible: 254,
+        None: 255
+    };
+
+    const SolidTiles = [Tile.CobbleStone,Tile.Breakable1,Tile.Breakable2,Tile.Breakable3,Tile.BouncyNote,Tile.GreyBlock,Tile.CollapsibleBlock,Tile.CollapsibleBlockActive,Tile.Spike,Tile.WoodSpike,Tile.QuestionMark,Tile.UsedQuestionMark,Tile.Wood1,Tile.Metal1,Tile.WoodPike,Tile.SpikeDown,Tile.Wood2,Tile.Metal2];
+    
     function getId(c, u, l, r, ul, ur, x, y, parseWall, pipeColor, liquidType){
      if (c == "░"){
         return parseWall(c, u, l, r, ul, ur, x, y);     //0-7 is solid terrain
@@ -93,64 +140,65 @@ var level2 = {
         return parseWall(c, u, l, r, ul, ur, x, y) + 8; //8-15 is walkthrough terrain
      }
 
-     let pipeOffset =(pipeColor % 3)*2+Math.floor(pipeColor / 3)*12;
      //Tree
-     if (c == "╦") return 100+8;
-     if (c == "║") return 9+8;
+     if (c == "╦") return Tile.PalmTree;
      //Weed
      if (c == "w") {
         if (u == '║')
-            return 106+8;
-        return 102+8;
+            return Tile.WeedAndPalmTrumk;
+        return Tile.Weed;
      }
 
      //Water/Lava
-     if (c == "▓") return 22+8+liquidType;
+     if (c == "▓") return 233+liquidType; //233-234
      
      //Pipe
-     if (c == "╒") return 30+8+pipeOffset;
-     if (c == "╕") return 31+8+pipeOffset;
-     if (c == "│") return 36+8+pipeOffset;
-     if (c == "┇") return 37+8+pipeOffset;
+     let pipeOffset =(pipeColor % 3)*2+Math.floor(pipeColor / 3)*12;
+     if (c == "╒") return Tile.PipeFirst+0+pipeOffset;
+     if (c == "╕") return Tile.PipeFirst+1+pipeOffset;
+     if (c == "│") return Tile.PipeFirst+6+pipeOffset;
+     if (c == "┇") return Tile.PipeFirst+7+pipeOffset;
 
      //Block
-     if (c == "₪") return 20+8;
-     if (c == "¤") return 0+8;
-     if (c == "E") return 10+8;
-     if (c == "◙") return 12+8;
-     if (c == "■") return 1+8;
-     if (c == "▲") return 8+8;
-     if (c == "♪") return 4+8;
-     if (c == "□") return 254;
+     if (c == "₪") return Tile.Wood2;
+     if (c == "¤") return Tile.CobbleStone;
+     if (c == "E") return Tile.ExitSign;
+     if (c == "◙") return Tile.QuestionMark;
+     if (c == "■") return Tile.Breakable1;
+     if (c == "▲") return Tile.Spike;
+     if (c == "║") return Tile.PalmTrunk;
+     if (c == "♪") return Tile.BouncyNote;
+     if (c == "□") return Tile.Invisible;
+     
 
      //Enemies
-     if (c == "₾") return 103+8;
-     if (c == "∩") return 104+8;
-     if (c == "₼") return 105+8;
-     if (c == "a") return 111+8;
-     if (c == "ψ") return 112+8;
+     if (c == "₾") return Tile.Goomba;
+     if (c == "∩") return Tile.Koopa;
+     if (c == "₼") return Tile.RedKoopa;
+     if (c == "a") return Tile.Fish;
+     if (c == "ψ") return Tile.Piranha;
      
      //Collectables
-     if (c == "○") return 101+8;
-     if (c == "♠") return 107+8;
-     if (c == "♣") return 108+8;
-     if (c == "♥") return 109+8;
-     if (c == "☼") return 110+8;    
-     if (c == "●") return 253; //253-249 reserved for multicoin brick
-     
-     return 255;
+     if (c == "○") return Tile.Coin;
+     if (c == "♠") return Tile.Mushroom;
+     if (c == "♣") return Tile.PoisonousMushroom;
+     if (c == "♥") return Tile.Life;
+     if (c == "☼") return Tile.Star;    
+     if (c == "●") return Tile.TenCoinsLeft;
+     //◌
+     return Tile.None;
     }
     
     function getTile(g, y,x){
         if (y >= 0 && x >=0 && y < g.length && x < g[y].length)
             return g[y][x];
-        return 255;
+        return Tile.None;
     }
     
     function parseLevel(levelData){
         let level = new Array(levelData.grid[0].length);
         let parser = parseTerrainWall;
-        if (levelData.terrainType >= 4)
+        if (levelData.terrainType >= 5)
             parser = parseDungeonWall;
 
         //this will convert the level walls to draw the grass and corners 

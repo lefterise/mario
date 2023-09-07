@@ -60,11 +60,11 @@ class Terrain{
 	}
 
 	isSolid(X,Y){
-		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || [8,9,10,11,12,13,14,15,16,19,20,21,22,23,25,27,28,29].includes(this.tiles[X][Y]) || (this.tiles[X][Y] >= 38 && this.tiles[X][Y] <= 74));
+		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || SolidTiles.includes(this.tiles[X][Y]) || (this.tiles[X][Y] >= Tile.PipeFirst && this.tiles[X][Y] <= Tile.PipeLast));
 	}
 
 	isBumpable(X, Y){
-		return this.inBounds(X,Y) && [9, 10,11,12, 20, 254].includes(this.tiles[X][Y]);
+		return this.inBounds(X,Y) && [Tile.Breakable1, Tile.Breakable2, Tile.Breakable3, Tile.BouncyNote, Tile.QuestionMark, Tile.Invisible].includes(this.tiles[X][Y]);
 	}
 	
 	getPointCollisionDistance(x, y, dx, dy, tMax, wantNonSolid){		
@@ -152,10 +152,9 @@ class Terrain{
 
 	bumpBrick(bumpedBricks, moveable){
 		this.bumpedBricks = bumpedBricks;
-		for (let b of bumpedBricks){
-			//20 = [?]   9=breakable brick 254=invisibrick 115=shroom
-			if ((this.tiles[b.x][b.y] == 20 || (this.tiles[b.x][b.y] == 254 && moveable.dy < 0)) || (this.tiles[b.x][b.y] == 9 && this.tiles[b.x][b.y - 1] == 115)){
-				if (this.tiles[b.x][b.y - 1] == 115){
+		for (let b of bumpedBricks){			
+			if ((this.tiles[b.x][b.y] == Tile.QuestionMark || (this.tiles[b.x][b.y] == Tile.Invisible && moveable.dy < 0)) || ([Tile.Breakable1, Tile.Breakable2, Tile.Breakable3].includes(this.tiles[b.x][b.y]) && this.tiles[b.x][b.y - 1] == Tile.Mushroom)){
+				if (this.tiles[b.x][b.y - 1] == Tile.Mushroom){
 
 					if (this.world.mario.size == 0){
 						let mushroom = new Mushroom(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
@@ -164,57 +163,62 @@ class Terrain{
 						let flower = new Flower(60 * (b.x),42 * (b.y - 1), 0.0, 0.0);
 						this.world.enemies.push(flower);
 					}
-					this.tiles[b.x][b.y] = 21;
-					this.tiles[b.x][b.y - 1] = 255;
+					this.tiles[b.x][b.y] = Tile.UsedQuestionMark;
+					this.tiles[b.x][b.y - 1] = Tile.None;
 
 					sound.sprout.play();
-				} else if (this.tiles[b.x][b.y - 1] >= 250 && this.tiles[b.x][b.y - 1] <= 253){//253=5 multicoins, 252=4 multicons .. 249 = 0
+				} else if (this.tiles[b.x][b.y - 1] >= Tile.OneCoinLeft && this.tiles[b.x][b.y - 1] <= Tile.TenCoinsLeft){
 					moveable.dy = 0.3;
-					this.tiles[b.x][b.y] = 20;
-					this.tiles[b.x][b.y - 1]--;
+					this.tiles[b.x][b.y] = Tile.QuestionMark;
+					if (this.tiles[b.x][b.y - 1] > Tile.OneCoinLeft)
+						this.tiles[b.x][b.y - 1]--;
+					else{
+						this.tiles[b.x][b.y - 1] = Tile.None;
+						this.tiles[b.x][b.y] = Tile.UsedQuestionMark;
+					}
 
 					let coin = new PopupCoin(60 * b.x, 42 * (b.y-1), 0.0, -0.6);
 					this.world.enemies.push(coin);
 					
 					sound.coin.play();
-				}else if (this.tiles[b.x][b.y - 1] == 116){					
+				}else if (this.tiles[b.x][b.y - 1] == Tile.PoisonousMushroom){					
 					let poisonousMushroom = new PoisonousMushroom(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
 					this.world.enemies.push(poisonousMushroom);
 					
-					this.tiles[b.x][b.y] = 21;
-					this.tiles[b.x][b.y - 1] = 255;
+					this.tiles[b.x][b.y] = Tile.UsedQuestionMark;
+					this.tiles[b.x][b.y - 1] = Tile.None;
 
 					sound.sprout.play();
-				}else if (this.tiles[b.x][b.y - 1] == 117){					
+				}else if (this.tiles[b.x][b.y - 1] == Tile.Life){					
 					let lifeMushroom = new LifeMushroom(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
 					this.world.enemies.push(lifeMushroom);
 					
-					this.tiles[b.x][b.y] = 21;
-					this.tiles[b.x][b.y - 1] = 255;
+					this.tiles[b.x][b.y] = Tile.UsedQuestionMark;
+					this.tiles[b.x][b.y - 1] = Tile.None;
 
 					sound.sprout.play();
-				}else if (this.tiles[b.x][b.y - 1] == 118){					
+				}else if (this.tiles[b.x][b.y - 1] == Tile.Star){					
 					let star = new Star(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
 					this.world.enemies.push(star);
 					
-					this.tiles[b.x][b.y] = 21;
-					this.tiles[b.x][b.y - 1] = 255;
+					this.tiles[b.x][b.y] = Tile.UsedQuestionMark;
+					this.tiles[b.x][b.y - 1] = Tile.None;
 
 					sound.sprout.play();
 				}else{
-					this.tiles[b.x][b.y] = 21;
+					this.tiles[b.x][b.y] = Tile.UsedQuestionMark;
 					
 					let coin = new PopupCoin(60 * b.x, 42 * (b.y-1), 0.0, -0.6);
 					this.world.enemies.push(coin);
 					
 					sound.coin.play();
 				}
-			}else if (this.tiles[b.x][b.y] == 9){				
+			}else if ([Tile.Breakable1, Tile.Breakable2, Tile.Breakable3].includes(this.tiles[b.x][b.y])){				
 				if (moveable.size == 0){
 					sound.bump.play(); //small mario
 				}else{
 					sound.break.play(); //large mario or koopa
-					this.tiles[b.x][b.y] = 255;
+					this.tiles[b.x][b.y] = Tile.None;
 					this.world.enemies.push(new BrickParticle(60 * b.x,42 * b.y ,  0.2, -0.5));
 					this.world.enemies.push(new BrickParticle(60 * b.x,42 * b.y , -0.2, -0.5));
 					this.world.enemies.push(new BrickParticle(60 * b.x,42 * b.y , 0.15, -0.75));
@@ -389,30 +393,30 @@ class Game{
 			if (x+tileOffset >= tiles.length-1) break;
 			for (let y=0; y<13;++y){
 				let tileId = tiles[x+tileOffset][y];
-				if (tileId == 103+8){
+				if (tileId == Tile.Goomba){
 					let goomba = new Goomba(60 * (x+tileOffset),42*y+41,-0.1,0.0);
 					this.enemies.push(goomba);
-					tiles[x+tileOffset][y] = 255;
-				}else if (tileId == 104+8){
+					tiles[x+tileOffset][y] = Tile.None;
+				}else if (tileId == Tile.Koopa){
 					let koopa = new Koopa(60 * (x+tileOffset),42*y+41,-0.1,0.0);
 					this.enemies.push(koopa);
-					tiles[x+tileOffset][y] = 255;
-				}else if (tileId == 105+8){
+					tiles[x+tileOffset][y] = Tile.None;
+				}else if (tileId == Tile.RedKoopa){
 					let koopa = new RedKoopa(60 * (x+tileOffset),42*y+41,-0.1,0.0);
 					this.enemies.push(koopa);
-					tiles[x+tileOffset][y] = 255;
-				}else if (tileId == 111+8){
+					tiles[x+tileOffset][y] = Tile.None;
+				}else if (tileId == Tile.Fish){
 					let fish = new Fish(60 * (x+tileOffset),42*y+41,0.0,-1.0);
 					this.enemies.push(fish);
-					tiles[x+tileOffset][y] = 255;
-				}else if (tileId == 101+8){
-					let coin = new Coin(60 * (x+tileOffset),42 * y, 0.0, 0.0);
-					this.enemies.push(coin);
-					tiles[x+tileOffset][y] = 255;
-				}else if (tileId == 112+8){
+					tiles[x+tileOffset][y] = Tile.None;
+				}else if (tileId == Tile.Piranha){
 					let piranha = new Piranha(60 * (x+tileOffset) + 60 ,42*y+41,0.0, 0.0);
 					this.enemies.push(piranha);
-					tiles[x+tileOffset][y] = 255;
+					tiles[x+tileOffset][y] = Tile.None;					
+				}else if (tileId == Tile.Coin){
+					let coin = new Coin(60 * (x+tileOffset),42 * y, 0.0, 0.0);
+					this.enemies.push(coin);
+					tiles[x+tileOffset][y] = Tile.None;
 				}
 			}
 		}
@@ -455,35 +459,51 @@ class Game{
 
 	drawEnemies(){
 		for (let e of this.enemies){
-			if (e.constructor.name == "Goomba"){
+			switch (e.constructor.name){
+			case "Goomba":
 				this.gfx.drawGoomba(e.x - this.screenX, e.y, e.frame, 0);
-			}else if (e.constructor.name == "Koopa"){
+				break;
+			case "Koopa":
 				this.gfx.drawTurtle(e.x - this.screenX, e.y, e.frame, 0, e.dx > 0 ? 1 : 0);
-			}else if (e.constructor.name == "RedKoopa"){
+				break;
+			case "RedKoopa":
 				this.gfx.drawTurtle(e.x - this.screenX, e.y, e.frame, 1, e.dx > 0 ? 1 : 0);
-			}else if (e.constructor.name == "Fish"){
+				break;
+			case "Fish":
 				this.gfx.drawFish(e.x - this.screenX, e.y, e.frame, 0);
-			}else if (e.constructor.name == "Coin" || e.constructor.name == "PopupCoin"){
+				break;
+			case "Coin":
+			case "PopupCoin":
 				this.gfx.drawCoin(e.x - this.screenX, e.y, this.coinAnimation.frame); //All coins use same frame so that glares are aligned
-			}else if (e.constructor.name == "Mushroom"){
+				break;
+			case "Mushroom":
 				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 0);
-			}else if (e.constructor.name == "PoisonousMushroom"){
+				break;
+			case "PoisonousMushroom":
 				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 3);
-			}else if (e.constructor.name == "LifeMushroom"){
+				break;
+			case "LifeMushroom":
 				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 2);
-			}else if (e.constructor.name == "Flower"){
+				break;
+			case "Flower":
 				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 4);	
-			}else if (e.constructor.name == "Star"){
+				break;
+			case "Star":
 				this.gfx.drawMushroom(e.x - this.screenX, e.y, e.frame, 5);	
-			}else if (e.constructor.name == "BrickParticle"){
-				this.gfx.drawBrickParticle(e.x - this.screenX, e.y);				
-			}else if (e.constructor.name == "Brick"){
+				break;
+			case "BrickParticle":
+				this.gfx.drawBrickParticle(e.x - this.screenX, e.y);
+				break;
+			case "Brick":
 				this.gfx.drawTileOld(e.x - this.screenX, e.y, 1);
-			}else if (e.constructor.name == "Fireball"){
+				break;
+			case "Fireball":
 				this.gfx.drawFireball(e.x - this.screenX, e.y, this.fireballAnimation.frame);
-			}else if (e.constructor.name == "Piranha"){
+				break;
+			case "Piranha":
 				this.gfx.drawPiranha(e.x - this.screenX, e.y, e.height, e.frame);
-			}else if (e.constructor.name == "WhiteFlash"){
+				break;
+			case "WhiteFlash":
 				this.gfx.drawWhiteFlash(e.x - this.screenX, e.y);
 			}
 			
@@ -493,9 +513,6 @@ class Game{
 				}
 			}
 		}
-
-		
-		
 	}
 
 	drawTerrain(dt){
@@ -507,19 +524,17 @@ class Game{
 			for (let y=0; y<13;++y){
 			   let tileId = this.terrain.tiles[x+tileOffset][y];
 			   if (tileId != 255){				   				  
-		           if (tileId == 101+8){
-					  //this.gfx.drawCoin(60 * x - screenOffset, 42 * y + 16, this.coinAnimation.frame);
-				   }else if (tileId == 102+8){
+		           if (tileId == Tile.Weed){
 					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
-				   }else if (tileId == 100+8){
-					  this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
-				   }else if (tileId == 22+8 || tileId == 23+8){
-					  this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame, tileId - 22-8);
-				   }else if (tileId < 8){
-				     this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId, this.terrain.terrainType);
-                   }else if (tileId == 106+8){
+				   }else if (tileId == Tile.WeedAndPalmTrumk){
 					 this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 					 this.gfx.drawTileOld(60 * x - screenOffset, 42*y, 9);
+				   }else if (tileId == Tile.PalmTree){
+					  this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
+				   }else if (tileId == Tile.Water || tileId == Tile.Lava){
+					  this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame, tileId - 233);
+				   }else if (tileId < Tile.CobbleStone){
+				     this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId % 8, this.terrain.terrainType);                   
                    }else{
 					
 					let bumpY = 0;
@@ -532,7 +547,7 @@ class Game{
 							bumpY = -Math.sin(b.t / 200 * Math.PI) * 10;
 						}
 					}					 					
-				     this.gfx.drawTileOld(60 * x - screenOffset, 42*y + bumpY, tileId-8);
+				     this.gfx.drawTileOld(60 * x - screenOffset, 42*y + bumpY, tileId-16);
                    }				   
 			   }
 		   }
