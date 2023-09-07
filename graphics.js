@@ -8,10 +8,17 @@ class Graphics{
        this.loadImage("graphics/tree.png",    (img)=>{this.tree = img;});
        this.loadImage("graphics/grass.png",   (img)=>{this.grass = img;});
        this.loadImage("graphics/buttons.png", (img)=>{this.buttons = img;});
-       this.loadImage("graphics/joystick.png", (img)=>{this.joystick = img;});
-       this.loadImage("graphics/brickPattern.png", (img)=>{this.brickPattern = this.ctx.createPattern(img, "repeat"); });
-       this.blueSkyGradient = this.createBlueSkyGradient();
-       this.nightGradient = this.createNightGradient();
+       this.loadImage("graphics/joystick.png", (img)=>{this.joystick = img;});       
+       
+       this.background = [
+        this.createSkyGradient("#48ACE8", "#C0E8E8"), 
+        this.createSkyGradient("#3071C3", "#6DAEFF"), 
+        this.createSkyGradient("#A2C3FF", "#DFFFFF"), 
+        this.createSkyGradient("#3071C3", "#6DAEFF"),
+        null,
+        null];
+       this.loadImage("graphics/brickPattern.png", (img)=>{this.background[4] = this.ctx.createPattern(img, "repeat"); });
+       this.loadImage("graphics/prisonPattern.png", (img)=>{this.background[5] = this.ctx.createPattern(img, "repeat"); });
     }
     
     loadImage(file, callback){
@@ -36,9 +43,9 @@ class Graphics{
       this.ctx.drawImage(this.terrain, 99, 3, 18, 18, x, y, 18, 18);
     }
 
-    drawWater(x,y, frame){
-        this.ctx.drawImage(this.terrain, 4 * 60, 3 * 42 + frame, 60, 42 - frame, x, y, 60, 42 - frame);
-        this.ctx.drawImage(this.terrain, 4 * 60, 3 * 42, 60, frame, x, y + 42  - frame, 60, frame);
+    drawWater(x,y, frame, type){
+        this.ctx.drawImage(this.terrain, (4+type) * 60, 3 * 42 + frame, 60, 42 - frame, x, y, 60, 42 - frame);
+        this.ctx.drawImage(this.terrain, (4+type) * 60, 3 * 42, 60, frame, x, y + 42  - frame, 60, frame);
     }
     
     drawTree(x,y, frame){
@@ -97,20 +104,11 @@ class Graphics{
       this.ctx.drawImage(this.joystick, 0, 0, 200, 70, x, y, 200, 70);
     }
     
-    createBlueSkyGradient(){
+    createSkyGradient(top, bottom){
       const grd = this.ctx.createLinearGradient(0, 0, 0, 546);
-      grd.addColorStop(0,   "#48ACE8");
-      grd.addColorStop(0.75,"#C0E8E8");
-      grd.addColorStop(1,   "#C0E8E8");      
-      return grd;
-    }
-
-    createNightGradient(){
-      const grd = this.ctx.createLinearGradient(0, 0, 0, 546);
-      grd.addColorStop(0,   "#245674");
-      grd.addColorStop(0.75,"#607474");
-      grd.addColorStop(1,   "#607474");
-
+      grd.addColorStop(0.00,    top);
+      grd.addColorStop(0.75, bottom);
+      grd.addColorStop(1.00, bottom);      
       return grd;
     }
 

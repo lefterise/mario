@@ -45,13 +45,14 @@ class Animation{
 }
 
 class Terrain{
-	constructor(tiles, world, terrainType){
+	constructor(tiles, world, terrainType, backgroundType){
 		this.tiles = tiles;
 		this.tileWidth = 60;
 		this.tileHeight = 42;
 		this.bumpedBricks = [];
 		this.world = world;
 		this.terrainType = terrainType;
+		this.backgroundType = backgroundType;
 	}
 
 	inBounds(X,Y){
@@ -244,8 +245,7 @@ class Game{
 		this.screenX = 0;
 		this.screenPan = 360;
 		let level = parseLevel(level1);
-		this.terrain = new Terrain(level.grid, this, level.terrainType);
-		this.skyGradient = this.gfx.blueSkyGradient;
+		this.terrain = new Terrain(level.grid, this, level.terrainType, level.backgroundType);
 		this.mario = new Mario(360, 461, 0.0, 0.0);
 		this.enemies = [];
 
@@ -317,7 +317,7 @@ class Game{
 		this.performance[this.perfIndex] = dt;
 		this.perfIndex = (this.perfIndex + 1) % 40;
 
-		this.gfx.ctx.fillStyle = this.skyGradient;
+		this.gfx.ctx.fillStyle = this.gfx.background[this.terrain.backgroundType];
 		this.gfx.ctx.fillRect(0, 0, 1200, 546);
 		
 		//this.gfx.ctx.fillStyle = "black";
@@ -513,8 +513,8 @@ class Game{
 					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
 				   }else if (tileId == 100+8){
 					  this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
-				   }else if (tileId == 22+8){
-					  this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame);
+				   }else if (tileId == 22+8 || tileId == 23+8){
+					  this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame, tileId - 22-8);
 				   }else if (tileId < 8){
 				     this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId, this.terrain.terrainType);
                    }else if (tileId == 106+8){
