@@ -362,11 +362,13 @@ class EmergesSubmerges{
 				this.height = 0;
 				this.state = EmergeStates.submerged;
 				this.t = 0;
+				moveable.state = States.Disabled;
 			}
 		}else if (this.state == EmergeStates.submerged){
 			if (this.t >= this.timeToStaySubmerged){
 				this.state = EmergeStates.emerging;
 				this.t = 0;
+				moveable.state = States.EmergingSubmerging;
 			}
 		}
 

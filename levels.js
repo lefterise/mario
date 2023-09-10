@@ -71,7 +71,8 @@ var level2 = {
     terrainType: 6,
     backgroundType: 4,
     pipeColor: 4,
-    liquidType: 1
+    liquidType: 1,
+    pipes: []
 };
 
 const AllLevels ={

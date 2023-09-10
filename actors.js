@@ -10,7 +10,8 @@ const States = {
 	Sprouting: 8,
 	EnemyKilling: 9,
 	Invulnerable: 10,
-	EmergingSubmerging: 11
+	EmergingSubmerging: 11,
+	Disabled: 12
 }
 
 const CollisionPoints = {	
@@ -212,6 +213,10 @@ class Mario extends Moveable{
 			return;
 		}
 		
+		if (otherState == States.Disabled){
+			return;
+		}
+
 		if (otherState == States.EmergingSubmerging){
 			this.takeDamage();
 			return;
