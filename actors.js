@@ -36,6 +36,25 @@ class Moveable{
 		this.behaviours = [];
 	}
 
+	getTop(){
+		return this.y + this.collisionPoints[CollisionPoints.TopLeft].y;
+	}
+
+	getBottom(){
+		return this.y + this.collisionPoints[CollisionPoints.BottomLeft].y;
+	}
+
+	getLeft(){
+		return this.x + this.collisionPoints[CollisionPoints.BottomLeft].x;
+	}
+
+	getRight(){
+		return this.x + this.collisionPoints[CollisionPoints.BottomRight].x;
+	}
+
+	getCenter(){
+		return this.x + (this.collisionPoints[CollisionPoints.BottomLeft].x + this.collisionPoints[CollisionPoints.BottomRight].x) * 0.5;
+	}
 
 	getRelativeLocationTo(other){
 		let al = this.x + this.collisionPoints[CollisionPoints.BottomLeft].x;
@@ -93,8 +112,8 @@ class Mario extends Moveable{
 		this.smallCollisionPoints = [
 			{x:-26, y:  0}, 
 			{x: 26, y:  0},
-			{x:-26, y:-50}, 
-			{x: 26, y:-50},
+			{x:-26, y:-58}, 
+			{x: 26, y:-58},
 			{x:-26, y:-25}, 
 			{x: 26, y:-25},
 		];
@@ -109,7 +128,7 @@ class Mario extends Moveable{
 		this.collisionPoints = this.smallCollisionPoints;
 		this.animation = new AnimationBehavior(0,1,250);
 		this.sparkleBehavior = new SpawnsSparkles(-26, -50, 52, 50, 10, 500, 25, false);
-		this.behaviours = [
+		this.defaultBehaviours = [
 			new RespectsTerrain(), 
 			new CanBumpBricksAbove(), 
 			new MinimumX(30), 
@@ -118,18 +137,23 @@ class Mario extends Moveable{
 			new ActsWhenSteppingOnBrick(Tile.Spike, ()=>this.takeDamage()), 
 			new ActsWhenSteppingOnBrick(Tile.BouncyNote, (x,y,terrain)=>this.jumpOnNote(x,y,terrain)),			
 			new Sparkling(),
-			this.sparkleBehavior
+			this.sparkleBehavior			
 		];
+		this.behaviours = this.defaultBehaviours;
 		this.facing = 1;
 		this.direction = Directions.Idle;
-		this.size = 0;
+		this.heightForSize = [60, 81, 81];
+		this.size = 0;		
+		this.height = this.heightForSize[this.size];
+		this.clipY = 0;
+		this.offY = 0;
 		this.isJumpPressed = false;
 		this.isRunning = false;
 		this.state = States.Walking;
 		this.sparkles = [];
 		this.activeSparkleEvents = 0;
-		this.starIsActive = false;
-	}
+		this.starIsActive = false;		
+	}	
 
 	collidesWith(other, otherState){
 		if (otherState == States.Dead || otherState == States.Dying || this.state == States.Dying) return;
@@ -192,6 +216,29 @@ class Mario extends Moveable{
 		}
 	}
 
+	exitPipeDownwards(){
+		this.behaviours = [new EmergesFromSkyPipe(this.heightForSize[this.size], 20, ()=>{ this.behaviours = this.defaultBehaviours; this.clipY = 0; this.offY = 0; this.height = this.heightForSize[this.size]; this.state = States.Walking;})];
+	}
+
+	exitPipeUpwards(){
+		this.behaviours = [new Emerges(this.heightForSize[this.size], 20, ()=>{ this.behaviours = this.defaultBehaviours;  this.clipY = 0; this.offY = 0; this.height = this.heightForSize[this.size]; this.state = States.Walking;})];
+	}
+
+	enterPipe(terrain, directionDown){
+		if (this.state == States.EmergingSubmerging)
+			return;
+
+		if (directionDown && terrain.isAbovePipeEntrance(this)){
+			this.state = States.EmergingSubmerging;
+			this.behaviours = [new Submerges(this.heightForSize[this.size], 20, ()=>{ this.behaviours = this.defaultBehaviours; this.exitPipeUpwards(); sound.pipe.play(); })];
+			sound.pipe.play();
+		}else if (!directionDown && terrain.isBelowPipeEntrance(this)){
+			this.state = States.EmergingSubmerging;
+			this.behaviours = [new GetsSuckedUpThePipe(this.heightForSize[this.size], 20, ()=>{ this.behaviours = this.defaultBehaviours; this.exitPipeDownwards(); sound.pipe.play();})];
+			sound.pipe.play();
+		}		
+	}
+
     takeDamage(){
         if (this.state == States.Invulnerable)
             return;
@@ -242,6 +289,7 @@ class Mario extends Moveable{
 
 	grow(){
 		this.size = 1;
+		this.height = this.heightForSize[this.size];
 		this.collisionPoints = this.bigCollisionPoints;
 		this.sparkleBehavior.resize(-26, -78, 52, 78);
 		this.sparkleBehavior.setEnable(true);
@@ -251,6 +299,7 @@ class Mario extends Moveable{
 
 	flower(){
 		this.size = 2;
+		this.height = this.heightForSize[this.size];
 		this.collisionPoints = this.bigCollisionPoints;
 		this.sparkleBehavior.resize(-26, -78, 52, 78);
 		this.sparkleBehavior.setEnable(true);
@@ -260,6 +309,7 @@ class Mario extends Moveable{
 
 	shrink(){
 		this.size = 0;
+		this.height = this.heightForSize[this.size];
 		this.collisionPoints = this.smallCollisionPoints;
 		this.sparkleBehavior.resize(-26, -50, 52, 50);
 		this.sparkleBehavior.setEnable(true);

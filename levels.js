@@ -1,9 +1,9 @@
 var level1 = { 
     grid: [
-          "                                                                         ◌◌◌◌◌                                                  ₪₪₪₪│┇₪₪₪₪       ♥                                  ",
-          "                                                       ♥             ☼         ●                                                  ₪₪│┇₪₪         □       ○○○                        ",
-          "                                           ○           □  ╦      ■◙ ■◙         □□                                                   │┇                  ₪ ₾ ₪                       ",
-          "     ╦            ╦                        ○              ║ ╦                        ₪ ₼ ₪      ╦     ○○○○                  ╦       ╒╕        ╦         ₪₪₪₪₪      ╦        ╦       ",
+          "             │┇                                                          ◌◌◌◌◌                                                  ₪₪₪₪│┇₪₪₪₪       ♥                                  ",
+          "             │┇                                        ♥             ☼         ●                                                  ₪₪│┇₪₪         □       ○○○                        ",
+          "             │┇                            ○           □  ╦      ■◙ ■◙         □□                                                   │┇                  ₪ ₾ ₪                       ",
+          "     ╦       ╒╕   ╦                        ○              ║ ╦                        ₪ ₼ ₪      ╦     ○○○○                  ╦       ╒╕        ╦         ₪₪₪₪₪      ╦        ╦       ",
           "     ║ ╦        ╦ ║            ╦     ■■■■■ ○             ╦║ ║               ╦        ₪₪₪₪₪      ║                           ║╦                ║                    ║   ╦    ║ ╦     ",
           "    ╦║ ║  ♠     ║ ║            ║           ○       ♠     ║║ ║               ║            ₪₼  ₪  ║                           ║║                ║        ○○○○○○○    ╦║   ║   ╦║ ║     ",
           "    ║║ ║ ◙◙     ║ ║            ║           ○     ╒╕◙     ║║ ║   ◙■ ◙■       ║            ₪₪₪₪₪  ║  ψ             ψ  ♣   ♠   ║║ ○○○○      ψ    ║       ₪     ₾ ₪   ║║   ║   ║║ ║     ",
@@ -17,9 +17,10 @@ var level1 = {
     backgroundType: 0,
     terrainType: 0,
     pipeColor: 0,
-    liquidType: 0
+    liquidType: 0,
+    pipes: [{entrance: {x: 14, y: 3, direction: 1}}, {entrance: {x: 14, y: 8, direction: 0}}]
   };
-      
+  //
   var secret1 = {
     grid: [
           "₪│┇₪₪₪₪₪₪₪₪₪₪₪₪₪₪₪₪₪ ",
@@ -221,5 +222,5 @@ var level2 = {
                );
            }
        }
-       return {grid: level, terrainType: levelData.terrainType, sky: levelData.sky, backgroundType: levelData.backgroundType};
+       return {grid: level, terrainType: levelData.terrainType, sky: levelData.sky, backgroundType: levelData.backgroundType, pipes: levelData.pipes};
     }

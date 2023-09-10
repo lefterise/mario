@@ -27,8 +27,12 @@ class Graphics{
         img.onload = ()=>{callback(img);};
     }
   
-    drawMario(x, y, frame, size, direction){
-       this.ctx.drawImage(this.mario, frame * 63 + direction * 252, size * 87, 60, 84, x, y, 60, 84); 
+    drawMario(x, y, frame, size, direction, height, clipY, offY){
+      this.ctx.drawImage(this.mario, 
+        frame * 63 + direction * 252, size * 87 + 84 - height-clipY, 
+        60, height, 
+        x, y - height-offY+1,
+        60, height); 
     }
     
     drawTile(x,y,id, type){

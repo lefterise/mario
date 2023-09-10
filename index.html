@@ -45,7 +45,7 @@ class Animation{
 }
 
 class Terrain{
-	constructor(tiles, world, terrainType, backgroundType){
+	constructor(tiles, world, terrainType, backgroundType, pipes){
 		this.tiles = tiles;
 		this.tileWidth = 60;
 		this.tileHeight = 42;
@@ -53,6 +53,24 @@ class Terrain{
 		this.world = world;
 		this.terrainType = terrainType;
 		this.backgroundType = backgroundType;
+		this.pipes = pipes;
+	}
+	
+	isAbovePipeEntrance(moveable){
+		for (let pipe of this.pipes){
+			if (pipe.entrance.direction == 0 && (Math.abs(moveable.getCenter() - pipe.entrance.x * this.tileWidth) < 20 && Math.abs(moveable.getBottom() - pipe.entrance.y * this.tileHeight) < 3)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	isBelowPipeEntrance(moveable){
+		for (let pipe of this.pipes){
+			if (pipe.entrance.direction == 1 && (Math.abs(moveable.getCenter() - pipe.entrance.x * this.tileWidth) < 20 && Math.abs(moveable.getTop() - (pipe.entrance.y+1) * this.tileHeight) < 3))
+				return true;
+		}
+		return false;
 	}
 
 	inBounds(X,Y){
@@ -256,7 +274,7 @@ class Game{
 		this.screenX = 0;
 		this.screenPan = 360;
 		let level = parseLevel(level1);
-		this.terrain = new Terrain(level.grid, this, level.terrainType, level.backgroundType);
+		this.terrain = new Terrain(level.grid, this, level.terrainType, level.backgroundType, level.pipes);
 		this.mario = new Mario(360, 461, 0.0, 0.0);
 		this.enemies = [];
 
@@ -303,8 +321,8 @@ class Game{
 			if (this.screenPan > 21 * 60 - 200) this.screenPan = 21 * 60 - 200;
 		}
 
-		if (this.controls.wantUp || this.controls.wantDown){
-			//sound.pipe.play();
+		if (this.controls.wantDown || this.controls.wantUp){
+			this.mario.enterPipe(this.terrain, this.controls.wantDown);
 		}
 
 		if (this.mario.y > 42*14) { //mario fell off screen
@@ -341,7 +359,7 @@ class Game{
 		if ((this.controls.debug % 3) < 2){
 			this.drawTerrain(dt);
 			this.drawEnemies();
-			this.gfx.drawMario(this.mario.x - this.screenX - 30, this.mario.y - 83, this.mario.frame, this.mario.size, this.mario.facing);
+			this.gfx.drawMario(this.mario.x - this.screenX - 30, this.mario.y, this.mario.frame, this.mario.size, this.mario.facing, this.mario.height, this.mario.clipY, this.mario.offY);
 
 			for(let s of this.mario.sparkles){
 				this.gfx.drawStar(s.x - this.screenX, s.y, s.size, s.spikes);

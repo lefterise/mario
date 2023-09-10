@@ -431,3 +431,125 @@ class Sparkling{
 	}
 	reactToNewPosition(moveable, dt, terrain){}
 }
+
+
+class Submerges{
+	constructor(maxHeight, timeToGrowByOnePixel, completionCallback){		
+		this.height = maxHeight;
+		this.timeToGrowByOnePixel = timeToGrowByOnePixel;
+		this.t = 0;
+		this.completionCallback = completionCallback;
+		this.maxHeight = maxHeight;
+	}
+
+	computeFuturePosition(moveable, dt, terrain){
+		this.t = this.t + dt;
+
+		let pixelsToShrink = Math.floor(this.t / this.timeToGrowByOnePixel);
+		this.height = this.height - pixelsToShrink;
+		this.t = this.t - pixelsToShrink * this.timeToGrowByOnePixel;
+		
+		if (this.height <= 0){
+			this.height = 0;
+			this.t = 0;
+			this.completionCallback();
+		}else {		
+			moveable.height = this.height;
+			moveable.clipY =  this.maxHeight - this.height;
+			moveable.offY = 0;
+		}
+	}
+	
+	reactToNewPosition(moveable, dt, terrain){}
+}
+
+class Emerges{
+	constructor(maxHeight, timeToGrowByOnePixel, completionCallback){		
+		this.height = 0;
+		this.timeToGrowByOnePixel = timeToGrowByOnePixel;
+		this.t = 0;
+		this.completionCallback = completionCallback;
+		this.maxHeight = maxHeight;
+	}
+
+	computeFuturePosition(moveable, dt, terrain){
+		this.t = this.t + dt;
+
+		let pixelsToGrow = Math.floor(this.t / this.timeToGrowByOnePixel);
+		this.height = this.height + pixelsToGrow;
+		this.t = this.t - pixelsToGrow * this.timeToGrowByOnePixel;
+		
+		if (this.height >= this.maxHeight){
+			this.height = this.maxHeight;
+			this.t = 0;
+			this.completionCallback();
+		}else {		
+			moveable.height = this.height;
+			moveable.clipY = this.maxHeight - this.height;
+			moveable.offY = 0;
+		}
+	}
+	
+	reactToNewPosition(moveable, dt, terrain){}
+}
+
+
+class GetsSuckedUpThePipe{
+	constructor(maxHeight, timeToGrowByOnePixel, completionCallback){		
+		this.height = maxHeight;
+		this.maxHeight = maxHeight;
+		this.timeToGrowByOnePixel = timeToGrowByOnePixel;
+		this.t = 0;
+		this.completionCallback = completionCallback;
+	}
+
+	computeFuturePosition(moveable, dt, terrain){
+		this.t = this.t + dt;
+
+		let pixelsToShrink = Math.floor(this.t / this.timeToGrowByOnePixel);
+		this.height = this.height - pixelsToShrink;
+		this.t = this.t - pixelsToShrink * this.timeToGrowByOnePixel;
+		
+		if (this.height <= 0){
+			this.height = 0;
+			this.t = 0;
+			this.completionCallback();
+		}else{		
+			moveable.height = this.height;
+			moveable.clipY = 0;
+			moveable.offY = this.maxHeight - this.height;
+		}
+	}
+	
+	reactToNewPosition(moveable, dt, terrain){}
+}
+
+class EmergesFromSkyPipe{
+	constructor(maxHeight, timeToGrowByOnePixel, completionCallback){		
+		this.height = 0;
+		this.timeToGrowByOnePixel = timeToGrowByOnePixel;
+		this.t = 0;
+		this.completionCallback = completionCallback;
+		this.maxHeight = maxHeight;		
+	}
+
+	computeFuturePosition(moveable, dt, terrain){
+		this.t = this.t + dt;
+
+		let pixelsToGrow = Math.floor(this.t / this.timeToGrowByOnePixel);
+		this.height = this.height + pixelsToGrow;
+		this.t = this.t - pixelsToGrow * this.timeToGrowByOnePixel;
+		
+		if (this.height >= this.maxHeight){
+			this.height = this.maxHeight;
+			this.t = 0;
+			this.completionCallback();
+		}else {		
+			moveable.height = this.height;
+			moveable.clipY = 0;
+			moveable.offY = this.maxHeight - this.height;
+		}
+	}
+	
+	reactToNewPosition(moveable, dt, terrain){}
+}
