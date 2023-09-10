@@ -14,16 +14,17 @@ var level1 = {
           "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▓░░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░▓▓░░░░░░░░░░░░░░░░░░░░░▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",
           "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▓░░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░▓▓░░░░░░░░░░░░░░░░░░░░░▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
       ],
+    startPosition: {x: 6, y: 11},
     backgroundType: 0,
     terrainType: 0,
     pipeColor: 0,
     liquidType: 0,
-    pipes: [        
-        {entrance: {x:  50, y: 6, direction: 0}, exit: {x: 133, y: 3, direction: 1}},
-        {entrance: {x: 177, y: 7, direction: 0}, exit: {x:  14, y: 8, direction: 0}},
+    pipes: [       
+        {entrance: {x:  50, y: 6, direction: 0}, exit: {x: 2, y: 2, direction: 1, level: "secret1", storeState: "level1"}},
+        {entrance: {x: 177, y: 7, direction: 0}, exit: {x: 2, y:-1, direction: 1, level: "level2", storeState: false}},
     ]
   };
-  //
+  
   var secret1 = {
     grid: [
           "₪│┇₪₪₪₪₪₪₪₪₪₪₪₪₪₪₪₪₪ ",
@@ -40,10 +41,14 @@ var level1 = {
           "₪  │┇              ₪ ",
           "₪₪₪│┇₪₪₪₪₪₪₪₪₪₪₪₪₪₪₪ "
     ],
+    startPosition: {x: 2, y: 2},
     backgroundType: 4,
-    terrainType: 4,
+    terrainType: 6,
     pipeColor: 0,
-    liquidType: 0
+    liquidType: 0,
+    pipes: [       
+        {entrance: {x:  4, y: 10, direction: 0}, exit: {x: 133, y: 3, direction: 1, level: "level1", storeState: "secret1"}},
+    ]
   };
   
 var level2 = {
@@ -62,11 +67,18 @@ var level2 = {
          "░░░░░░░░░░░░░░░░░░▓▓▓░░░░░▓▓▓▓▓░░░░░░░░░  ♪░░░░░░░░▓▓▓░░░▓▓▓░░░░░░░░░░░░░░░░░░░░▓▓▓░░▓▓▓▓░░▓▓▓░░░░▓▓▓▓▓▓▓░░░░░░░░░░░░▓▓▓▓░░░░░░░░▓▓▓░░░░▓░░░░░░░░░░░░░░░░▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │┇    │┇│┇  ╒╕░░░░╒╕│┇   ░",
          "░░░░░░░░░░░░░░░░░░▓▓▓░░░░░▓▓▓▓▓░░░░░░░░░   ░░░░░░░░▓▓▓░░░▓▓▓░░░░░░░░░░░░░░░░░░░░▓▓▓░░▓▓▓▓░░▓▓▓░░░░▓▓▓▓▓▓▓░░░░░░░░░░░░▓▓▓▓░░░░░░░░▓▓▓░░░░▓░░░░░░░░░░░░░░░░▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │┇    │┇│┇  │┇    │┇│┇   ░",  
     ],
-    terrainType: 5,
-    backgroundType: 2,
+    startPosition: {x: 2, y: -1},
+    terrainType: 6,
+    backgroundType: 4,
     pipeColor: 4,
     liquidType: 1
-}
+};
+
+const AllLevels ={
+    level1 : level1,
+    secret1: secret1,
+    level2 : level2,
+};
   
     function parseTerrainWall(c, u, l, r, ul, ur, x, y){
     if (u != c){
@@ -225,5 +237,5 @@ var level2 = {
                );
            }
        }
-       return {grid: level, terrainType: levelData.terrainType, sky: levelData.sky, backgroundType: levelData.backgroundType, pipes: levelData.pipes};
+       return {grid: level, terrainType: levelData.terrainType, sky: levelData.sky, backgroundType: levelData.backgroundType, pipes: levelData.pipes, startPosition: levelData.startPosition};
     }

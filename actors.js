@@ -131,7 +131,13 @@ class Mario extends Moveable{
 		];
 		this.collisionPoints = this.smallCollisionPoints;
 		this.animation = new AnimationBehavior(0,1,250);
-		this.sparkleBehavior = new SpawnsSparkles(-26, -50, 52, 50, 10, 500, 25, false);
+		this.sparkleBehavior = new SpawnsSparkles(
+			this.collisionPoints[CollisionPoints.Left].x, 
+			this.collisionPoints[CollisionPoints.Top].y, 
+			this.collisionPoints[CollisionPoints.Right].x - this.collisionPoints[CollisionPoints.Left].x, 
+			this.collisionPoints[CollisionPoints.Top].y   - this.collisionPoints[CollisionPoints.Bottom].y,
+			10, 500, 25, false
+		);
 		this.defaultBehaviours = [
 			new RespectsTerrain(), 
 			new CanBumpBricksAbove(), 
@@ -156,8 +162,17 @@ class Mario extends Moveable{
 		this.state = States.Walking;
 		this.sparkles = [];
 		this.activeSparkleEvents = 0;
-		this.starIsActive = false;		
-	}	
+		this.starIsActive = false;
+	}
+
+	reset(x,y){
+		this.x = this.futureX = x;
+		this.y = this.futureY = y;
+		this.dx = 0.0;
+		this.dy = 0.0;
+		this.state = States.Walking;
+		this.behaviours = this.defaultBehaviours;
+	}
 
 	collidesWith(other, otherState){
 		if (otherState == States.Dead || otherState == States.Dying || this.state == States.Dying) return;
@@ -250,6 +265,13 @@ class Mario extends Moveable{
 		if (directionDown && (pipe = terrain.isAbovePipeEntrance(this))){
 			this.state = States.EmergingSubmerging;
 			this.behaviours = [new Submerges(this.heightForSize[this.size], 20, ()=>{ 
+				if (pipe.exit.level){
+					if (pipe.exit.storeState){
+						gGame.saveState(pipe.exit.storeState);
+					}
+					gGame.loadState(pipe.exit.level);					
+				}
+
 				if (pipe.exit.direction == 0){
 					this.exitPipeUpwards(pipe.exit, terrain);
 				}else if (pipe.exit.direction == 1){

@@ -28,20 +28,20 @@ canvas {
 
 <script>
 class Animation{
-  constructor(frames, transitionTime){
-     this.frames = frames; 
-     this.transitionTime = transitionTime;
-	 this.frame = 0;
-	 this.t = 0;
-  }
-  
-  update(dt){
-	 this.t = this.t + dt;
-     let framesToAdvance = Math.floor(this.t / this.transitionTime);
-	 this.frame = (this.frame + framesToAdvance) % this.frames;	
-	 this.t = this.t - framesToAdvance * this.transitionTime;
-  }
-  
+	constructor(frames, transitionTime){
+		this.frames = frames; 
+		this.transitionTime = transitionTime;
+		this.frame = 0;
+		this.t = 0;
+	}
+
+	update(dt){
+		this.t = this.t + dt;
+		let framesToAdvance = Math.floor(this.t / this.transitionTime);
+		this.frame = (this.frame + framesToAdvance) % this.frames;	
+		this.t = this.t - framesToAdvance * this.transitionTime;
+	}
+
 }
 
 class Terrain{
@@ -89,79 +89,79 @@ class Terrain{
 		return this.inBounds(X,Y) && [Tile.Breakable1, Tile.Breakable2, Tile.Breakable3, Tile.BouncyNote, Tile.QuestionMark, Tile.Invisible].includes(this.tiles[X][Y]);
 	}
 	
-	getPointCollisionDistance(x, y, dx, dy, tMax, wantNonSolid, shouldConsiderSolidOnFall){		
-        //Ref: A fast voxel traversal algorithm J.Amanatides, A. Woo      
-		//(x,y) the location of the point. 
+	getPointCollisionDistance(x, y, dx, dy, tMax, wantNonSolid, shouldConsiderSolidOnFall){
+		//Ref: A fast voxel traversal algorithm J.Amanatides, A. Woo
+		//(x,y) the location of the point.
 		//(dx, dy) the normalized speed of the point in pixels per second. 
 		//tMax the number of seconds the point intents to travel
 
-        //Distance in seconds between two consecutive lines when moving at direction (dx,dy)
-        let tVertical    = this.tileWidth  / Math.abs(dx);
-        let tHorizontal  = this.tileHeight / Math.abs(dy);
+		//Distance in seconds between two consecutive lines when moving at direction (dx,dy)
+		let tVertical    = this.tileWidth  / Math.abs(dx);
+		let tHorizontal  = this.tileHeight / Math.abs(dy);
 
-        //Starting Tile location
-        let X = Math.floor(x / this.tileWidth);
-        let Y = Math.floor(y / this.tileHeight);
+		//Starting Tile location
+		let X = Math.floor(x / this.tileWidth);
+		let Y = Math.floor(y / this.tileHeight);
 
 		//Ending Tile location
-        let endX = Math.floor((x + dx * tMax) / this.tileWidth);
-        let endY = Math.floor((y + dy * tMax) / this.tileHeight);
+		let endX = Math.floor((x + dx * tMax) / this.tileWidth);
+		let endY = Math.floor((y + dy * tMax) / this.tileHeight);
 
 		let tNextVertical, tNextHorizontal; //The distance in seconds to the next line
-        let stepX, stepY;                   //The direction we move across tiles        
+		let stepX, stepY;                   //The direction we move across tiles
 		
 		let beforeOrAfter = wantNonSolid ? 1 : -1;
 
 		if (dx == 0.0){
 			stepX = 0;
 			tNextVertical = Infinity;
-        }else if (dx > 0.0){
-            stepX = 1;
-            tNextVertical = ((X+1) * this.tileWidth - x) / dx;
-        }else{
-            stepX = -1;
-            tNextVertical = (X * this.tileWidth - x) / dx;
-        }
+		}else if (dx > 0.0){
+			stepX = 1;
+			tNextVertical = ((X+1) * this.tileWidth - x) / dx;
+		}else{
+			stepX = -1;
+			tNextVertical = (X * this.tileWidth - x) / dx;
+		}
 
 		if (dy == 0.0){
 			stepY = 0;
 			tNextHorizontal = Infinity;
-        }else if (dy > 0.0){
-            stepY = 1;
-            tNextHorizontal = ((Y+1) * this.tileHeight - y) / dy;
-        }else{
-            stepY = -1;
-            tNextHorizontal = (Y * this.tileHeight - y) / dy;
-        }
+		}else if (dy > 0.0){
+			stepY = 1;
+			tNextHorizontal = ((Y+1) * this.tileHeight - y) / dy;
+		}else{
+			stepY = -1;
+			tNextHorizontal = (Y * this.tileHeight - y) / dy;
+		}
 
-        if (this.isSolid(X, Y) && !wantNonSolid) {
+		if (this.isSolid(X, Y) && !wantNonSolid) {
 			//this tries to solve the problem if mario happens to be inside a solid block.
 			//the idea is to flip the direction and call the inverse of this function to find the first non-solid
-            return this.getPointCollisionDistance(x,y,-dx,-dy, 10000, true, false); 
-        }
+			return this.getPointCollisionDistance(x,y,-dx,-dy, 10000, true, false); 
+		}
 
-        let t = 0.0;
-        while ((X != endX || Y !=endY) && (t < tMax)){
-            if(tNextVertical < tNextHorizontal){
-                t = tNextVertical;
-                tNextVertical += tVertical;	
-                X += stepX;
+		let t = 0.0;
+		while ((X != endX || Y !=endY) && (t < tMax)){
+			if(tNextVertical < tNextHorizontal){
+				t = tNextVertical;
+				tNextVertical += tVertical;	
+				X += stepX;
 
 				if (this.isSolid(X, Y) ^ wantNonSolid) {
 					return t + beforeOrAfter * (stepX / dx);
 				}
-            }else{
-                t = tNextHorizontal;
-                tNextHorizontal += tHorizontal;
-                Y += stepY;
+			}else{
+				t = tNextHorizontal;
+				tNextHorizontal += tHorizontal;
+				Y += stepY;
 
-				if ((this.isSolid(X, Y) ^ wantNonSolid) || (shouldConsiderSolidOnFall && stepY == 1 && this.isSolidOnFall(X,Y))) {                		
+				if ((this.isSolid(X, Y) ^ wantNonSolid) || (shouldConsiderSolidOnFall && stepY == 1 && this.isSolidOnFall(X,Y))) {
 					return t + beforeOrAfter * (stepY / dy);
 				}
-            }
-        }
-        return tMax;
-    }
+			}
+		}
+		return tMax;
+	}
 
 	getMultipointCollisionDistance(x, y, dx, dy, tMax, collisionPoints){
 		let i = 0;
@@ -177,7 +177,7 @@ class Terrain{
 
 	bumpBrick(bumpedBricks, moveable){
 		this.bumpedBricks = bumpedBricks;
-		for (let b of bumpedBricks){			
+		for (let b of bumpedBricks){
 			if ((this.tiles[b.x][b.y] == Tile.QuestionMark || (this.tiles[b.x][b.y] == Tile.Invisible && moveable.dy < 0)) || ([Tile.Breakable1, Tile.Breakable2, Tile.Breakable3].includes(this.tiles[b.x][b.y]) && this.tiles[b.x][b.y - 1] == Tile.Mushroom)){
 				if (this.tiles[b.x][b.y - 1] == Tile.Mushroom){
 
@@ -206,7 +206,7 @@ class Terrain{
 					this.world.enemies.push(coin);
 					
 					sound.coin.play();
-				}else if (this.tiles[b.x][b.y - 1] == Tile.PoisonousMushroom){					
+				}else if (this.tiles[b.x][b.y - 1] == Tile.PoisonousMushroom){
 					let poisonousMushroom = new PoisonousMushroom(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
 					this.world.enemies.push(poisonousMushroom);
 					
@@ -214,7 +214,7 @@ class Terrain{
 					this.tiles[b.x][b.y - 1] = Tile.None;
 
 					sound.sprout.play();
-				}else if (this.tiles[b.x][b.y - 1] == Tile.Life){					
+				}else if (this.tiles[b.x][b.y - 1] == Tile.Life){
 					let lifeMushroom = new LifeMushroom(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
 					this.world.enemies.push(lifeMushroom);
 					
@@ -222,7 +222,7 @@ class Terrain{
 					this.tiles[b.x][b.y - 1] = Tile.None;
 
 					sound.sprout.play();
-				}else if (this.tiles[b.x][b.y - 1] == Tile.Star){					
+				}else if (this.tiles[b.x][b.y - 1] == Tile.Star){
 					let star = new Star(60 * (b.x),42 * (b.y - 1), 0.1, 0.0);
 					this.world.enemies.push(star);
 					
@@ -238,7 +238,7 @@ class Terrain{
 					
 					sound.coin.play();
 				}
-			}else if ([Tile.Breakable1, Tile.Breakable2, Tile.Breakable3].includes(this.tiles[b.x][b.y])){				
+			}else if ([Tile.Breakable1, Tile.Breakable2, Tile.Breakable3].includes(this.tiles[b.x][b.y])){
 				if (moveable.size == 0){
 					sound.bump.play(); //small mario
 				}else{
@@ -265,27 +265,43 @@ class Game{
 		this.frame = 0;
 		this.treeAnimation = new Animation(3, 500);
 		this.coinAnimation = new Animation(3, 333);
-
-		this.fireballAnimation = new Animation(2, 100);
-		this.startLevel();
+		this.fireballAnimation = new Animation(2, 100);	
+		this.mario = new Mario(360, 461, 0.0, 0.0);
+		this.startLevel("level1");
+		this.savedStates = {};
 	}
 	
-	startLevel(){
-		this.screenX = 0;
-		this.screenPan = 360;
-		let level = parseLevel(level1);
-		this.terrain = new Terrain(level.grid, this, level.terrainType, level.backgroundType, level.pipes);
-		this.mario = new Mario(360, 461, 0.0, 0.0);
-		this.enemies = [];
+	saveState(name){
+		this.savedStates[name] = {terrain: this.terrain, enemies: this.enemies};
+	}
 
+	loadState(name){
+		let state = this.savedStates[name];
+		if (state){
+			this.terrain = state.terrain;
+			this.enemies = state.enemies;
+			this.currentLevel = name;
+		} else{
+			this.startLevel(name);
+		}
+	}
+
+	startLevel(levelName){
+		this.mario.reset(AllLevels[levelName].startPosition.x * 60, AllLevels[levelName].startPosition.y * 42);
+		this.currentLevel = levelName;
+		this.screenX = 0;
+		this.screenPan = 420;
+		let level = parseLevel(AllLevels[levelName]);
+		this.terrain = new Terrain(level.grid, this, level.terrainType, level.backgroundType, level.pipes);
+		this.enemies = [];
 		this.performance = [];
 		this.perfIndex = 0;
 		this.spawnEnemies();		
 	}
 
 	update(time){
-	    let dt = time - (this.prevTime ?? time);
-	    this.prevTime = time;
+		let dt = time - (this.prevTime ?? time);
+		this.prevTime = time;
 				
 		if (dt == 0 || dt > 1000) return;
 
@@ -373,21 +389,21 @@ class Game{
 		
 
 		if (this.state == "FadingOut"){
-			this.fadeAnimation.update(dt);		
+			this.fadeAnimation.update(dt);
 			this.gfx.ctx.fillStyle = "rgba(0,0,0," + (this.fadeAnimation.frame / 50) + ")";
 			this.gfx.ctx.fillRect(0, 0, 1200, 546);
 
-			if (this.fadeAnimation.frame == 49){				
-				this.startLevel();
+			if (this.fadeAnimation.frame == 49){
+				this.startLevel(this.currentLevel);
 				this.fadeIn();
 			}
 		}
 		if (this.state == "FadingIn"){
-			this.fadeAnimation.update(dt);		
+			this.fadeAnimation.update(dt);
 			this.gfx.ctx.fillStyle = "rgba(0,0,0," + (1 - this.fadeAnimation.frame / 50) + ")";
 			this.gfx.ctx.fillRect(0, 0, 1200, 546);
 
-			if (this.fadeAnimation.frame == 49){				
+			if (this.fadeAnimation.frame == 49){
 				this.state = "Playing";
 			}
 		}
@@ -437,7 +453,7 @@ class Game{
 				}else if (tileId == Tile.Piranha){
 					let piranha = new Piranha(60 * (x+tileOffset) + 60 ,42*y+41,0.0, 0.0);
 					this.enemies.push(piranha);
-					tiles[x+tileOffset][y] = Tile.None;					
+					tiles[x+tileOffset][y] = Tile.None;	
 				}else if (tileId == Tile.Coin){
 					let coin = new Coin(60 * (x+tileOffset),42 * y, 0.0, 0.0);
 					this.enemies.push(coin);
@@ -459,7 +475,7 @@ class Game{
 					this.enemies[j].collidesWith(this.enemies[i], stateBeforeCollision);
 				}
 			}
-    	}
+		}
 	}
 
 	updateEnemies(dt){
@@ -544,38 +560,37 @@ class Game{
 		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
 		let tileOffset = Math.floor(this.screenX / 60);
 		for (let x=-2; x<21 +1;++x){
-		    if (x+tileOffset < 0) continue;
+			if (x+tileOffset < 0) continue;
 			if (x+tileOffset >= this.terrain.tiles.length-1) break;
 			for (let y=0; y<13;++y){
-			   let tileId = this.terrain.tiles[x+tileOffset][y];
-			   if (tileId != 255){				   				  
-		           if (tileId == Tile.Weed){
-					  this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
-				   }else if (tileId == Tile.WeedAndPalmTrumk){
-					 this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
-					 this.gfx.drawTileOld(60 * x - screenOffset, 42*y, 9);
-				   }else if (tileId == Tile.PalmTree){
-					  this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
-				   }else if (tileId == Tile.Water || tileId == Tile.Lava){
-					  this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame, tileId - 233);
-				   }else if (tileId < Tile.CobbleStone){
-				     this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId % 8, this.terrain.terrainType);                   
-                   }else{
-					
-					let bumpY = 0;
-					for(let b of this.terrain.bumpedBricks){
-						if (b.x == x + tileOffset && b.y == y){
-							if (!b.t){
-								b.t = 0;
+				let tileId = this.terrain.tiles[x+tileOffset][y];
+				if (tileId != 255){
+					if (tileId == Tile.Weed){
+						this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
+					}else if (tileId == Tile.WeedAndPalmTrumk){
+						this.gfx.drawWeed(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
+						this.gfx.drawTileOld(60 * x - screenOffset, 42*y, 9);
+					}else if (tileId == Tile.PalmTree){
+						this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
+					}else if (tileId == Tile.Water || tileId == Tile.Lava){
+						this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame, tileId - 233);
+					}else if (tileId < Tile.CobbleStone){
+						this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId % 8, this.terrain.terrainType);
+					}else{
+						let bumpY = 0;
+						for(let b of this.terrain.bumpedBricks){
+							if (b.x == x + tileOffset && b.y == y){
+								if (!b.t){
+									b.t = 0;
+								}
+								b.t += dt;
+								bumpY = -Math.sin(b.t / 200 * Math.PI) * 10;
 							}
-							b.t += dt;
-							bumpY = -Math.sin(b.t / 200 * Math.PI) * 10;
+						}					 					
+						this.gfx.drawTileOld(60 * x - screenOffset, 42*y + bumpY, tileId-16);
 						}
-					}					 					
-				     this.gfx.drawTileOld(60 * x - screenOffset, 42*y + bumpY, tileId-16);
-                   }				   
-			   }
-		   }
+				}
+			}
 		}
 		this.terrain.bumpedBricks = this.terrain.bumpedBricks.filter((b)=> (b.t ?? 0) < 200);
 		//this.gfx.drawSpiney(60 * x - screenOffset, 42 * y + 16, this.turtleAnimation.frame, 1);
@@ -589,27 +604,27 @@ class Game{
 		this.gfx.ctx.strokeStyle = "darkGray";
 		for (let x=0; x<21;++x){
 			this.gfx.ctx.beginPath();
-	        this.gfx.ctx.moveTo(x * 60 - screenOffset, 0);
-		    this.gfx.ctx.lineTo(x * 60 - screenOffset, 13 * 42);
-	        this.gfx.ctx.stroke();
+			this.gfx.ctx.moveTo(x * 60 - screenOffset, 0);
+			this.gfx.ctx.lineTo(x * 60 - screenOffset, 13 * 42);
+			this.gfx.ctx.stroke();
 		}
 		for (let y=0; y<13;++y){
 			this.gfx.ctx.beginPath();
-	        this.gfx.ctx.moveTo(0,       y * 42);
-		    this.gfx.ctx.lineTo(21 * 60, y * 42);
-	        this.gfx.ctx.stroke();
+			this.gfx.ctx.moveTo(0,       y * 42);
+			this.gfx.ctx.lineTo(21 * 60, y * 42);
+			this.gfx.ctx.stroke();
 		}
 
 		//Draw Solid blocks
 		this.gfx.ctx.strokeStyle = "red";
 		for (let x=0; x<21;++x){
-		    if (x+tileOffset < 0) continue;
+			if (x+tileOffset < 0) continue;
 			if (x+tileOffset >= this.terrain.tiles.length-1) break;
 			for (let y=0; y<13;++y){
-			   if (this.terrain.isSolid(x+tileOffset,y)){
-				   this.gfx.ctx.strokeRect(x * 60 - screenOffset, y * 42, 60, 42);
-			   }
-		    }
+				if (this.terrain.isSolid(x+tileOffset,y)){
+					this.gfx.ctx.strokeRect(x * 60 - screenOffset, y * 42, 60, 42);
+				}
+			}
 			this.gfx.ctx.fillStyle = "red";
 			this.gfx.ctx.fillText(x+tileOffset, x * 60 - screenOffset, 50);
 		}
@@ -621,9 +636,9 @@ class Game{
 		//Draw mario direction
 		this.gfx.ctx.strokeStyle = "green";
 		this.gfx.ctx.beginPath();
-        this.gfx.ctx.moveTo(this.mario.x - this.screenX, this.mario.y);
-	    this.gfx.ctx.lineTo(this.mario.x + this.mario.dx * dt * 5 - this.screenX, this.mario.y + this.mario.dy * dt * 5);
-        this.gfx.ctx.stroke();
+		this.gfx.ctx.moveTo(this.mario.x - this.screenX, this.mario.y);
+		this.gfx.ctx.lineTo(this.mario.x + this.mario.dx * dt * 5 - this.screenX, this.mario.y + this.mario.dy * dt * 5);
+		this.gfx.ctx.stroke();
 		//Draw mario location
 		this.gfx.ctx.beginPath();
 		this.gfx.ctx.arc(this.mario.x - this.screenX,this.mario.y, 5, 0, 2 * Math.PI);
@@ -668,6 +683,6 @@ function initGame(){
 </script>
 </head>
 <body onload="initGame()">
-   <canvas id="MyCanvas" width="1200" height="546" style="border:1px solid #000000; background-color:#000000;"></canvas>
+	<canvas id="MyCanvas" width="1200" height="546" style="border:1px solid #000000; background-color:#000000;"></canvas>
 </body>
 </html>
