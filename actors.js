@@ -13,11 +13,15 @@ const States = {
 	EmergingSubmerging: 11
 }
 
-const CollisionPoints = {
+const CollisionPoints = {	
 	BottomLeft: 0,
 	BottomRight: 1,
 	TopLeft: 2,
-	TopRight: 3
+	TopRight: 3,
+	Bottom:0,
+	Left:0,
+	Top: 3,
+	Right: 3
 };
 
 class Moveable{
@@ -37,50 +41,50 @@ class Moveable{
 	}
 
 	getTop(){
-		return this.y + this.collisionPoints[CollisionPoints.TopLeft].y;
+		return this.y + this.collisionPoints[CollisionPoints.Top].y;
 	}
 
 	getBottom(){
-		return this.y + this.collisionPoints[CollisionPoints.BottomLeft].y;
+		return this.y + this.collisionPoints[CollisionPoints.Bottom].y;
 	}
 
 	getLeft(){
-		return this.x + this.collisionPoints[CollisionPoints.BottomLeft].x;
+		return this.x + this.collisionPoints[CollisionPoints.Left].x;
 	}
 
 	getRight(){
-		return this.x + this.collisionPoints[CollisionPoints.BottomRight].x;
+		return this.x + this.collisionPoints[CollisionPoints.Right].x;
 	}
 
 	getCenter(){
-		return this.x + (this.collisionPoints[CollisionPoints.BottomLeft].x + this.collisionPoints[CollisionPoints.BottomRight].x) * 0.5;
+		return this.x + (this.collisionPoints[CollisionPoints.Left].x + this.collisionPoints[CollisionPoints.Right].x) * 0.5;
 	}
 
 	getRelativeLocationTo(other){
-		let al = this.x + this.collisionPoints[CollisionPoints.BottomLeft].x;
-		let ar = this.x + this.collisionPoints[CollisionPoints.TopRight].x;
-		let at = this.y + this.collisionPoints[CollisionPoints.TopRight].y;
-		let ab = this.y + this.collisionPoints[CollisionPoints.BottomLeft].y;
+		let al = this.x + this.collisionPoints[CollisionPoints.Left].x;
+		let ar = this.x + this.collisionPoints[CollisionPoints.Right].x;
+		let at = this.y + this.collisionPoints[CollisionPoints.Top].y;
+		let ab = this.y + this.collisionPoints[CollisionPoints.Bottom].y;
 
-		let bl = other.x + other.collisionPoints[CollisionPoints.BottomLeft].x;
-		let br = other.x + other.collisionPoints[CollisionPoints.TopRight].x;
-		let bt = other.y + other.collisionPoints[CollisionPoints.TopRight].y;
-		let bb = other.y + other.collisionPoints[CollisionPoints.BottomLeft].y;
+		let bl = other.x + other.collisionPoints[CollisionPoints.Left].x;
+		let br = other.x + other.collisionPoints[CollisionPoints.Right].x;
+		let bt = other.y + other.collisionPoints[CollisionPoints.Top].y;
+		let bb = other.y + other.collisionPoints[CollisionPoints.Bottom].y;
 
 		return {above: ab < bt, below: at > bb, left: ar < bl, right: al > br };
 	}
 
 
 	getDistanceFromOtherMoveable(other){
-		let al = this.futureX + this.collisionPoints[CollisionPoints.BottomLeft].x;
-		let ar = this.futureX + this.collisionPoints[CollisionPoints.TopRight].x;
-		let at = this.futureY + this.collisionPoints[CollisionPoints.TopRight].y;
-		let ab = this.futureY + this.collisionPoints[CollisionPoints.BottomLeft].y;
+		let al = this.futureX + this.collisionPoints[CollisionPoints.Left].x;
+		let ar = this.futureX + this.collisionPoints[CollisionPoints.Right].x;
+		let at = this.futureY + this.collisionPoints[CollisionPoints.Top].y;
+		let ab = this.futureY + this.collisionPoints[CollisionPoints.Bottom].y;
 
-		let bl = other.futureX + other.collisionPoints[CollisionPoints.BottomLeft].x;
-		let br = other.futureX + other.collisionPoints[CollisionPoints.TopRight].x;
-		let bt = other.futureY + other.collisionPoints[CollisionPoints.TopRight].y;
-		let bb = other.futureY + other.collisionPoints[CollisionPoints.BottomLeft].y;
+		let bl = other.futureX + other.collisionPoints[CollisionPoints.Left].x;
+		let br = other.futureX + other.collisionPoints[CollisionPoints.Right].x;
+		let bt = other.futureY + other.collisionPoints[CollisionPoints.Top].y;
+		let bb = other.futureY + other.collisionPoints[CollisionPoints.Bottom].y;
 
 		let dx1 = al - br;
 		let dx2 = bl - ar;
@@ -216,25 +220,52 @@ class Mario extends Moveable{
 		}
 	}
 
-	exitPipeDownwards(){
-		this.behaviours = [new EmergesFromSkyPipe(this.heightForSize[this.size], 20, ()=>{ this.behaviours = this.defaultBehaviours; this.clipY = 0; this.offY = 0; this.height = this.heightForSize[this.size]; this.state = States.Walking;})];
+	exitPipeDownwards(position, terrain){
+		this.futureX = this.x = position.x * terrain.tileWidth;
+		this.futureY = this.y = position.y * terrain.tileHeight + terrain.tileHeight - this.collisionPoints[CollisionPoints.Top].y;
+		this.height = 0;
+		this.clipY = 0;
+		this.offY = this.maxHeight;
+
+		sound.pipe.play();
+		this.behaviours = [new EmergesFromSkyPipe(this.heightForSize[this.size], 20, ()=>{ this.behaviours = this.defaultBehaviours; this.clipY = 0; this.offY = 0; this.height = this.heightForSize[this.size]; this.state = States.Walking;})];		
 	}
 
-	exitPipeUpwards(){
-		this.behaviours = [new Emerges(this.heightForSize[this.size], 20, ()=>{ this.behaviours = this.defaultBehaviours;  this.clipY = 0; this.offY = 0; this.height = this.heightForSize[this.size]; this.state = States.Walking;})];
+	exitPipeUpwards(position, terrain){
+		this.futureX = this.x = position.x * terrain.tileWidth;
+		this.futureY = this.y = position.y * terrain.tileHeight - this.collisionPoints[CollisionPoints.Bottom].y;
+		this.height = 0;
+		this.clipY = this.maxHeight;
+		this.offY = 0;
+
+		sound.pipe.play();
+		this.behaviours = [new Emerges(this.heightForSize[this.size], 20, ()=>{ this.behaviours = this.defaultBehaviours;  this.clipY = 0; this.offY = 0; this.height = this.heightForSize[this.size]; this.state = States.Walking;})];		
 	}
 
 	enterPipe(terrain, directionDown){
 		if (this.state == States.EmergingSubmerging)
 			return;
 
-		if (directionDown && terrain.isAbovePipeEntrance(this)){
+		let pipe = null;
+		if (directionDown && (pipe = terrain.isAbovePipeEntrance(this))){
 			this.state = States.EmergingSubmerging;
-			this.behaviours = [new Submerges(this.heightForSize[this.size], 20, ()=>{ this.behaviours = this.defaultBehaviours; this.exitPipeUpwards(); sound.pipe.play(); })];
+			this.behaviours = [new Submerges(this.heightForSize[this.size], 20, ()=>{ 
+				if (pipe.exit.direction == 0){
+					this.exitPipeUpwards(pipe.exit, terrain);
+				}else if (pipe.exit.direction == 1){
+					this.exitPipeDownwards(pipe.exit, terrain);					
+				}
+			})];
 			sound.pipe.play();
-		}else if (!directionDown && terrain.isBelowPipeEntrance(this)){
+		}else if (!directionDown && (pipe = terrain.isBelowPipeEntrance(this))){
 			this.state = States.EmergingSubmerging;
-			this.behaviours = [new GetsSuckedUpThePipe(this.heightForSize[this.size], 20, ()=>{ this.behaviours = this.defaultBehaviours; this.exitPipeDownwards(); sound.pipe.play();})];
+			this.behaviours = [new GetsSuckedUpThePipe(this.heightForSize[this.size], 20, ()=>{ 
+				if (pipe.exit.direction == 0){
+					this.exitPipeUpwards(pipe.exit, terrain);
+				}else if (pipe.exit.direction == 1){
+					this.exitPipeDownwards(pipe.exit, terrain);					
+				}
+			})];
 			sound.pipe.play();
 		}		
 	}

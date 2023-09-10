@@ -36,5 +36,5 @@ var sound = {
 	powerdown:  new Sound('sounds/powerdown.wav', 0.2, 2),
     levelstart: new Sound('sounds/levelstart.wav', 0.2, 1),
     star:       new Sound('sounds/star.mp3', 0.4, 1),
-    pipe:       new Sound('sounds/pipe.mp3', 0.4, 1)
+    pipe:       new Sound('sounds/pipe.mp3', 0.4, 2)
 };
