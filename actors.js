@@ -132,18 +132,13 @@ class Mario extends Moveable{
 		];
 		this.collisionPoints = this.smallCollisionPoints;
 		this.animation = new AnimationBehavior(0,1,250);
-		this.sparkleBehavior = new SpawnsSparkles(
-			this.collisionPoints[CollisionPoints.Left].x, 
-			this.collisionPoints[CollisionPoints.Top].y, 
-			this.collisionPoints[CollisionPoints.Right].x - this.collisionPoints[CollisionPoints.Left].x, 
-			this.collisionPoints[CollisionPoints.Top].y   - this.collisionPoints[CollisionPoints.Bottom].y,
-			10, 500, 25, false
-		);
+		this.sparkleBehavior = new SpawnsSparkles(-26, -50, 52, 50, 10, 500, 25, false);
+		this.maxBehaviourX = new MaximumX(179*60-30);
 		this.defaultBehaviours = [
 			new RespectsTerrain(), 
 			new CanBumpBricksAbove(), 
 			new MinimumX(30), 
-			new MaximumX(179*60-30), 
+			this.maxBehaviourX, 
 			this.animation, 
 			new ActsWhenSteppingOnBrick(Tile.Spike, ()=>this.takeDamage()), 
 			new ActsWhenSteppingOnBrick(Tile.BouncyNote, (x,y,terrain)=>this.jumpOnNote(x,y,terrain)),			
@@ -166,13 +161,14 @@ class Mario extends Moveable{
 		this.starIsActive = false;
 	}
 
-	reset(x,y){
+	reset(x,y, maxX){
 		this.x = this.futureX = x;
 		this.y = this.futureY = y;
 		this.dx = 0.0;
 		this.dy = 0.0;
 		this.state = States.Walking;
 		this.behaviours = this.defaultBehaviours;
+		this.maxBehaviourX.maxX = maxX;
 	}
 
 	collidesWith(other, otherState){

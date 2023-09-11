@@ -286,16 +286,16 @@ class Game{
 		}
 	}
 
-	startLevel(levelName){
-		this.mario.reset(AllLevels[levelName].startPosition.x * 60, AllLevels[levelName].startPosition.y * 42);
+	startLevel(levelName){		
 		this.currentLevel = levelName;
 		this.screenX = 0;
 		this.screenPan = 420;
 		let level = parseLevel(AllLevels[levelName]);
-		this.terrain = new Terrain(level.grid, this, level.terrainType, level.backgroundType, level.pipes);
+		this.terrain = new Terrain(level.grid, this, level.terrainType, level.backgroundType, level.pipes);		
 		this.enemies = [];
 		this.performance = [];
 		this.perfIndex = 0;
+		this.mario.reset(AllLevels[levelName].startPosition.x * 60, AllLevels[levelName].startPosition.y * 42, this.terrain.tiles.length * 60 - 30);
 		this.spawnEnemies();		
 	}
 
@@ -351,7 +351,7 @@ class Game{
 		this.screenX = Math.floor(this.mario.x) - this.screenPan;
 
 		//Clip screen X to the level size
-		if (this.screenX > 60 * (this.terrain.tiles.length-21)) this.screenX = 60 * (this.terrain.tiles.length-21); //21 visible tiles
+		if (this.screenX > 60 * (this.terrain.tiles.length-20)) this.screenX = 60 * (this.terrain.tiles.length-20); //21 visible tiles
 		if (this.screenX < 0) this.screenX = 0;
 
 		let screenOffset = ((this.screenX % 60)+60)%60; //+60) % 60 solves the negative modulo jump issue
@@ -431,7 +431,7 @@ class Game{
 		let tileOffset = Math.floor(this.screenX / 60);
 		for (let x=0; x<21;++x){
 		    if (x+tileOffset < 0) continue;
-			if (x+tileOffset >= tiles.length-1) break;
+			if (x+tileOffset >= tiles.length) break;
 			for (let y=0; y<13;++y){
 				let tileId = tiles[x+tileOffset][y];
 				if (tileId == Tile.Goomba){
@@ -561,7 +561,7 @@ class Game{
 		let tileOffset = Math.floor(this.screenX / 60);
 		for (let x=-2; x<21 +1;++x){
 			if (x+tileOffset < 0) continue;
-			if (x+tileOffset >= this.terrain.tiles.length-1) break;
+			if (x+tileOffset >= this.terrain.tiles.length) break;
 			for (let y=0; y<13;++y){
 				let tileId = this.terrain.tiles[x+tileOffset][y];
 				if (tileId != 255){
