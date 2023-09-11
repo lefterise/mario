@@ -281,6 +281,7 @@ class Game{
 			this.terrain = state.terrain;
 			this.enemies = state.enemies;
 			this.currentLevel = name;
+			this.mario.reset(AllLevels[name].startPosition.x * 60, AllLevels[name].startPosition.y * 42, this.terrain.tiles.length * 60 - 30); //i do this to reset the maxX
 		} else{
 			this.startLevel(name);
 		}
