@@ -382,10 +382,11 @@ class EmergesSubmerges{
 }
 
 class SpawnsSparkles{
-	constructor(offsetX, offsetY, width, height, maxSize, duration, sparkleSpawnInterval, enabled){
+	constructor(offsetX, offsetY, width, height, maxSize, duration, sparkleSpawnInterval, enabled, color){
 		this.resize(offsetX, offsetY, width, height);
 		this.reconfigure(maxSize, duration, sparkleSpawnInterval);
 		this.setEnable(enabled);
+		this.color = color;
 	}
 
 	setEnable(enabled){
@@ -416,7 +417,7 @@ class SpawnsSparkles{
 		this.t = this.t - sparklesToAdd * this.sparkleSpawnInterval;
 
 		for (let i=0; i < sparklesToAdd; ++i){
-			moveable.sparkles.push({x: moveable.x + this.offsetX + Math.random() * this.width, y: moveable.y + this.offsetY + Math.random() * this.height, size: this.maxSize, spikes: 4, t: 0, maxSize: this.maxSize, duration: this.duration});
+			moveable.sparkles.push({x: moveable.x + this.offsetX + Math.random() * this.width, y: moveable.y + this.offsetY + Math.random() * this.height, size: this.maxSize, spikes: 4, t: 0, maxSize: this.maxSize, duration: this.duration, color: this.color});
 		}
 	}
 	reactToNewPosition(moveable, dt, terrain){}

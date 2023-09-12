@@ -132,7 +132,7 @@ class Mario extends Moveable{
 		];
 		this.collisionPoints = this.smallCollisionPoints;
 		this.animation = new AnimationBehavior(0,1,250);
-		this.sparkleBehavior = new SpawnsSparkles(-26, -50, 52, 50, 10, 500, 25, false);
+		this.sparkleBehavior = new SpawnsSparkles(-26, -50, 52, 50, 10, 500, 25, false, "#FFFFFF");
 		this.maxBehaviourX = new MaximumX(179*60-30);
 		this.defaultBehaviours = [
 			new RespectsTerrain(), 
@@ -610,7 +610,7 @@ class PopupCoin extends Moveable{
 		{x: 51, y:  0}			
 		];
 		this.sparkles = [];		
-		this.behaviours = [new IgnoresTerrain(), new AlarmBehavior(500, "Disappear"), new SpawnsSparkles(10, 0, 41, 40, 10, 500, 50, true), new Sparkling()];
+		this.behaviours = [new IgnoresTerrain(), new AlarmBehavior(500, "Disappear"), new SpawnsSparkles(10, 0, 41, 40, 10, 500, 50, true, "#FFFFFF"), new Sparkling()];
 		this.state = States.Dying;
 	}
 	
@@ -697,12 +697,12 @@ class Star extends Moveable{
 		];				
 		this.state = States.Sprouting;
 		this.sparkles = [];
-		this.behaviours = [new AnimationBehavior(0,42,12), new AlarmBehavior(500, "BecomeCollectable"),new SpawnsSparkles(1, 0, 58, 40, 10, 200, 30, true), new Sparkling()];
+		this.behaviours = [new AnimationBehavior(0,42,12), new AlarmBehavior(500, "BecomeCollectable"),new SpawnsSparkles(1, 0, 58, 40, 10, 200, 30, true, "#FFFFFF"), new Sparkling()];
 	}
 	
 	becomeCollectable(){
 		this.state = States.Collectable;
-		this.behaviours = [new RespectsTerrain(), new BouncesOnTouchGround(-0.8), new ChangesDirectionWhenHittingWalls(), new SpawnsSparkles(1, 0, 58, 40, 10, 1000, 30, true), new Sparkling()];
+		this.behaviours = [new RespectsTerrain(), new BouncesOnTouchGround(-0.8), new ChangesDirectionWhenHittingWalls(), new SpawnsSparkles(1, 0, 58, 40, 10, 1000, 30, true, "#FFFFFF"), new Sparkling()];
 		this.frame = 42;
 		this.dy = -0.3;
 		this.dx = 0.2;
@@ -882,6 +882,27 @@ class Fish extends Moveable{
 	}
 }
 
+class LavaFlair extends Moveable{
+	constructor(x,y,dx,dy){		
+		super(x,y,dx,dy);
+		this.state = States.Walking;
+		this.collisionPoints = [
+			{x: -24, y: 20}, 
+			{x:  20, y: 20},
+			{x: -24, y:-18}, 
+			{x:  20, y:-18},
+		];
+		this.frame = 0;
+		this.sparkles = [];
+		this.behaviours = [new IgnoresTerrain(), new BouncesWhenReachingY(14 * 42, -1.35, 1500), new AnimationBehavior(0,4,60), new SpawnsSparkles(-20, -20, 40, 40, 8, 500, 10, true, "#FFAA00"), new Sparkling()];		
+	}
+
+	collidesWith(other, otherState){}
+
+	stomp(mario){}
+
+	wipe(){}
+}
 
 class Piranha extends Moveable{
 	constructor(x,y,dx,dy){

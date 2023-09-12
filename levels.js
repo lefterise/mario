@@ -19,6 +19,7 @@ var level1 = {
     terrainType: 0,
     pipeColor: 0,
     liquidType: 0,
+    tileTint: 0,
     pipes: [       
         {entrance: {x:  50, y: 6, direction: 0}, exit: {x: 2, y: 2, direction: 1, level: "secret1", storeState: "level1"}},
         {entrance: {x: 177, y: 7, direction: 0}, exit: {x: 2, y:-1, direction: 1, level: "level2", storeState: false}},
@@ -46,6 +47,7 @@ var level1 = {
     terrainType: 6,
     pipeColor: 0,
     liquidType: 0,
+    tileTint: 0,
     pipes: [       
         {entrance: {x:  4, y: 10, direction: 0}, exit: {x: 133, y: 3, direction: 1, level: "level1", storeState: "secret1"}},
     ]
@@ -63,7 +65,7 @@ var level2 = {
          "░       ψ │┇                          │┇                                      ╒╕   │┇    Ψ    ╒╕│┇        ╒╕◙  ψ   │┇    │┇                      Ψ │┇                     ╒╕◙    ░░░░░░░░░░░░░░   ○○○○○  │┇░░░          ψ       ○○○ ψ    ░",
          "░       ╒╕│┇  ψ                     ╒╕│┇                                      │┇   │┇   ₪╒╕   │┇│┇        │┇   ╒╕  │┇    │┇ ○○○○                 ╒╕│┇                     │┇     ░░░░░░░░░░░░░░ E        │┇░░░          ╒╕          ╒╕  @░",
          "░       │┇│┇  ╒╕          ∩         │┇│┇                                      │┇   │┇    │┇   │┇│┇¤¤ ¤¤ ¤¤│┇   │┇  │┇    │┇ ○○○○                 │┇│┇                E    │┇     ░░░░░░░░░░░░░░ E        │┇░░░  Ψ    ∩  │┇          │┇   ░",
-         "░       │┇│┇  │┇         ¤¤ ‚ ¤¤    │┇│┇         ∩  ‚     ‚                 ∩ │┇   │┇    │┇   │┇│┇  ‚  ‚  │┇   │┇  │┇ ‚‚ │┇             ‚        │┇│┇  ¤¤ ‚ ¤¤ ‚ ¤¤  E  ∩ │┇ ₾₾  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ╒╕░░░░╒╕│┇      ₼ Ψ │┇   ░",
+         "░       │┇│┇  │┇         ¤¤ , ¤¤    │┇│┇         ∩  ,     ,                 ∩ │┇   │┇    │┇   │┇│┇  ,  ,  │┇   │┇  │┇ ,, │┇             ‚        │┇│┇  ¤¤ , ¤¤ , ¤¤  E  ∩ │┇ ₾₾  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ╒╕░░░░╒╕│┇      ₼ Ψ │┇   ░",
          "░░░░░░░░░░░░░░░░░░▓▓▓░░░░░▓▓▓▓▓░░░░░░░░░  ♪░░░░░░░░▓▓▓░░░▓▓▓░░░░░░░░░░░░░░░░░░░░▓▓▓░░▓▓▓▓░░▓▓▓░░░░▓▓▓▓▓▓▓░░░░░░░░░░░░▓▓▓▓░░░░░░░░▓▓▓░░░░▓░░░░░░░░░░░░░░░░▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │┇    │┇│┇  ╒╕░░░░╒╕│┇   ░",
          "░░░░░░░░░░░░░░░░░░▓▓▓░░░░░▓▓▓▓▓░░░░░░░░░   ░░░░░░░░▓▓▓░░░▓▓▓░░░░░░░░░░░░░░░░░░░░▓▓▓░░▓▓▓▓░░▓▓▓░░░░▓▓▓▓▓▓▓░░░░░░░░░░░░▓▓▓▓░░░░░░░░▓▓▓░░░░▓░░░░░░░░░░░░░░░░▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │┇    │┇│┇  │┇    │┇│┇   ░",  
     ],
@@ -72,6 +74,7 @@ var level2 = {
     backgroundType: 4,
     pipeColor: 4,
     liquidType: 1,
+    tileTint: 1,
     pipes: [
         {entrance: {x:  95, y: 7, direction: 0}, exit: {x: 37, y: 8, direction: 0}},
         {entrance: {x:  72, y: 4, direction: 0}, exit: {x: 116, y: 6, direction: 0}},
@@ -144,6 +147,7 @@ const AllLevels ={
         Star: 209,        
         OneCoinLeft: 210,
         TenCoinsLeft: 219,
+        LavaFlair: 220,
         Weed: 230,
         WeedAndPalmTrumk: 231,
         PalmTree: 232,
@@ -155,7 +159,7 @@ const AllLevels ={
 
     const SolidTiles = [Tile.CobbleStone,Tile.Breakable1,Tile.Breakable2,Tile.Breakable3,Tile.BouncyNote,Tile.GreyBlock,Tile.CollapsibleBlock,Tile.CollapsibleBlockActive,Tile.Spike,Tile.WoodSpike,Tile.QuestionMark,Tile.UsedQuestionMark,Tile.Wood1,Tile.Metal1,Tile.WoodPike,Tile.SpikeDown,Tile.Wood2,Tile.Metal2];
     
-    function getId(c, u, l, r, ul, ur, x, y, parseWall, pipeColor, liquidType){
+    function getId(c, u, l, r, ul, ur, x, y, parseWall, pipeColor, liquidType, tileTint){
      if (c == "░"){
         return parseWall(c, u, l, r, ul, ur, x, y);     //0-7 is solid terrain
      }
@@ -191,7 +195,7 @@ const AllLevels ={
         return Tile.ExitPole;
      }
      if (c == "◙") return Tile.QuestionMark;
-     if (c == "■") return Tile.Breakable1;
+     if (c == "■") return Tile.Breakable1 + tileTint;
      if (c == "▲") return Tile.Spike;
      if (c == "║") return Tile.PalmTrunk;
      if (c == "♪") return Tile.BouncyNote;
@@ -204,6 +208,7 @@ const AllLevels ={
      if (c == "₼") return Tile.RedKoopa;
      if (c == "a") return Tile.Fish;
      if (c == "ψ") return Tile.Piranha;
+     if (c == ",") return Tile.LavaFlair;
      
      //Collectables
      if (c == "○") return Tile.Coin;
@@ -244,7 +249,8 @@ const AllLevels ={
                y,
                parser,
                levelData.pipeColor,
-               levelData.liquidType
+               levelData.liquidType,
+               levelData.tileTint
                );
            }
        }

@@ -379,6 +379,7 @@ class Game{
 			this.gfx.drawMario(this.mario.x - this.screenX - 30, this.mario.y, this.mario.frame, this.mario.size, this.mario.facing, this.mario.height, this.mario.clipY, this.mario.offY);
 
 			for(let s of this.mario.sparkles){
+				this.gfx.ctx.fillStyle = s.color;
 				this.gfx.drawStar(s.x - this.screenX, s.y, s.size, s.spikes);
 			}
 
@@ -459,6 +460,10 @@ class Game{
 					let coin = new Coin(60 * (x+tileOffset),42 * y, 0.0, 0.0);
 					this.enemies.push(coin);
 					tiles[x+tileOffset][y] = Tile.None;
+				}else if (tileId == Tile.LavaFlair){
+					let flair = new LavaFlair(60 * (x+tileOffset)+30,42*y+41,0.0,-1.0);
+					this.enemies.push(flair);
+					tiles[x+tileOffset][y] = Tile.None;					
 				}
 			}
 		}
@@ -499,7 +504,7 @@ class Game{
 		this.mario.applyPosition(dt, this.terrain, this.enemies);
 	}
 
-	drawEnemies(){
+	drawEnemies(){		
 		for (let e of this.enemies){
 			switch (e.constructor.name){
 			case "Goomba":
@@ -547,10 +552,15 @@ class Game{
 				break;
 			case "WhiteFlash":
 				this.gfx.drawWhiteFlash(e.x - this.screenX, e.y);
+				break;
+			case "LavaFlair":
+				this.gfx.drawLavaFlair(e.x - this.screenX, e.y, e.frame);
+				break;
 			}
 			
 			if (e.sparkles){
 				for(let s of e.sparkles){
+					this.gfx.ctx.fillStyle = s.color;
 					this.gfx.drawStar(s.x - this.screenX, s.y, s.size, s.spikes);
 				}
 			}

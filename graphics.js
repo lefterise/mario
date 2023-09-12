@@ -100,6 +100,10 @@ class Graphics{
        this.ctx.drawImage(this.enemies, 315, 486, 60, 42, x - 30, y - 21, 60, 42);
     }
 
+    drawLavaFlair(x,y, frame){
+      this.ctx.drawImage(this.enemies, 64 * frame, 489, 62, 39, x - 32, y - 20, 62, 39);
+    }
+
     drawButton(x,y, id){
       this.ctx.drawImage(this.buttons, 98 * id, 0, 98, 98, x, y, 98, 98);
     }
@@ -117,8 +121,7 @@ class Graphics{
     }
 
     drawStar(x, y, r, spikes) {
-      this.ctx.save();      
-        this.ctx.fillStyle = "#fff";
+      this.ctx.save();
         this.ctx.translate(x, y);
         this.ctx.save();
           this.ctx.beginPath();
