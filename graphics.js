@@ -19,6 +19,8 @@ class Graphics{
         null];
        this.loadImage("graphics/brickPattern.png", (img)=>{this.background[4] = this.ctx.createPattern(img, "repeat"); });
        this.loadImage("graphics/prisonPattern.png", (img)=>{this.background[5] = this.ctx.createPattern(img, "repeat"); });
+
+       this.tilesWithTerrainBackground = {8: 6, 9: 7, 10:0, 11:5};
     }
     
     loadImage(file, callback){
@@ -36,7 +38,13 @@ class Graphics{
     }
     
     drawTile(x,y,id, type){
-        this.ctx.drawImage(this.levels, (id % 8) * 60, Math.floor(id / 8) * 42 + 42 * type, 60, 42, x, y, 60, 42);
+       if (id >= 8){
+          this.ctx.drawImage(this.levels, 3 * 60, 42 * type, 60, 42, x, y, 60, 42); //Draw land
+          this.ctx.drawImage(this.levels, this.tilesWithTerrainBackground[id] * 60, 42 * type, 60, 42, x, y, 60, 42);
+          return;
+       }
+
+        this.ctx.drawImage(this.levels, id * 60, 42 * type, 60, 42, x, y, 60, 42);
     }
     
     drawTileOld(x,y,id){

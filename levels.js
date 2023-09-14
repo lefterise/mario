@@ -57,11 +57,11 @@ var level2 = {
    grid: [
          "░    ■■■■■■■■■■■■■   ░░░░░     ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░       ♠  ₼                                          ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░            ░░░░░░░│┇│┇     │┇│┇░░░░░│┇░░░░",
          "░    üüüüüüüüüüüüü   ░░░░░¤   ¤░░                                        ░    ■■■■■■■■■■■■■                           ○○                                                         ░░░░░░░░░░░░░░            ░░░    │┇│┇     │┇│┇     │┇   ░",
-         "░                    ░░░░░     ░░                           ○○○○○○○○○    ░                                  ♣        ○  ○       W   ∩                                            ░░░░░░░░░░░░░░            ░░░ ○○ │┇╒╕░░░░░╒╕│┇     │┇  ♠░",
-         "░                    ░░░░░     ░░                           ○○○○○○○○○  ψ ░                                  ◙                   WWWWW     ○○○○                                   ░░░░░░░░░░░░░░            ░░░ ○○ │┇         │┇ ○○○ ╒╕  ◙░",
+         "░                    ░░░░░     ░░                           ○○○○○○○○○    ░                                  ♣        ○  ○       ₪   ∩                                            ░░░░░░░░░░░░░░            ░░░ ○○ │┇╒╕░░░░░╒╕│┇     │┇  ♠░",
+         "░                    ░░░░░     ░░                           ○○○○○○○○○  ψ ░                                  ◙                   ₪₪₪₪₪     ○○○○                                   ░░░░░░░░░░░░░░            ░░░ ○○ │┇         │┇ ○○○ ╒╕  ◙░",
          "░                                     ψ                            ₾ ₾ ╒╕░●                       ♠                                                Ψ                             ░░░░░░░░░░░░░░♥  ○○○○○    ░░░ ○○ │┇         ╒╕ ○○○      ░",
-         "░         ψ  ♠                        ╒╕     ░░░░░░░ ░░░░░ ░░░░░░░░░░░ │┇░□        Ψ            ╒╕◙                      ψ             W W   ₾W    ╒╕                            ░░░░░░░░░░░░░░◙  ○○○○○    ░░░∩   │┇            ○○○      ░",
-         "░         ╒╕◙◙                        │┇                               ░░░    Ψ    ╒╕           │┇          ☼      ╒╕    ╒╕WWWWWWWWWWWWW WWWWWW    │┇                       ã    ░░░░░░░░░░░░░░   ○○○○○  ╒╕░░░░░  ╒╕            ○○○      ░",
+         "░         ψ  ♠                        ╒╕     ░░░░░░░ ░░░░░ ░░░░░░░░░░░ │┇░□        Ψ            ╒╕◙                      ψ             ₪ ₪   ₾₪    ╒╕                            ░░░░░░░░░░░░░░◙  ○○○○○    ░░░∩   │┇            ○○○      ░",
+         "░         ╒╕◙◙                        │┇                               ░░░    Ψ    ╒╕           │┇          ☼      ╒╕    ╒╕₪₪₪₪₪₪₪₪₪₪₪₪₪ ₪₪₪₪₪₪    │┇                       ã    ░░░░░░░░░░░░░░   ○○○○○  ╒╕░░░░░  ╒╕            ○○○      ░",
          "░       ψ │┇                          │┇                                      ╒╕   │┇    Ψ    ╒╕│┇        ╒╕◙  ψ   │┇    │┇                      Ψ │┇                     ╒╕◙    ░░░░░░░░░░░░░░   ○○○○○  │┇░░░          ψ       ○○○ ψ    ░",
          "░       ╒╕│┇  ψ                     ╒╕│┇                                      │┇   │┇   ₪╒╕   │┇│┇        │┇   ╒╕  │┇    │┇ ○○○○                 ╒╕│┇                     │┇     ░░░░░░░░░░░░░░ E        │┇░░░          ╒╕          ╒╕  @░",
          "░       │┇│┇  ╒╕          ∩         │┇│┇                                      │┇   │┇    │┇   │┇│┇¤¤ ¤¤ ¤¤│┇   │┇  │┇    │┇ ○○○○                 │┇│┇                E    │┇     ░░░░░░░░░░░░░░ E        │┇░░░  Ψ    ∩  │┇          │┇   ░",
@@ -80,27 +80,58 @@ var level2 = {
         {entrance: {x:  72, y: 4, direction: 0}, exit: {x: 116, y: 6, direction: 0}},
         {entrance: {x:  79, y: 7, direction: 0}, exit: {x: 211, y: 6, direction: 1}},
         {entrance: {x: 229, y: 3, direction: 1}, exit: {x: 107, y: 7, direction: 0}},
-        {entrance: {x:  171, y: 7, direction: 0}, exit: {x: 6, y: -1, direction: 1, level: "level1"}},
-        {entrance: {x:  202, y: 6, direction: 0}, exit: {x: 6, y: -1, direction: 1, level: "level1"}}
+        {entrance: {x:  171, y: 7, direction: 0}, exit: {x: 6, y: -1, direction: 1, level: "level3"}},
+        {entrance: {x:  202, y: 6, direction: 0}, exit: {x: 6, y: -1, direction: 1, level: "level3"}}
     ]
 };
+
+
+level3 = { 
+    grid: [
+       " ♠                               ₼              ♠ ₼              ₼                               ¤¤¤¤¤¤│┇¤¤¤¤                                     ♥      ░░",
+       " ◙              ○○○            ○○○            ◙◙◙◙◙    ○○○○    ○○○    ○○○○          ╒╕                 │┇         ○○○             □   □ ░░░░  ◙◙◙◙◙◙◙◙◙  ░░",
+       "        ₼       ▒▒▒            ▒▒▒                     ■■■■    ▒▒▒    ■■■■          │┇     ₼           │┇         ▒▒▒         □         ░░░░             ░░",
+       "       ¤¤       ▒▒▒○           ▒▒▒○○                           ▒▒▒                  │┇    ¤¤           ╒╕         ▒▒▒        ╦          ░░░░ E           ░░",
+       "   ₼ ╦      ₼   ▒▒▒▒        ╦  ▒▒▒▒▒                 ╦         ▒▒▒         ╦    ₼◙  ¤¤¤¤                      ╦  ○▒▒▒     □  ║ ╦        ░░░░ E w ₼       ░░",
+       "  ¤¤ ║      ¤¤  ▒▒▒▒        ║  ▒▒▒▒▒           ₼     ║         ▒▒▒         ║ ¤¤¤¤¤                ψ           ║  ▒▒▒▒       ╦║ ║        ░░░░ ▒▒▒▒▒     ₼ ░░",
+       "     ║          ▒▒▒▒        ║ ○▒▒▒▒▒    ψ     ◙◙◙◙◙ ♪║         ▒▒▒♪♪♪      ║                      ╒╕          ║  ▒▒▒▒₼w     ║║ ║        ░░░░ ▒▒▒▒▒    ▒▒ ░░",
+       "     ║         ○▒▒▒▒        ║ ▒▒▒▒▒▒    ╒╕           ║        ○▒▒▒         ║              ♠ ww    │┇ψ         ║ ○▒▒▒░░░░    E║ ║    ╒╕  ░░░░░░░▒▒▒ ╒╕ ▒▒ ░░",
+       "     ║         ▒▒▒▒▒        ║ ▒▒▒▒▒▒    │┇           ║        ▒▒▒▒    ψ    ║            ╒╕◙◙▒▒▒▒  │┇╒╕        ║ ▒▒▒▒░░░░    ║║ ║    │┇  ░░░░░░░▒▒▒ │┇ ▒▒ ░░",
+       "     ║         ▒▒▒▒▒ ♠      ║ ▒▒▒▒▒▒‡ ψ │┇           ║‡       ▒▒▒▒    ╒╕   ║          ψ │┇  ▒▒▒▒  │┇│┇        ║ ▒▒▒▒░░░░░   ║║ ║    │┇  ░░░░░░░░▒▒ │┇ ▒▒ ░░",
+       " w   ║         ▒▒▒▒▒ ◙      ║ ▒▒▒▒▒░░░╒╕│┇  ww       ║¤    W ‡▒▒▒▒  ‡ │┇   ║       ♠  ╒╕│┇ ‡▒▒▒▒‡ │┇│┇  w     ║₼▒▒▒░░░░░░   ║║ ║∩ww │┇  ░░░░░░░░▒▒ │┇ ▒▒ ░░",
+       "░░░░░░░     ░░░░░░░░░░    ╒╕░░░░░░░░░░│┇│┇  ░░░░░░░░░░░    ░░░░░░░░░░░│┇  ■║‡     ‡◙  │┇│┇░░░░░░░░│┇│┇░░░░   ░░░░░░░░░░░░░░░░░░░░░░░░░░ ░░░░░░░░░░░░░░░░░░░",
+       "░░░░░░░     ░░░░░░░░░░    │┇░░░░░░░░░░│┇│┇  ░░░░░░░░░░░    ░░░░░░░░░░░│┇  ░░░░░░░░░░  │┇│┇░░░░░░░░│┇│┇░░░░   ░░░░░░░░░░░░░░░░░░░░░░░░░░ ░░░░░░░░░░░░░░░░░░░",
+      ],
+    startPosition: {x: 6, y: 11},
+    backgroundType: 1,
+    terrainType: 2,
+    pipeColor: 1,
+    liquidType: 0,
+    tileTint: 0,
+    pipes: [       
+       
+    ]
+  };
+
 
 const AllLevels ={
     level1 : level1,
     secret1: secret1,
     level2 : level2,
+    level3: level3
 };
   
     function parseTerrainWall(c, u, l, r, ul, ur, x, y){
     if (u != c){
-        if (l != c) return 0;
-        if (r != c) return 5;
+        if (l != c) return 0+ (c == '░' && l == '▒' ? 10 : 0);
+        if (r != c) return 5+ (c == '░' && r == '▒' ? 6 : 0);
         return 1;
       }
-      if (l != c) return 6;
-      if (r != c) return 7;
-      if (ul != c) return 2;
-      if (ur != c) return 4;
+
+      if (l != c && l != '░') return 6 + (c == '░' && l == '▒' ? 2 : 0);
+      if (r != c && r != '░') return 7 + (c == '░' && r == '▒' ? 2 : 0);
+      if (ul != c && ul != '░') return 2;
+      if (ur != c && ur != '░') return 4;
       return 3;
     }
 
@@ -112,29 +143,29 @@ const AllLevels ={
     }    
 
     const Tile ={
-        CobbleStone: 0+16,
-        Breakable1:  1+16,
-        Breakable2:  2+16,
-        Breakable3:  3+16,
-        BouncyNote:  4+16,
-        GreyBlock:   5+16,
-        CollapsibleBlock: 6+16,
-        CollapsibleBlockActive: 7+16,
-        Spike: 8+16,
-        PalmTrunk: 9+16,
-        ExitSign: 10+16,
-        WoodSpike: 11+16,
-        QuestionMark: 12+16,
-        UsedQuestionMark: 13+16,
-        Wood1: 14+16,
-        Metal1: 15+16,
-        ExitPole: 16+16,
-        WoodPike: 17+16,        
-        SpikeDown: 19+16,
-        Wood2: 20+16,
-        Metal2: 21+16,
-        PipeFirst: 30+16,
-        PipeLast: 66+16,    
+        CobbleStone: 0+20,
+        Breakable1:  1+20,
+        Breakable2:  2+20,
+        Breakable3:  3+20,
+        BouncyNote:  4+20,
+        GreyBlock:   5+20,
+        CollapsibleBlock: 6+20,
+        CollapsibleBlockActive: 7+20,
+        Spike: 8+20,
+        PalmTrunk: 9+20,
+        ExitSign: 10+20,
+        WoodSpike: 11+20,
+        QuestionMark: 12+20,
+        UsedQuestionMark: 13+20,
+        Wood1: 14+20,
+        Metal1: 15+20,
+        ExitPole: 16+20,
+        WoodPike: 17+20,        
+        SpikeDown: 19+20,
+        Wood2: 20+20,
+        Metal2: 21+20,
+        PipeFirst: 30+20,
+        PipeLast: 66+20,    
         Goomba: 200,
         Koopa: 201,
         RedKoopa: 202,
@@ -161,11 +192,11 @@ const AllLevels ={
     
     function getId(c, u, l, r, ul, ur, x, y, parseWall, pipeColor, liquidType, tileTint){
      if (c == "░"){
-        return parseWall(c, u, l, r, ul, ur, x, y);     //0-7 is solid terrain
+        return parseWall(c, u, l, r, ul, ur, x, y);     //0-11 is solid terrain
      }
      
      if (c == "▒"){
-        return parseWall(c, u, l, r, ul, ur, x, y) + 8; //8-15 is walkthrough terrain
+        return parseWall(c, u, l, r, ul, ur, x, y) + 12; //12-19 is walkthrough terrain
      }
 
      //Tree
@@ -208,6 +239,7 @@ const AllLevels ={
      if (c == "₼") return Tile.RedKoopa;
      if (c == "a") return Tile.Fish;
      if (c == "ψ") return Tile.Piranha;
+     if (c == "Ψ") return Tile.Piranha;//Red
      if (c == ",") return Tile.LavaFlair;
      
      //Collectables

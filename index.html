@@ -1,7 +1,8 @@
-<!DOCTYPE html>”
+<!DOCTYPE html>
 <html>
 <head>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <script src="graphics.js"></script>
 <script src="levels.js"></script>
 <script src="keyboard.js"></script>
@@ -78,11 +79,11 @@ class Terrain{
 	}
 
 	isSolid(X,Y){
-		return this.inBounds(X,Y) && (this.tiles[X][Y] < 8 || SolidTiles.includes(this.tiles[X][Y]) || (this.tiles[X][Y] >= Tile.PipeFirst && this.tiles[X][Y] <= Tile.PipeLast));
+		return this.inBounds(X,Y) && (this.tiles[X][Y] < 12 || SolidTiles.includes(this.tiles[X][Y]) || (this.tiles[X][Y] >= Tile.PipeFirst && this.tiles[X][Y] <= Tile.PipeLast));
 	}
 
 	isSolidOnFall(X,Y){
-		return this.inBounds(X,Y) && [8,9,13].includes(this.tiles[X][Y]);
+		return this.inBounds(X,Y) && [12,13,17].includes(this.tiles[X][Y]);
 	}
 
 	isBumpable(X, Y){
@@ -586,7 +587,7 @@ class Game{
 					}else if (tileId == Tile.Water || tileId == Tile.Lava){
 						this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame, tileId - 233);
 					}else if (tileId < Tile.CobbleStone){
-						this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId % 8, this.terrain.terrainType);
+						this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId % 12, this.terrain.terrainType);
 					}else{
 						let bumpY = 0;
 						for(let b of this.terrain.bumpedBricks){
@@ -598,7 +599,7 @@ class Game{
 								bumpY = -Math.sin(b.t / 200 * Math.PI) * 10;
 							}
 						}					 					
-						this.gfx.drawTileOld(60 * x - screenOffset, 42*y + bumpY, tileId-16);
+						this.gfx.drawTileOld(60 * x - screenOffset, 42*y + bumpY, tileId-20);
 						}
 				}
 			}
