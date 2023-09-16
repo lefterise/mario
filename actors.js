@@ -119,7 +119,7 @@ class Mario extends Moveable{
 			{x:-26, y:  0}, 
 			{x: 26, y:  0},
 			{x:-26, y:-58}, 
-			{x: 26, y:-58},
+			{x: 26, y:-58},   
 			{x:-26, y:-25}, 
 			{x: 26, y:-25},
 		];
@@ -235,8 +235,8 @@ class Mario extends Moveable{
 		}
 		
 		if (relativeLocation.above){
-			this.dy = this.isJumpPressed ? -1.1 : -0.7;
-			this.futureY = this.futureY - 3;
+			this.dy = this.isJumpPressed ? -1.1 : -0.7;			
+			this.y = this.futureY = other.y + other.collisionPoints[CollisionPoints.Top].y - 1;			
 			other.stomp(this);
 		}else{
 			if (otherState == States.Walking || otherState == States.Spinning){				
@@ -506,7 +506,7 @@ class Koopa extends Moveable{
 	}
 
 	collidesWith(other, otherState){
-		if (this.state == States.Dead || otherState == States.Dead || otherState == States.Dying || otherState == States.Collectable) return;
+		if (this.state == States.Dead || this.state == States.Dying || otherState == States.Dead || otherState == States.Dying || otherState == States.Collectable) return;
 
 		if (otherState == States.Spinning || otherState == States.EnemyKilling){
 			this.wipe();

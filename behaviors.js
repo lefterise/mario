@@ -535,10 +535,13 @@ class GetsSuckedUpThePipe{
 			this.height = 0;
 			this.t = 0;
 			this.completionCallback();
-		}else{		
+		}else{
+			let adj = this.maxHeight + moveable.collisionPoints[CollisionPoints.Top].y - 2;
+			if (this.height > this.maxHeight - adj) this.height = this.maxHeight - adj;
+			console.log(adj);
 			moveable.height = this.height;
 			moveable.clipY = 0;
-			moveable.offY = this.maxHeight - this.height;
+			moveable.offY = this.maxHeight - this.height - adj;
 		}
 	}
 	
@@ -561,14 +564,16 @@ class EmergesFromSkyPipe{
 		this.height = this.height + pixelsToGrow;
 		this.t = this.t - pixelsToGrow * this.timeToGrowByOnePixel;
 		
-		if (this.height >= this.maxHeight){
-			this.height = this.maxHeight;
+		let adj = this.maxHeight + moveable.collisionPoints[CollisionPoints.Top].y - 2;
+
+		if (this.height >= this.maxHeight - adj){
+			this.height = this.maxHeight - adj;
 			this.t = 0;
 			this.completionCallback();
-		}else {		
+		}else {			
 			moveable.height = this.height;
 			moveable.clipY = 0;
-			moveable.offY = this.maxHeight - this.height;
+			moveable.offY = this.maxHeight - this.height - adj;
 		}
 	}
 	
