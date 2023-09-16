@@ -109,16 +109,46 @@ level3 = {
     liquidType: 0,
     tileTint: 0,
     pipes: [       
-       
+      {entrance: {x:  133, y: 7, direction: 0}, exit: {x: 3, y: 9, direction: 0, level: "level4"}},
+      {entrance: {x:  148, y: 7, direction: 0}, exit: {x: 3, y: 9, direction: 0, level: "level4"}}
     ]
   };
 
+
+  level4 = { 
+    grid: [
+        "░░░░░░    ░░░░░░░░░░░ ░░░    ░░░░░░░░░░░░░░░░░      ░░░░░░   ░░░░░░░      ░░░¤¤¤¤¤░░▼▼              ¤¤░░░░░░░░░░░¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤",
+        "░░░░░      ░░¤¤                                     ░░░░░░   ░░░░░░░      ░░░ ▼▼▼                    ▼   ¤¤░░░░░░¤                zz                                                                     ¤",
+        "             ▼▼                                     ░░░░░░   ░░░░░░░      ░░░                            ▼▼     ░¤                zz                ○○○○○ ○   ○ ○○○○○   ○○○○○ ○   ○ ○○○○   ○ ○           ¤",
+        "                                        ‡           ░░░░░░   ░░░░░░░      ░░░                                   ░¤        ¤¤¤¤¤¤¤¤¤z                  ○   ○   ○ ○       ○     ○○  ○ ○   ○  ○ ○           ¤",
+        "                                     à              ░░░░░░   ░░░░░░░      ░░░                              ♥    ░¤        ¤░░░░░░░¤                   ○   ○   ○ ○       ○     ○ ○ ○ ○   ○  ○ ○           ¤",
+        "                                     ◙◙◙                                                                   ◙    ░¤        ¤░░░░░░░¤        ♠♠         ○   ○○○○○ ○○○○    ○○○○  ○  ○○ ○   ○  ○ ○           ¤",
+        "                                                                                    ╒╕      ᵕᵕ                ╒╕░¤        ¤░░░░░░░¤        ◙◙         ○   ○   ○ ○       ○     ○   ○ ○   ○  ○ ○           ¤",
+        "                                              ‡                  ‰                 ▲│┇            ᵕ           │┇░¤      ╒╕¤░░░░░░░¤                   ○   ○   ○ ○       ○     ○   ○ ○   ○                ¤",
+        "               ¤░░░░░ ░░¤    ¤░░¤          ¤░░¤    ¤░░░░░░ ᵕ ░░░░░░░¤    ¤░░░░   ░░░│┇                        │┇░¤      │┇¤░░░░░░░¤                   ○   ○   ○ ○○○○○   ○○○○○ ○   ○ ○○○○   ○ ○      ╒╕   ¤",
+        "░░░░░¤ ᵕᵕ ¤░░  ░░░░░░ ░░░    ░░¤¤▲         ░░░      ░░░░░░   ░░░░░░░░    ░░░░░   ░░¤│┇                   ▲    │┇░¤      │┇¤░░░░░░░¤   E                                                             │┇   ¤",
+        "░░░░░░    ░░░▲▲░░░░░░ ░░░    ░░░░░░░░░░░  ░░░░▲▲▲▲▲▲░░░░░░   ░░░░░░░░▲▲▲▲░░░░░ ‚ ░░░¤¤▲         ▲    ᵕᵕ  ¤░░¤¤¤¤░¤      │┇¤░░░░░░░¤   E                                                             │┇   ¤",
+        "░░░░░░▓▓▓▓░░░¤¤░░░░░░▓░░░▓▓▓▓░░░░░░░░░░░▓▓░░░░░░░░░░░░░░░░▓▓▓░░░░░░░░¤¤¤¤░░░░░▓▓▓░░░░¤¤▲        ¤        ░░░░¤¤░░¤▓▓▓▓▓▓│┇¤░░░░░░░¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤░",
+        "░░░░░░▓▓▓▓░░░░░░░░░░░▓░░░▓▓▓▓░░░░░░░░░░░▓▓░░░░░░░░░░░░░░░░▓▓▓░░░░░░░░░░░░░░░░░▓▓▓░░░░░░¤▲       ¤        ░░░░░░░░¤▓▓▓▓▓▓│┇¤░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",       
+      ],
+    startPosition: {x: 3, y: 8},
+    backgroundType: 5,
+    terrainType: 7,
+    pipeColor: 1,
+    liquidType: 2,
+    tileTint: 0,
+    pipes: [       
+      {entrance: {x:  111, y: 6, direction: 0}, exit: {x: 121, y: 7, direction: 0}},
+      {entrance: {x:  197, y: 8, direction: 0}, exit: {x: 6, y: -1, direction: 1, level: "level1"}},
+    ]
+  };
 
 const AllLevels ={
     level1 : level1,
     secret1: secret1,
     level2 : level2,
-    level3: level3
+    level3: level3,
+    level4: level4
 };
   
     function parseTerrainWall(c, u, l, r, ul, ur, x, y){
@@ -184,6 +214,8 @@ const AllLevels ={
         PalmTree: 232,
         Water: 233,
         Lava: 234,
+        Fire: 235,
+        Fire2: 236,
         Invisible: 254,
         None: 255
     };
@@ -208,8 +240,12 @@ const AllLevels ={
         return Tile.Weed;
      }
 
-     //Water/Lava
-     if (c == "▓") return 233+liquidType; //233-234
+     //Fire body
+     if (c == "▓" && u=="▓" && liquidType == 2) return 236;
+     //Water/Lava/Fire
+     if (c == "▓") return 233+liquidType; //233-234-235
+
+     
      
      //Pipe
      let pipeOffset =(pipeColor % 3)*2+Math.floor(pipeColor / 3)*12;
@@ -228,9 +264,12 @@ const AllLevels ={
      if (c == "◙") return Tile.QuestionMark;
      if (c == "■") return Tile.Breakable1 + tileTint;
      if (c == "▲") return Tile.Spike;
+     if (c == "▼") return Tile.SpikeDown;
+     
      if (c == "║") return Tile.PalmTrunk;
      if (c == "♪") return Tile.BouncyNote;
      if (c == "□") return Tile.Invisible;
+     if (c == "ᵕ") return Tile.CollapsibleBlock;
      
 
      //Enemies

@@ -11,7 +11,8 @@ const States = {
 	EnemyKilling: 9,
 	Invulnerable: 10,
 	EmergingSubmerging: 11,
-	Disabled: 12
+	Disabled: 12,
+	Collapsible: 13,
 }
 
 const CollisionPoints = {	
@@ -141,6 +142,7 @@ class Mario extends Moveable{
 			this.maxBehaviourX, 
 			this.animation, 
 			new ActsWhenSteppingOnBrick(Tile.Spike, ()=>this.takeDamage()), 
+			new ActsWhenBumpingBrick(Tile.SpikeDown, ()=>{this.takeDamage(); this.dy = 0;}), 
 			new ActsWhenSteppingOnBrick(Tile.BouncyNote, (x,y,terrain)=>this.jumpOnNote(x,y,terrain)),			
 			new Sparkling(),
 			this.sparkleBehavior			
@@ -172,6 +174,8 @@ class Mario extends Moveable{
 	}
 
 	collidesWith(other, otherState){
+		this.anchorDy = 0;
+
 		if (otherState == States.Dead || otherState == States.Dying || this.state == States.Dying) return;
 
 		if (otherState == States.Collectable) {
@@ -181,10 +185,22 @@ class Mario extends Moveable{
 
 		let relativeLocation = this.getRelativeLocationTo(other);
 
+
+		if (otherState == States.Collapsible){
+		  if(this.y < other.y + other.collisionPoints[CollisionPoints.Top].y + 14){
+			this.futureY = other.futureY + other.collisionPoints[CollisionPoints.Top].y;
+			this.isStandingOnSolid = true;
+			this.anchorDy = other.dy;
+			return;		
+		  }
+		}
+
 		if (otherState == States.Solid) {
 			if (this.dy > 0 && relativeLocation.above){
+				let distance = this.getDistanceFromOtherMoveable(other);
+
 				this.dy = 0.0;
-				this.futureY = this.y;
+				this.y = this.futureY = this.futureY + distance.dy;
 				this.isStandingOnSolid = true;
 			}
 
@@ -813,6 +829,34 @@ class BrickParticle extends Moveable{
 			this.state = States.Dead;
 		}
 	}
+}
+
+class CollapsibleBrick extends Moveable{
+	constructor(x,y,dx,dy){
+		super(x,y,dx,dy);
+		this.collisionPoints = [
+		{x:  0, y:   0},
+		{x: 59, y:   0},
+		{x:  0, y: -42}, 
+		{x: 59, y: -42}			
+		];
+		this.behaviours = [new ChecksForBeingStoodOn(200, ()=>{this.collapse();})];
+		this.state = States.Collapsible;
+		this.dy = 0;
+		this.frame = 0;
+	}
+	
+	collapse(){
+		this.ay = 0.0010;
+		this.dyTerminal = 0.9;
+		this.behaviours = [new IgnoresTerrain()];
+	}
+
+	collect(mario){}
+
+	bump(mario){ }
+
+	collidesWith(other, otherState){ }
 }
 
 class Fireball extends Moveable{

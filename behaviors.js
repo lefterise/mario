@@ -29,9 +29,9 @@ class RespectsTerrain {
 
 		if (!moveable.isTouchingGround)
 			moveable.dy = Math.min(moveable.dy + moveable.ay * dt, moveable.dyTerminal);
-		else if (moveable.dy > 0.0)
-			moveable.dy = 0.0;
-
+		else if (moveable.dy > 0.0){
+			moveable.dy = moveable.anchorDy ?? 0.0; //anchorDy is the speed of the object mario stands on. 0 if it's a still block, useful for collapsible brick
+		}
 		if (moveable.isBumpingCeiling && moveable.dy < 0.0){
 			moveable.dy = 0.0;			
 		}
@@ -286,6 +286,24 @@ class ActsWhenSteppingOnBrick{
         }
 	}
 }
+
+class ActsWhenBumpingBrick{
+    constructor(brick, action){
+        this.brick = brick;
+        this.action = action;
+    }
+	computeFuturePosition(moveable, dt, terrain){}
+	
+	reactToNewPosition(moveable, dt, terrain){
+        let x = Math.floor((moveable.x + (moveable.collisionPoints[CollisionPoints.Left].x + moveable.collisionPoints[CollisionPoints.Right].x) * 0.5) / terrain.tileWidth);
+	    let y = Math.floor((moveable.y + moveable.collisionPoints[CollisionPoints.Top].y - 2.0) / terrain.tileHeight);
+
+        if (terrain.inBounds(x,y) && terrain.tiles[x][y] == this.brick){
+            this.action(x,y,terrain);
+        }
+	}
+}
+
 
 class BouncesWhenReachingY{
 	constructor(y, bounceSpeed, delay){
@@ -555,4 +573,29 @@ class EmergesFromSkyPipe{
 	}
 	
 	reactToNewPosition(moveable, dt, terrain){}
+}
+
+
+class ChecksForBeingStoodOn{
+	constructor(collapseTime, completionCallback){
+		this.t = 0;
+		this.collapseTime = collapseTime;
+		this.completionCallback = completionCallback;
+	}
+
+	computeFuturePosition(moveable, dt, terrain){		
+	}
+
+	reactToNewPosition(moveable, dt, terrain){
+		let distance = gGame.mario.getDistanceFromOtherMoveable(moveable);
+
+		if (distance.dx < 0 && distance.dy < 2 && gGame.mario.y <= moveable.y + moveable.collisionPoints[CollisionPoints.Top].y){
+			moveable.frame = 7;
+			this.t += dt;
+			if (this.t > this.collapseTime) {this.completionCallback();}
+		}else{
+			moveable.frame = 6;
+			this.t = 0;
+		}
+	}
 }

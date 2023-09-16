@@ -262,11 +262,15 @@ class Terrain{
 class Game{
 	constructor(gfx, controls){
 		this.gfx = gfx;
-		this.controls = controls;
-		this.frame = 0;
+		this.controls = controls;		
 		this.treeAnimation = new Animation(3, 500);
 		this.coinAnimation = new Animation(3, 333);
 		this.fireballAnimation = new Animation(2, 100);	
+		
+		this.waterAnimation = new Animation(42, 10);
+		
+		this.lavaAnimation = new Animation(5, 100);
+
 		this.mario = new Mario(360, 461, 0.0, 0.0);
 		this.startLevel("level1");
 		this.savedStates = {};
@@ -310,11 +314,9 @@ class Game{
 		this.treeAnimation.update(dt);
 		this.coinAnimation.update(dt);
 		this.fireballAnimation.update(dt);
-		
-		this.updateEnemies(dt);
-
-		this.frame = this.frame-2;
-		if (this.frame <=0) this.frame = 41;			
+		this.lavaAnimation.update(dt);
+		this.waterAnimation.update(dt);
+		this.updateEnemies(dt);		
 		
 		let direction = this.controls.direction;
 		
@@ -465,6 +467,10 @@ class Game{
 					let flair = new LavaFlair(60 * (x+tileOffset)+30,42*y+41,0.0,-1.0);
 					this.enemies.push(flair);
 					tiles[x+tileOffset][y] = Tile.None;					
+				}else if (tileId == Tile.CollapsibleBlock){
+					let block = new CollapsibleBrick(60 * (x+tileOffset),42*y+41,0.0,-1.0);
+					this.enemies.push(block);
+					tiles[x+tileOffset][y] = Tile.None;					
 				}
 			}
 		}
@@ -557,6 +563,9 @@ class Game{
 			case "LavaFlair":
 				this.gfx.drawLavaFlair(e.x - this.screenX, e.y, e.frame);
 				break;
+			case "CollapsibleBrick":
+				this.gfx.drawTileOld(e.x - this.screenX, e.y-42, e.frame);
+				break;
 			}
 			
 			if (e.sparkles){
@@ -584,8 +593,8 @@ class Game{
 						this.gfx.drawTileOld(60 * x - screenOffset, 42*y, 9);
 					}else if (tileId == Tile.PalmTree){
 						this.gfx.drawTree(60 * x - screenOffset, 42 * y + 16, this.treeAnimation.frame);
-					}else if (tileId == Tile.Water || tileId == Tile.Lava){
-						this.gfx.drawWater(60 * x - screenOffset, 42*y+16, this.frame, tileId - 233);
+					}else if (tileId == Tile.Water || tileId == Tile.Lava || tileId == Tile.Fire || tileId == Tile.Fire2){
+						this.gfx.drawWater(60 * x - screenOffset, 42*y+16, 42 - this.waterAnimation.frame, tileId - 233, this.lavaAnimation.frame);
 					}else if (tileId < Tile.CobbleStone){
 						this.gfx.drawTile(60 * x - screenOffset, 42*y, tileId % 12, this.terrain.terrainType);
 					}else{

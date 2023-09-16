@@ -55,9 +55,15 @@ class Graphics{
       this.ctx.drawImage(this.terrain, 99, 3, 18, 18, x, y, 18, 18);
     }
 
-    drawWater(x,y, frame, type){
+    drawWater(x,y, frame, type, lavaFrame){
+      if (type < 2){
         this.ctx.drawImage(this.terrain, (4+type) * 60, 3 * 42 + frame, 60, 42 - frame, x, y, 60, 42 - frame);
         this.ctx.drawImage(this.terrain, (4+type) * 60, 3 * 42, 60, frame, x, y + 42  - frame, 60, frame);
+      }else if (type == 2){
+        this.ctx.drawImage(this.terrain, (lavaFrame % 5) * 60, 4 * 42, 60, 42, x, y, 60, 42);
+      }else if (type == 3){
+        this.ctx.drawImage(this.terrain, 5 * 60, 4 * 42, 60, 42, x, y, 60, 42);
+      }
     }
     
     drawTree(x,y, frame){
