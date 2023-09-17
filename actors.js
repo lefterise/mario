@@ -497,10 +497,10 @@ class Koopa extends Moveable{
 	constructor(x,y,dx,dy){
 		super(x,y,dx,dy);
 		this.collisionPoints = [
-			{x:  4, y:  0}, 
-			{x: 56, y:  0},
-			{x:  4, y:-41}, 
-			{x: 56, y:-41},
+			{x: -26, y:  0}, 
+			{x:  26, y:  0},
+			{x: -26, y:-41}, 
+			{x:  26, y:-41},
 		];
 		this.walk();
 	}

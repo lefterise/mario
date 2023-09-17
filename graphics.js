@@ -7,6 +7,7 @@ class Graphics{
        this.loadImage("graphics/terrain.png", (img)=>{this.terrain = img;});
        this.loadImage("graphics/tree.png",    (img)=>{this.tree = img;});
        this.loadImage("graphics/grass.png",   (img)=>{this.grass = img;});
+       this.loadImage("graphics/bush.png",   (img)=>{this.bush = img;});
        this.loadImage("graphics/buttons.png", (img)=>{this.buttons = img;});
        this.loadImage("graphics/joystick.png", (img)=>{this.joystick = img;});       
        
@@ -16,9 +17,12 @@ class Graphics{
         this.createSkyGradient("#A2C3FF", "#DFFFFF"), 
         this.createSkyGradient("#3071C3", "#6DAEFF"),
         null,
-        null];
+        null,
+        null
+      ];
        this.loadImage("graphics/brickPattern.png", (img)=>{this.background[4] = this.ctx.createPattern(img, "repeat"); });
        this.loadImage("graphics/prisonPattern.png", (img)=>{this.background[5] = this.ctx.createPattern(img, "repeat"); });
+       this.loadImage("graphics/prisonPattern2.png", (img)=>{this.background[6] = this.ctx.createPattern(img, "repeat"); });
 
        this.tilesWithTerrainBackground = {8: 6, 9: 7, 10:0, 11:5};
     }
@@ -73,6 +77,7 @@ class Graphics{
     drawWeed(x,y, frame){
         this.ctx.drawImage(this.grass, 180, 42 * frame, 180, 42, x, y-16, 180, 42);
     }
+
     
     drawCoin(x,y, frame){    
       this.ctx.drawImage(this.enemies, 63 * frame, 579, 60, 40, x, y, 60, 40);
@@ -96,9 +101,9 @@ class Graphics{
     
     drawTurtle(x,y, frame, color, direction){
       if (frame < 2){
-        this.ctx.drawImage(this.enemies, 63 * (frame + 2 * direction), 231 + 123 * color, 60, 66, x, y - 65, 60, 66);	//walking
+        this.ctx.drawImage(this.enemies, 63 * (frame + 2 * direction), 231 + 123 * color, 60, 66, x - 30, y - 65, 60, 66);	//walking
       }else{
-        this.ctx.drawImage(this.enemies, 63 * (frame-2), 183 + 120 * color, 60, 42, x, y-41, 60, 42); //cowering
+        this.ctx.drawImage(this.enemies, 63 * (frame-2), 183 + 120 * color, 60, 42, x - 30, y-41, 60, 42); //cowering
       }
     }
 

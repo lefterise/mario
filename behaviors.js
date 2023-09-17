@@ -144,8 +144,8 @@ class AvoidsCliffs{
 	computeFuturePosition(moveable, dt, terrain){}
 	
 	reactToNewPosition(moveable, dt, terrain){
-		let isLeftFootOnAir  = terrain.getPointCollisionDistance(moveable.x + moveable.collisionPoints[0].x, moveable.y + moveable.collisionPoints[0].y, 0.0, 1.0, 2.0, false) > 1.0;
-		let isRightFootOnAir = terrain.getPointCollisionDistance(moveable.x + moveable.collisionPoints[1].x, moveable.y + moveable.collisionPoints[1].y, 0.0, 1.0, 2.0, false) > 1.0;
+		let isLeftFootOnAir  = terrain.getPointCollisionDistance(moveable.x + moveable.collisionPoints[0].x*0.2, moveable.y + moveable.collisionPoints[0].y, 0.0, 1.0, 2.0, false) > 1.0;
+		let isRightFootOnAir = terrain.getPointCollisionDistance(moveable.x + moveable.collisionPoints[1].x*0.2, moveable.y + moveable.collisionPoints[1].y, 0.0, 1.0, 2.0, false) > 1.0;
 
 		if (moveable.isTouchingGround && isLeftFootOnAir){
 			moveable.dx = Math.abs(moveable.dx);

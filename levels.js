@@ -4,7 +4,7 @@ var level1 = {
           "                                                       ♥             ☼         ●                                                  ₪₪│┇₪₪         □       ○○○                        ",
           "                                           ○           □  ╦      ■◙ ■◙         □□                                                   │┇                  ₪ ₾ ₪                       ",
           "     ╦            ╦                        ○              ║ ╦                        ₪ ₼ ₪      ╦     ○○○○                  ╦       ╒╕        ╦         ₪₪₪₪₪      ╦        ╦       ",
-          "     ║ ╦     ╒╕ ╦ ║            ╦     ■■■■■ ○             ╦║ ║               ╦        ₪₪₪₪₪      ║                           ║╦                ║                    ║   ╦    ║ ╦     ",
+          "     ║ ╦        ╦ ║            ╦     ■■■■■ ○             ╦║ ║               ╦        ₪₪₪₪₪      ║                           ║╦                ║                    ║   ╦    ║ ╦     ",
           "    ╦║ ║  ♠     ║ ║            ║           ○       ♠     ║║ ║               ║            ₪₼  ₪  ║                           ║║                ║        ○○○○○○○    ╦║   ║   ╦║ ║     ",
           "    ║║ ║ ◙◙     ║ ║            ║           ○     ╒╕◙     ║║ ║   ◙■ ◙■       ║            ₪₪₪₪₪  ║  ψ             ψ  ♣   ♠   ║║ ○○○○      ψ    ║       ₪     ₾ ₪   ║║   ║   ║║ ║     ",
           "    ║║ ║        ║ ║       ╒╕   ║  ■■       ○     │┇      ║║ ║               ║   ₪  ₼₪           ║  ╒╕ □□□□□╒╕   ♪╒╕ ◙ ■■■   ║║           ╒╕   ║       ₪₪₪₪₪₪₪₪₪   ║║   E   ║║ ║ ╒╕  ",
@@ -23,8 +23,6 @@ var level1 = {
     pipes: [       
         {entrance: {x:  50, y: 6, direction: 0}, exit: {x: 2, y: 2, direction: 1, level: "secret1", storeState: "level1"}},
         {entrance: {x: 177, y: 7, direction: 0}, exit: {x: 2, y:-1, direction: 1, level: "level2", storeState: false}},
-
-        {entrance: {x: 14, y: 4, direction: 1}, exit: {x: 14, y:4, direction: 1}},
     ]
   };
   
@@ -177,27 +175,29 @@ level3 = {
 
   level5 = { 
     grid: [
-        "                                                                                                 ♥             ♠                               ○                     ",
-        "                                                                                                 □             ◙                            ○  ○                     ",
-        "                                      ♠                              ○○○○                                                                ○  ○  ○                     ",
-        "                          ○○○        ◙◙◙                                           ₼   ?  ♠       ♣  █                                   ○  ○                        ",
-        "                                                            █                      XX ╒╕  ◙◙      □  ██                                  ○     ₼                     ",
-        "                                   ▐         ▐ ₼            █                ₼        │┇             ██        ₼                            ₼  X              ▐      ",
-        "      ▐             ▐ ●ψ   ▐       ▐         ▐ X  ₼  ψ?    ██      ψ?    ╒╕  XX       │┇             ██        X      ╒╕                 ₼  X  X             ▐▐      ",
-        "     ▐▐      ╒╕    ▐▐ ◙╒╕  ▐   ╒╕ ▐▐ ◙◙◙    ₼▐▐   X  ╒╕    ██ ▐    ╒╕    │┇ ▐    ₼    │┇           □ ██ ▐    ₼ X      │┇╒╕               X  X                ▐▐  ╒╕  ",
-        "     ▐▐    ╒╕│┇    ▐▐▐ │┇  ▐   │┇ ▐▐        X▐▐      │┇ ▐  ██ ▐    │┇  ╒╕│┇ ▐▐  XX ▐  │┇ ▐▐         ▐██ ▐    X X╒╕    │┇│┇ ▐             X ▐   ▐  ╒╕  ▐      ▐▐  │┇  ",
-        "     ▐▐    │┇│┇    ▐▐▐ │┇ ▐▐   │┇ ▐▐ ▐   ₼   ▐▐    ▐ │┇ ▐▐ ██ ▐ ▐  │┇  │┇│┇ ▐▐    ▐▐  │┇ ▐▐         ▐██ ▐  ₼ X X│┇    │┇│┇ ▐▐          ▐   ▐  ▐▐  │┇  ▐ E    ▐▐▐ │┇  ",
-        "     ▐▐ w  │┇│┇ ∩w ▐▐▐ │┇ ▐▐∩  │┇ ▐▐▐▐   X   ▐▐ w  ▐▐│┇ ▐▐ ██ ▐∩▐w │┇  │┇│┇ ▐▐    ▐▐  │┇ ▐▐₼        ▐██ ▐  X X X│┇ w  │┇│┇ ▐▐      w ₼ ▐▐  ▐  ▐▐▐ │┇ ▐▐ Ew  ∩▐▐▐ │┇  ",
-        "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ░░░░░░░░░░░  ░░░░░░░░░░░░░░░░░░░░░░░░░  ░░░░░░░░░░░░░░ ░░░░░░░░     ░░░░░░░░░░░░░░░ ░░░░░░░░░░░   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",
-        "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ░░░░░░░░░░░  ░░░░░░░░░░░░░░░░░░░░░░░░░  ░░░░░░░░░░░░░░ ░░░░░░░░     ░░░░░░░░░░░░░░░ ░░░░░░░░░░░   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
+      "                                                                                                 ♥             ♠                               ○                     ",
+      "                                                                                                 □             ◙                            ○  ○                     ",
+      "                                      ♠                              ○○○○                                                                ○  ○  ○                     ",
+      "                          ○○○        ◙◙◙                                           ₼   ?  ♠       ♣  %#                                  ○  ○                        ",
+      "                                                            %#                     XX ╒╕  ◙◙      □  %%#                                 ○     ₼                     ",
+      "                                   ▐         ▐ ₼            %#               ₼        │┇             %%#       ₼                            ₼  X              ▐      ",
+      "      ▐             ▐ ●ψ   ▐       ▐         ▐ X  ₼  ψ     %##     ψ?    ╒╕  XX       │┇             %%#       X      ╒╕                 ₼  X  X             ▐▐      ",
+      "     ▐▐      ╒╕    ▐▐ ◙╒╕  ▐   ╒╕ ▐▐ ◙◙◙    ₼▐▐   X  ╒╕    %##▐    ╒╕    │┇ ▐    ₼    │┇           □ %%#▐    ₼ X      │┇╒╕               X  X                ▐▐  ╒╕  ",
+      "     ▐▐    ╒╕│┇    ▐▐▐ │┇  ▐   │┇ ▐▐        X▐▐      │┇ ▐  %##▐    │┇  ╒╕│┇ ▐▐  XX ▐  │┇ ▐▐         ▐%%#▐    X X╒╕    │┇│┇ ▐             X ▐   ▐  ╒╕  ▐      ▐▐  │┇  ",
+      "     ▐▐    │┇│┇    ▐▐▐ │┇ ▐▐   │┇ ▐▐ ▐   ₼   ▐▐    ▐ │┇ ▐▐ %##▐ ▐  │┇  │┇│┇ ▐▐    ▐▐  │┇ ▐▐         ▐%%#▐  ₼ X X│┇    │┇│┇ ▐▐          ▐   ▐  ▐▐  │┇  ▐ E    ▐▐▐ │┇  ",
+      "     ▐▐ w  │┇│┇ ∩w ▐▐▐ │┇ ▐▐∩  │┇ ▐▐▐▐   X   ▐▐ w  ▐▐│┇ ▐▐ %##▐∩▐w │┇  │┇│┇ ▐▐    ▐▐  │┇ ▐▐₼        ▐%%#▐  X X X│┇ w  │┇│┇ ▐▐      w ₼ ▐▐  ▐  ▐▐▐ │┇ ▐▐ Ew  ∩▐▐▐ │┇  ",
+      "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ░░░░░░░░░░░  ░░░░░░░░░░░░░░░░░░░░░░░░░  ░░░░░░░░░░░░░░ ░░░░░░░░     ░░░░░░░░░░░░░░░ ░░░░░░░░░░░   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░",
+      "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ░░░░░░░░░░░  ░░░░░░░░░░░░░░░░░░░░░░░░░  ░░░░░░░░░░░░░░ ░░░░░░░░     ░░░░░░░░░░░░░░░ ░░░░░░░░░░░   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
       ],
     startPosition: {x: 7, y: 3},
-    backgroundType: 5,
-    terrainType: 7,
-    pipeColor: 1,
+    backgroundType: 2,
+    terrainType: 3,
+    pipeColor: 2,
     liquidType: 2,
-    tileTint: 0,
-    pipes: [      
+    tileTint: 1,
+    pipes: [
+      {entrance: {x:  24, y: 7, direction: 0}, exit: {x: 54, y: 7, direction: 0}},
+      {entrance: {x:  68, y: 7, direction: 0}, exit: {x: 23, y: 1, direction: 1, level: "level5b"}},
     ]
   };
 
@@ -212,18 +212,19 @@ level3 = {
       "X       X                           ₼         X",
       "XX  X  XX ◙♠               XXXXX   XXX     ╒╕ X",
       "X       X  ◙                               │┇ X",
-      "X       X       K                          │┇ X",
-      "X▲▲▲▲▲▲▲X                €                 │┇ X",
+      "X       X       ♪                          │┇ X",
+      "X▲▲▲▲▲▲▲X                ₾                 │┇ X",
       "░░░░░░░░░░░░░▓▓▓░▓▓▓░░░░░░░░░░░░▓▓▓░░░░░░░░░░░░",
       "░░░░░░░░░░░░░▓▓▓░▓▓▓░░░░░░░░░░░░▓▓▓░░░░░░░░░░░░"
       ],
-    startPosition: {x: 7, y: 3},
-    backgroundType: 5,
-    terrainType: 7,
-    pipeColor: 1,
+    startPosition: {x: 23, y: 3},
+    backgroundType: 6,
+    terrainType: 6,
+    pipeColor: 4,
     liquidType: 2,
     tileTint: 0,
     pipes: [      
+      {entrance: {x:  44, y: 7, direction: 0}, exit: {x: 24, y: 7, direction: 0, level: "level5"}},
     ]
   };
 
@@ -282,7 +283,15 @@ const AllLevels ={
         Wood2: 20+20,
         Metal2: 21+20,
         PipeFirst: 30+20,
-        PipeLast: 66+20,    
+        PipeLast: 65+20,  
+        SmallBushTop: 66 + 20,
+        SmallBushBody: 72 + 20,  
+        LargeBushTopLeft: 67 + 20,
+        LargeBushTopRight: 68 + 20,
+        LargeBushBodyLeft: 73 + 20,
+        LargeBushBodyRight: 74 + 20,
+        LargeBushTopRightOverLeftBody: 70 + 20,
+        LargeBushTopLeftOverRightBody: 69 + 20,
         Goomba: 200,
         Koopa: 201,
         RedKoopa: 202,
@@ -302,7 +311,7 @@ const AllLevels ={
         Water: 233,
         Lava: 234,
         Fire: 235,
-        Fire2: 236,
+        Fire2: 236,        
         Invisible: 254,
         None: 255
     };
@@ -327,6 +336,34 @@ const AllLevels ={
         return Tile.Weed;
      }
 
+     if (c == '▐'){
+      if (u == '▐') return Tile.SmallBushBody;
+        return Tile.SmallBushTop;
+     }
+
+     //Parse bushes
+     if (l == '%' && u == '%' && c == '#') return Tile.LargeBushTopRightOverLeftBody;
+     if (r == '#' && u == '#' && c == '%') return Tile.LargeBushTopLeftOverRightBody;
+
+      if (c == '#' && u == '#'){
+        if (l == '#' || l == '%') return Tile.LargeBushBodyRight;
+        return Tile.LargeBushBodyLeft;
+      }
+
+      if (c == '%' && u == '%'){
+        return Tile.LargeBushBodyLeft;
+      }
+    
+      if (c == '#' && u != '#'){
+        if (l == '#' || l == '%') return Tile.LargeBushTopRight;
+        return Tile.LargeBushTopLeft;
+      }
+
+      if (c == '%' && u != '%'){
+        return Tile.LargeBushTopLeft;
+      }
+    
+
      //Fire body
      if (c == "▓" && u=="▓" && liquidType == 2) return 236;
      //Water/Lava/Fire
@@ -344,7 +381,7 @@ const AllLevels ={
      //Block
      if (c == "₪") return Tile.Wood2;
      if (c == "¤") return Tile.CobbleStone;
-     if (c == "X") return Tile.Metal1;
+     if (c == "X") return Tile.Metal1 + tileTint * 6;
      if (c == "E") {
         if (u != "E") return Tile.ExitSign;
         return Tile.ExitPole;
