@@ -44,7 +44,7 @@ var level1 = {
     ],
     startPosition: {x: 2, y: 2},
     backgroundType: 4,
-    terrainType: 6,
+    terrainType: 7,
     pipeColor: 0,
     liquidType: 0,
     tileTint: 0,
@@ -70,7 +70,7 @@ var level2 = {
          "░░░░░░░░░░░░░░░░░░▓▓▓░░░░░▓▓▓▓▓░░░░░░░░░   ░░░░░░░░▓▓▓░░░▓▓▓░░░░░░░░░░░░░░░░░░░░▓▓▓░░▓▓▓▓░░▓▓▓░░░░▓▓▓▓▓▓▓░░░░░░░░░░░░▓▓▓▓░░░░░░░░▓▓▓░░░░▓░░░░░░░░░░░░░░░░▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │┇    │┇│┇  │┇    │┇│┇   ░",  
     ],
     startPosition: {x: 2, y: -1},
-    terrainType: 6,
+    terrainType: 7,
     backgroundType: 4,
     pipeColor: 4,
     liquidType: 1,
@@ -133,7 +133,7 @@ level3 = {
       ],
     startPosition: {x: 3, y: 8},
     backgroundType: 5,
-    terrainType: 7,
+    terrainType: 8,
     pipeColor: 1,
     liquidType: 2,
     tileTint: 0,
@@ -162,7 +162,7 @@ level3 = {
       ],
     startPosition: {x: 7, y: 3},
     backgroundType: 5,
-    terrainType: 7,
+    terrainType: 8,
     pipeColor: 1,
     liquidType: 2,
     tileTint: 0,
@@ -178,10 +178,10 @@ level3 = {
       "                                                                                                 ♥             ♠                               ○                     ",
       "                                                                                                 □             ◙                            ○  ○                     ",
       "                                      ♠                              ○○○○                                                                ○  ○  ○                     ",
-      "                          ○○○        ◙◙◙                                           ₼   ?  ♠       ♣  %#                                  ○  ○                        ",
+      "                          ○○○        ◙◙◙                                           ₼      ♠       ♣  %#                                  ○  ○                        ",
       "                                                            %#                     XX ╒╕  ◙◙      □  %%#                                 ○     ₼                     ",
       "                                   ▐         ▐ ₼            %#               ₼        │┇             %%#       ₼                            ₼  X              ▐      ",
-      "      ▐             ▐ ●ψ   ▐       ▐         ▐ X  ₼  ψ     %##     ψ?    ╒╕  XX       │┇             %%#       X      ╒╕                 ₼  X  X             ▐▐      ",
+      "      ▐             ▐ ●ψ   ▐       ▐         ▐ X  ₼  ψ     %##     ψ     ╒╕  XX       │┇             %%#       X      ╒╕                 ₼  X  X             ▐▐      ",
       "     ▐▐      ╒╕    ▐▐ ◙╒╕  ▐   ╒╕ ▐▐ ◙◙◙    ₼▐▐   X  ╒╕    %##▐    ╒╕    │┇ ▐    ₼    │┇           □ %%#▐    ₼ X      │┇╒╕               X  X                ▐▐  ╒╕  ",
       "     ▐▐    ╒╕│┇    ▐▐▐ │┇  ▐   │┇ ▐▐        X▐▐      │┇ ▐  %##▐    │┇  ╒╕│┇ ▐▐  XX ▐  │┇ ▐▐         ▐%%#▐    X X╒╕    │┇│┇ ▐             X ▐   ▐  ╒╕  ▐      ▐▐  │┇  ",
       "     ▐▐    │┇│┇    ▐▐▐ │┇ ▐▐   │┇ ▐▐ ▐   ₼   ▐▐    ▐ │┇ ▐▐ %##▐ ▐  │┇  │┇│┇ ▐▐    ▐▐  │┇ ▐▐         ▐%%#▐  ₼ X X│┇    │┇│┇ ▐▐          ▐   ▐  ▐▐  │┇  ▐ E    ▐▐▐ │┇  ",
@@ -219,12 +219,64 @@ level3 = {
       ],
     startPosition: {x: 23, y: 3},
     backgroundType: 6,
-    terrainType: 6,
+    terrainType: 7,
     pipeColor: 4,
     liquidType: 2,
     tileTint: 0,
     pipes: [      
       {entrance: {x:  44, y: 7, direction: 0}, exit: {x: 24, y: 7, direction: 0, level: "level5"}},
+    ]
+  };
+
+  level6 = { 
+    grid: [
+      "              ♠                                                                                                                              ",
+      "              ◙                                       ₼  ▒▒           ○○○   ○○○                                 ○○○○○                        ",
+      "                          ○○○○                      ▒▒▒▒▒▒▒                                      ψ?   ã               ψ                      ",
+      "                     ▐                              ▒▒▒▒▒▒▒             ▐                ♪ ♪   ψ?╒╕   ◙               ╒╕ψ         ▐          ",
+      "        ▐      ■■■  ▐▐                              ▒▒▒▒▒▒▒            ▐▐                      ╒╕│┇         ▐         │┇╒╕        ▐   ▐      ",
+      " ▐      ▐▐          ▐▐           ψ    ♠     ψ?   ▐  ▒▒▒▒▒▒▒₼      ▐ ₼ ♥▐▐ ₼   ♣ ₼     ₼        │┇│┇      ▐  ▐         │┇│┇       ▐▐   ▐▐     ",
+      " ▐▐   ▐ ▐▐ ■■■      ▐▐ ψ?        ╒╕   ◙◙◙   ╒╕   ▐▐ ▒▒▒▒▒░░░░     ▐ ₪ □▐▐ ₪   □ ₪   ₪₪₪       ₪₪₪₪₪₪     ▐ ▐▐ ₪♪♪♪♪♪♪♪₪₪₪₪♪      ▐▐ ▐ ▐▐     ",
+      " ▐▐   ▐ ▐▐        w ▐▐ ╒╕      ╒╕│┇     ▐▐  │┇   ▐▐ ▒▒▒▒▒░░░░     ▐ ₪  ▐▐ ₪     ₪                        ▐ ▐▐ ₪                  ▐▐ ▐ ▐▐ ╒╕  ",
+      " ▐▐   ▐ ▐▐       ‡░░░░░│┇   ▐  │┇│┇    ▐▐▐  │┇  ▐▐▐ ▒▒▒▒░░░░░ w   ▐▐₪  ▐▐ ₪   ▐ ₪▐▐             ▐        ▐ ▐▐ ₪♥                 ▐▐ ▐ ▐▐ │┇  ",
+      " ▐▐   ▐ ▐▐     ░░░░░░░░░░░‡ ▐▐ │┇│┇    ▐▐▐  │┇  ▐▐▐ ▒▒▒▒░░░░░▒▒▒▒▒▐▐₪  ▐▐ ₪   ▐▐₪▐▐             ▐▐       ▐ ▐▐ ₪◙               þ ▐▐ ▐ ▐▐ │┇  ",
+      " ▐▐   ▐ ▐▐w ‡░░░░░░░░░░░░░░ ▐▐ │┇│┇ ∩w ▐▐▐  │┇  ▐▐▐‡▒w ▒░░░░░▒▒▒▒▒▐▐₪w ▐▐‡₪w ‡▐▐₪▐▐ w   ♪ ♪ ♪ ‡ ▐▐‡w  ♪  ▐ ▐▐ ₪      w    w  ₪ þ‡▐▐ ▐ ▐▐‡│┇  ",
+      "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░▒▒░░░░░░░░░░░░░░░░░░░░░░░░       ░░░░░░░   ░░░░░░░  ░░ ‡░░‡  ░░░░░░░░░░░░░░░░░░░",
+      "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░     ░░░░░░░░░ ░░░░░░░░ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"     
+      ],
+    startPosition: {x: 7, y: 3},
+    backgroundType: 2,
+    terrainType: 3,
+    pipeColor: 2,
+    liquidType: 2,
+    tileTint: 1,
+    pipes: [
+    ]
+  };
+
+  level6b = { 
+    grid: [
+      "        ○                   ♠           ○         ",
+      "       ○○○                  ◙          ○○○        ",
+      "       ○○○                             ○○○        ",
+      "        ○                               ○         ",
+      "                 ▒▒▒▒▒▒▒                          ",
+      "     ▐       ‡▒▒▒▒▒▒▒▒▒▒                          ",
+      "  ╒╕ ▐▐ ♪ ▐ ▒▒▒▒▒▒▒ww▒▒▒       ▐            ▐     ",
+      "  │┇ ▐▐  ▐▐ ▒▒▒▒▒▒░░░░▒▒▒▒▒ ♪ ▐▐  ♪  ▐  ♪  ▐▐ ╒╕  ",
+      "  │┇ ▐▐  ▐▐ ▒▒▒▒▒▒░░░░▒▒▒▒▒   ▐▐     ▐   ▐ ▐▐ │┇  ",
+      "  │┇ ▐▐ww▐▐‡▒▒▒▒▒▒░░░░▒▒▒▒▒  ▐▐▐ ₼   ▐   ▐ ▐▐ │┇  ",
+      "░░░░░░░░░░░░░░www▒░░░░░▒▒▒▒‡ ▐▐▐ X ‡ ▐ ww▐‡▐▐ │┇  ",
+      "░░░░░░░░░░░░░░░░░░░░░░░▒▒▒░░░░░░░░░░░░░░░░░░░░░░░░",
+      "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
+      ],
+    startPosition: {x: 7, y: 3},
+    backgroundType: 2,
+    terrainType: 3,
+    pipeColor: 2,
+    liquidType: 2,
+    tileTint: 1,
+    pipes: [
     ]
   };
 
@@ -236,7 +288,8 @@ const AllLevels ={
     level4: level4,
     level4b: level4b,
     level5: level5,
-    level5b: level5b
+    level5b: level5b,
+    level6: level6,
 };
   
     function parseTerrainWall(c, u, l, r, ul, ur, x, y){
@@ -426,7 +479,7 @@ const AllLevels ={
     function parseLevel(levelData){
         let level = new Array(levelData.grid[0].length);
         let parser = parseTerrainWall;
-        if (levelData.terrainType >= 5)
+        if (levelData.terrainType >= 6)
             parser = parseDungeonWall;
 
         //this will convert the level walls to draw the grass and corners 
