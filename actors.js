@@ -286,7 +286,7 @@ class Mario extends Moveable{
 					if (pipe.exit.storeState){
 						gGame.saveState(pipe.exit.storeState);
 					}
-					gGame.loadState(pipe.exit.level);					
+					gGame.loadState(pipe.exit.level);
 				}
 
 				if (pipe.exit.direction == 0){
@@ -493,6 +493,12 @@ class Goomba extends Moveable{
 	}
 }
 
+class Spiney extends Goomba {
+	constructor(x,y,dx,dy){		
+		super(x,y,dx,dy);
+	}
+}
+
 class Koopa extends Moveable{
 	constructor(x,y,dx,dy){
 		super(x,y,dx,dy);
@@ -563,7 +569,7 @@ class Koopa extends Moveable{
 
 	kick(mario){
 		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(2,3,75), new CanBumpBricksHorizontaly(), new FlashesWhenHittingWalls(0,-21)];
-		this.dx = 0.5 * ((mario.futureX < this.x) ? 1 : -1);
+		this.dx = 0.66 * ((mario.futureX < this.x) ? 1 : -1);
 		this.futureX = this.x;
 		this.state = States.Spinning;
 		sound.kick.play();
@@ -949,7 +955,7 @@ class LavaFlair extends Moveable{
 }
 
 class Piranha extends Moveable{
-	constructor(x,y,dx,dy){
+	constructor(x,y,dx,dy, isSubmergedInitially){
 		super(x,y,dx,dy);
 		this.collisionPoints = [
 		{x:-36, y:   0},	
@@ -960,6 +966,11 @@ class Piranha extends Moveable{
 		this.state = States.EmergingSubmerging;
 		this.emergeSubmergeBehavior = new EmergesSubmerges(51, 40, 2000, 4000);
 		this.behaviours = [this.emergeSubmergeBehavior, new AnimationBehavior(2, 2, 200)];
+
+		if (isSubmergedInitially){
+			this.state = States.Disabled;
+			this.emergeSubmergeBehavior.state = EmergeStates.submerged;
+		}
 	}
 
 

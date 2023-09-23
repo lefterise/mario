@@ -455,8 +455,8 @@ class Game{
 					let fish = new Fish(60 * (x+tileOffset),42*y+41,0.0,-1.0);
 					this.enemies.push(fish);
 					tiles[x+tileOffset][y] = Tile.None;
-				}else if (tileId == Tile.Piranha){
-					let piranha = new Piranha(60 * (x+tileOffset) + 60 ,42*y+41,0.0, 0.0);
+				}else if (tileId == Tile.Piranha || tileId == Tile.PiranhaSubmerged){
+					let piranha = new Piranha(60 * (x+tileOffset) + 60 ,42*y+41,0.0, 0.0, tileId == Tile.PiranhaSubmerged);
 					this.enemies.push(piranha);
 					tiles[x+tileOffset][y] = Tile.None;	
 				}else if (tileId == Tile.Coin){
@@ -470,7 +470,11 @@ class Game{
 				}else if (tileId == Tile.CollapsibleBlock){
 					let block = new CollapsibleBrick(60 * (x+tileOffset),42*y+41,0.0,-1.0);
 					this.enemies.push(block);
-					tiles[x+tileOffset][y] = Tile.None;					
+					tiles[x+tileOffset][y] = Tile.None;
+				}else if (tileId == Tile.Spiney){
+					let goomba = new Spiney(60 * (x+tileOffset),42*y+41,-0.1,0.0);
+					this.enemies.push(goomba);
+					tiles[x+tileOffset][y] = Tile.None;
 				}
 			}
 		}
@@ -565,6 +569,9 @@ class Game{
 				break;
 			case "CollapsibleBrick":
 				this.gfx.drawTileOld(e.x - this.screenX, e.y-42, e.frame);
+				break;
+			case "Spiney":
+				this.gfx.drawSpiney(e.x - this.screenX, e.y, e.frame, e.dx > 0 ? 1 : 0);
 				break;
 			}
 			

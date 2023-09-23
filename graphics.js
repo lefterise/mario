@@ -92,7 +92,7 @@ class Graphics{
     }
     
     drawSpiney(x,y, frame, direction){    
-      this.ctx.drawImage(this.enemies, 63 * (frame + 2 * direction),90, 60, 42, x, y - 14, 60, 42);
+      this.ctx.drawImage(this.enemies, 63 * (frame + 2 * direction),90, 60, 42, x, y - 41, 60, 42);
     }
     
     drawFish(x,y, frame, direction){    
