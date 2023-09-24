@@ -1,11 +1,10 @@
 class RespectsTerrain {
-	computeFuturePosition(moveable, dt, terrain){
-
+	computeFuturePosition(moveable, dt, terrain){		
 		let tDiagonal = terrain.getMultipointCollisionDistance(moveable.x, moveable.y, moveable.dx, moveable.dy, dt, moveable.collisionPoints);
 
 		let x = moveable.x + moveable.dx * tDiagonal;
 		let y = moveable.y + moveable.dy * tDiagonal;
-				
+
 		//check if mario can move stricly in dx or dy for the remainder of the distance
 		let tHorizontal = terrain.getMultipointCollisionDistance(x, y, moveable.dx, 0.0, dt - tDiagonal, moveable.collisionPoints);	
 		
@@ -36,6 +35,38 @@ class RespectsTerrain {
 			moveable.dy = 0.0;			
 		}
 	}
+}
+
+class SlipsNearCliffsAndWhenBumpingEdges{
+	// This is to help slip-in or squeeze though one tile-width cracks
+	constructor(threshold){
+		this.threshold = threshold;
+	}
+	computeFuturePosition(moveable, dt, terrain){
+		if (moveable.dx <= 0 && (moveable.futureX + moveable.collisionPoints[CollisionPoints.Right].x) % terrain.tileWidth < this.threshold){
+			let currentTileX = Math.floor((moveable.futureX + moveable.collisionPoints[CollisionPoints.Right].x) / terrain.tileWidth);
+			let floorY = Math.floor((moveable.futureY + moveable.collisionPoints[CollisionPoints.Bottom].y + 2) / terrain.tileHeight);
+			let ceilingY = Math.floor((moveable.futureY + moveable.collisionPoints[CollisionPoints.Top].y - 2) / terrain.tileHeight);
+
+			if (  (terrain.isSolid(currentTileX, floorY) && !terrain.isSolid(currentTileX -1, floorY)) 
+			    ||(terrain.isSolid(currentTileX, ceilingY) && !terrain.isSolid(currentTileX -1, ceilingY))){
+				
+				moveable.futureX = currentTileX * terrain.tileWidth - moveable.collisionPoints[CollisionPoints.Right].x-1;
+			}
+		}			
+		if (moveable.dx >= 0 && (moveable.futureX + moveable.collisionPoints[CollisionPoints.Left].x) % terrain.tileWidth > terrain.tileWidth - this.threshold){
+			let currentTileX = Math.floor((moveable.futureX + moveable.collisionPoints[CollisionPoints.Left].x) / terrain.tileWidth);
+			let floorY = Math.floor((moveable.futureY + moveable.collisionPoints[CollisionPoints.Bottom].y + 2) / terrain.tileHeight);
+			let ceilingY = Math.floor((moveable.futureY + moveable.collisionPoints[CollisionPoints.Top].y - 2) / terrain.tileHeight);
+			
+			if (  (terrain.isSolid(currentTileX, floorY) && ! terrain.isSolid(currentTileX + 1, floorY))
+			    ||(terrain.isSolid(currentTileX, ceilingY) && ! terrain.isSolid(currentTileX + 1, ceilingY))){
+
+				moveable.futureX = (currentTileX + 1) * terrain.tileWidth - moveable.collisionPoints[CollisionPoints.Left].x+1;
+			}
+		}
+	}
+	reactToNewPosition(moveable, dt, terrain){}
 }
 
 class IgnoresTerrain{
@@ -123,9 +154,9 @@ class CanBumpBricksHorizontaly{
 	}
 
 	getBumpedBricks(moveable, terrain){
-		let x1 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.TopLeft].x - 2.0) / terrain.tileWidth);
-		let x2 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.TopRight].x + 2.0) / terrain.tileWidth);
-	    let y  = Math.floor((moveable.y + moveable.collisionPoints[CollisionPoints.TopRight].y) / terrain.tileHeight);
+		let x1 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.Left].x - 2.0) / terrain.tileWidth);
+		let x2 = Math.floor((moveable.x + moveable.collisionPoints[CollisionPoints.Right].x + 2.0) / terrain.tileWidth);
+	    let y  = Math.floor((moveable.y + (moveable.collisionPoints[CollisionPoints.Top].y + moveable.collisionPoints[CollisionPoints.Bottom].y) * 0.5) / terrain.tileHeight);
 
 		let bumpedBricks = [];
 		if (terrain.isBumpable(x1, y)){

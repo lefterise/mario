@@ -137,6 +137,7 @@ class Mario extends Moveable{
 		this.maxBehaviourX = new MaximumX(179*60-30);
 		this.defaultBehaviours = [
 			new RespectsTerrain(), 
+			new SlipsNearCliffsAndWhenBumpingEdges(6),
 			new CanBumpBricksAbove(), 
 			new MinimumX(30), 
 			this.maxBehaviourX, 
@@ -568,7 +569,7 @@ class Koopa extends Moveable{
 	}
 
 	kick(mario){
-		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(2,3,75), new CanBumpBricksHorizontaly(), new FlashesWhenHittingWalls(0,-21)];
+		this.behaviours = [new RespectsTerrain(), new ChangesDirectionWhenHittingWalls(), new AnimationBehavior(2,3,75), new FlashesWhenHittingWalls(0,-21), new CanBumpBricksHorizontaly()];
 		this.dx = 0.66 * ((mario.futureX < this.x) ? 1 : -1);
 		this.futureX = this.x;
 		this.state = States.Spinning;

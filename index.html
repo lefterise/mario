@@ -19,11 +19,7 @@ body {
 }
 canvas {
   display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+
 }
 </style>
 
@@ -702,6 +698,7 @@ function initGame(){
 		controls = touch;
 	} else {
 		controls = keyboard;
+		document.getElementById('message').innerHTML = "<b>Arrow Keys:</b> Move<br/><b>Alt:</b> Jump<br/><b>Ctrl:</b> Run<br/><b>Space:</b> Shoot<br/><b>Shift:</b> Camera<br/><b>F:</b> FullScreen";
 	}
 	
 	var game = new Game(graphics, controls);
@@ -711,7 +708,10 @@ function initGame(){
 </script>
 </head>
 <body onload="initGame()">
-	<canvas id="MyCanvas" width="1200" height="546" style="border:1px solid #000000; background-color:#000000;"></canvas>
-	<img src = "https://lefterise.github.io/mario/graphics/screenshot.png" hidden></img>
+	<div>
+		<div><canvas id="MyCanvas" width="1200" height="546" style="border:1px solid #000000; background-color:#000000;"></canvas></div>
+		<div id="message" style:"clear:both;"></div>
+		<div><img src = "https://lefterise.github.io/mario/graphics/screenshot.png" hidden></img>
+	</div>
 </body>
 </html>
