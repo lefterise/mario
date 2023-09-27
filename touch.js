@@ -102,8 +102,8 @@ class Touch{
 		this.debug = 0;
 		this.pan = Directions.Idle;
         this.jumpTouchIdentifier =-1;       
-        this.jumpButton  = {x: 1040-5, y:430-20, w: 98, h: 98};
-        this.shootButton = {x: 1040-5, y:320-20, w: 98, h: 98};
+        this.jumpButton  = {x: 1040, y:430-20, w: 98, h: 98};
+        this.shootButton = {x: 1040, y:310-20, w: 98, h: 98};
         this.fire = false;
         this.fireTouchIdentifier =-1;
         this.joystick = new Joystick();
@@ -212,7 +212,7 @@ class Touch{
     overlaps(p, button){
         let cx = button.x + button.w * 0.5;
         let cy = button.y + button.h * 0.5;
-        let r  = button.w * 0.5 + 12;
+        let r  = button.w * 0.5 + 17;
         return (p.x - cx) * (p.x - cx) + (p.y - cy) * (p.y - cy) < r * r;
     }
 
