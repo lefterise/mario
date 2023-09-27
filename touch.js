@@ -1,8 +1,8 @@
 class Joystick {
     constructor() {
-        this.y1 = 400;
-        this.y2 = 546;
-        this.yDefault = 473;
+        this.y1 = 400-20;
+        this.y2 = 546-20;
+        this.yDefault = 473-20;
         this.areas = [
             {x1:  50,  x2:  90, direction: Directions.Left,  run: true },
             {x1:  90,  x2: 130, direction: Directions.Left,  run: false},
@@ -102,8 +102,8 @@ class Touch{
 		this.debug = 0;
 		this.pan = Directions.Idle;
         this.jumpTouchIdentifier =-1;       
-        this.jumpButton  = {x: 1040, y:430, w: 98, h: 98};
-        this.shootButton = {x: 1040, y:320, w: 98, h: 98};
+        this.jumpButton  = {x: 1040-20, y:430-20, w: 98, h: 98};
+        this.shootButton = {x: 1040-20, y:320-20, w: 98, h: 98};
         this.fire = false;
         this.fireTouchIdentifier =-1;
         this.joystick = new Joystick();
