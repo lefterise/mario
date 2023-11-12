@@ -8,7 +8,8 @@
  ## Controls
  
 *  Arrow keys: Move
-*  Space: Jump
+*  Alt: Jump
 *  Ctrl: Run
+*  Space: Shoot
 *  F: Fullscreen
 *  D: Toggle Debug

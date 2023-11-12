@@ -690,15 +690,17 @@ function initGame(){
 	var ctx = canvas.getContext("2d");
 	var graphics = new Graphics(ctx);
 
-	var keyboard = new Keyboard(canvas);
+	let keyboardMapping = navigator.userAgent.match(/(Ubuntu)|(Macintosh)/i) ? 1 : 0;
+
+	var keyboard = new Keyboard(canvas, keyboardMapping);
 	var touch = new Touch(canvas);
-	var controls;
+	var controls;	
 
 	if (navigator.userAgent.match(/(Android)|(webOS)|(iPhone)|(iPad)|(BlackBerry)|(Windows Phone)/i)) {
 		controls = touch;
 	} else {
 		controls = keyboard;
-		document.getElementById('message').innerHTML = "<b>Arrow Keys:</b> Move<br/><b>Alt:</b> Jump<br/><b>Ctrl:</b> Run<br/><b>Space:</b> Shoot<br/><b>Shift:</b> Camera<br/><b>F:</b> FullScreen";
+		document.getElementById('message').innerHTML = "<b>Arrow Keys:</b> Move<br/><b>Alt/Z:</b> Jump<br/><b>Ctrl/X:</b> Run<br/><b>Space:</b> Shoot<br/><b>Shift:</b> Camera<br/><b>F:</b> FullScreen";
 	}
 	
 	var game = new Game(graphics, controls);

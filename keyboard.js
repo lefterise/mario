@@ -3,10 +3,34 @@ const Directions = {
 	Left: -1,
 	Right: 1
 }
-
 //https://www.toptal.com/developers/keycode
+const KeyMapping=[
+{ //default
+	left: "ArrowLeft",
+	right: "ArrowRight",
+	up: "ArrowUp",
+	down: "ArrowDown",
+	panLeft: "ShiftLeft",
+	panRight: "ShiftRight",
+	jump: "AltLeft",
+	run: "ControlLeft",
+	shoot: "Space"	
+},
+{ //unix
+	left: "ArrowLeft",
+	right: "ArrowRight",
+	up: "ArrowUp",
+	down: "ArrowDown",
+	panLeft: "ShiftLeft",
+	panRight: "ShiftRight",
+	jump: "KeyZ",
+	run: "KeyX",
+	shoot: "Space"	
+}
+];
+
 class Keyboard{
-	constructor(canvas){
+	constructor(canvas, mappingId){
 		this.direction = Directions.Idle;
 		this.jump = false;
 		this.run = false;
@@ -15,40 +39,41 @@ class Keyboard{
 		this.pan = Directions.Idle;
 		this.wantDown = false;
 		this.wantUp = false;
-
+		let keys = KeyMapping[mappingId];
+		
 		document.addEventListener('keydown', (ev) => {
-			if (ev.code == "ArrowLeft"){
+			if (ev.code == keys.left){
 				this.direction =  Directions.Left;
 			}
-			if (ev.code == "ArrowRight"){
+			if (ev.code == keys.right){
 				this.direction = Directions.Right;
 			}
 			
-			if (ev.code == "ArrowUp"){
+			if (ev.code == keys.up){
 				this.wantUp = true;
 			}
 
-			if (ev.code == "ArrowDown"){
+			if (ev.code == keys.down){
 				this.wantDown = true;
 			}
 
-			if (ev.code == "ShiftLeft"){
+			if (ev.code == keys.panLeft){
 				this.pan = Directions.Left;
 			}
 
-			if (ev.code == "ShiftRight"){
+			if (ev.code == keys.panRight){
 				this.pan = Directions.Right;
 			}
 
-			if (ev.code == "AltLeft"){
+			if (ev.code == keys.jump){
 				this.jump = true;
 			}
 			
-			if (ev.code == "ControlLeft"){
+			if (ev.code == keys.run){
 				this.run = true;
 			}
 
-			if (ev.code == "Space"){
+			if (ev.code == keys.shoot){
 				this.fire = true;
 			}
 
@@ -65,35 +90,35 @@ class Keyboard{
 		}, false);
 		
 		document.addEventListener('keyup', (ev) => {
-			if (this.direction == Directions.Left && ev.code == "ArrowLeft"){
+			if (this.direction == Directions.Left && ev.code == keys.left){
 				this.direction =  Directions.Idle;
 			}
 
-			if (this.direction == Directions.Right && ev.code == "ArrowRight"){
+			if (this.direction == Directions.Right && ev.code == keys.right){
 				this.direction = Directions.Idle;
 			}
 			
-			if (ev.code == "ArrowUp"){
+			if (ev.code == keys.up){
 				this.wantUp = false;
 			}
 			
-			if (ev.code == "ArrowDown"){
+			if (ev.code == keys.down){
 				this.wantDown = false;
 			}
 
-			if (this.pan == Directions.Left && ev.code == "ShiftLeft"){
+			if (this.pan == Directions.Left && ev.code == keys.panLeft){
 				this.pan = Directions.Idle;
 			}
 
-			if (this.pan == Directions.Right && ev.code == "ShiftRight"){
+			if (this.pan == Directions.Right && ev.code == keys.panRight){
 				this.pan = Directions.Idle;
 			}
 
-			if (this.jump && ev.code == "AltLeft"){
+			if (this.jump && ev.code == keys.jump){
 				this.jump = false;
 			}
 
-			if (this.run && ev.code == "ControlLeft"){
+			if (this.run && ev.code == keys.run){
 				this.run = false;
 			}
 
