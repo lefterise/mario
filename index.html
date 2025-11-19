@@ -2,7 +2,41 @@
 <html>
 <head>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<!--meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"-->
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js")
+            .catch(err => console.log("Service Worker error:", err));
+    });
+}
+</script>
+
+<style>
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+}
+canvas {
+  width: 100vw;
+  display: block;
+}
+</style>
+
 <script src="graphics.js"></script>
 <script src="levels.js"></script>
 <script src="keyboard.js"></script>
@@ -10,18 +44,6 @@
 <script src="sound.js"></script>
 <script src="behaviors.js"></script>
 <script src="actors.js"></script>
-<style>
-html,
-body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-}
-canvas {
-  display: block;
-
-}
-</style>
 
 <script>
 class Animation{
@@ -690,7 +712,7 @@ function initGame(){
 	var ctx = canvas.getContext("2d");
 	var graphics = new Graphics(ctx);
 
-	let keyboardMapping = navigator.userAgent.match(/(Ubuntu)|(Macintosh)/i) ? 1 : 0;
+	let keyboardMapping = navigator.userAgent.match(/(Ubuntu)|(Linux)|(Macintosh)/i) ? 1 : 0;
 
 	var keyboard = new Keyboard(canvas, keyboardMapping);
 	var touch = new Touch(canvas);
@@ -700,7 +722,7 @@ function initGame(){
 		controls = touch;
 	} else {
 		controls = keyboard;
-		document.getElementById('message').innerHTML = "<b>Arrow Keys:</b> Move<br/><b>Alt/Z:</b> Jump<br/><b>Ctrl/X:</b> Run<br/><b>Space:</b> Shoot<br/><b>Shift:</b> Camera<br/><b>F:</b> FullScreen";
+		document.getElementById('message').innerHTML = "<b>Arrow Keys:</b> Move<br/><b>Alt/X:</b> Jump<br/><b>Ctrl/Z:</b> Run<br/><b>Space:</b> Shoot<br/><b>Shift:</b> Camera<br/><b>F:</b> FullScreen";
 	}
 	
 	var game = new Game(graphics, controls);
@@ -712,7 +734,7 @@ function initGame(){
 <body onload="initGame()">
 	<div>
 		<div><canvas id="MyCanvas" width="1200" height="546" style="border:1px solid #000000; background-color:#000000;"></canvas></div>
-		<div id="message" style:"clear:both;"></div>
+		<div id="message" style="color: white;"></div>
 		<div><img src = "https://lefterise.github.io/mario/graphics/screenshot.png" hidden></img>
 	</div>
 </body>

@@ -114,8 +114,8 @@ class Touch{
 		canvas.addEventListener('touchstart', (e)=>{
             
             if (canvas.requestFullscreen && document.fullscreenElement != canvas){                
-                canvas.requestFullscreen();
-                screen.orientation.lock("landscape");
+                //canvas.requestFullscreen();
+                //screen.orientation.lock("landscape");
             }
                         
 			for (let touchobj of e.changedTouches){                
@@ -205,7 +205,12 @@ class Touch{
                 return {x: (touchobj.clientX - left) / width * canvas.width, y: (touchobj.clientY - top) / height * canvas.height};
             }
         } else {
-            return {x: touchobj.clientX / canvas.clientWidth * canvas.width, y: touchobj.clientY / canvas.clientHeight * canvas.height};
+            //return {x: touchobj.clientX / canvas.clientWidth * canvas.width, y: touchobj.clientY / canvas.clientHeight * canvas.height};
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (touchobj.clientX - rect.left) * (canvas.width / rect.width),
+                y: (touchobj.clientY - rect.top) * (canvas.height / rect.height)
+            };
         }
     }
 

@@ -23,8 +23,8 @@ const KeyMapping=[
 	down: "ArrowDown",
 	panLeft: "ShiftLeft",
 	panRight: "ShiftRight",
-	jump: "KeyZ",
-	run: "KeyX",
+	jump: "KeyX",
+	run: "KeyZ",
 	shoot: "Space"	
 }
 ];

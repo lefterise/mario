@@ -7,7 +7,6 @@ class Graphics{
        this.loadImage("graphics/terrain.png", (img)=>{this.terrain = img;});
        this.loadImage("graphics/tree.png",    (img)=>{this.tree = img;});
        this.loadImage("graphics/grass.png",   (img)=>{this.grass = img;});
-       this.loadImage("graphics/bush.png",   (img)=>{this.bush = img;});
        this.loadImage("graphics/buttons.png", (img)=>{this.buttons = img;});
        this.loadImage("graphics/joystick.png", (img)=>{this.joystick = img;});       
        
