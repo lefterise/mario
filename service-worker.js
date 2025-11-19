@@ -49,6 +49,8 @@ self.addEventListener("install", (event) => {
       return cache.addAll(FILES_TO_CACHE);
     })
   );
+  
+  self.skipWaiting(); //Firefox quirk
 });
 
 self.addEventListener("activate", (event) => {
@@ -59,9 +61,20 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
+  self.clients.claim(); //Firefox quirk
 });
 
 self.addEventListener("fetch", (event) => {
+  // Handle HTML navigation specifically (Firefox PWA quirk)
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      caches.match("index.html").then(response => {
+        return response || fetch(event.request);
+      })
+    );
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request).then(cached => {
       return cached || fetch(event.request);
