@@ -3,7 +3,7 @@
   "short_name": "Mario",
   "display": "fullscreen",
   "orientation": "landscape",
-  "start_url": "/mario/index.html",
+  "start_url": "index.html",
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
