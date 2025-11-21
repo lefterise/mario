@@ -3,7 +3,7 @@
   "short_name": "Mario",
   "display": "fullscreen",
   "orientation": "landscape",
-  "start_url": "index.html",
+  "start_url": "/mario/index.html",
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
@@ -15,12 +15,12 @@
   ],
   "screenshots": [
     {
-      "src": "/graphics/screenshot1280x720.png",
+      "src": "/mario/graphics/screenshot1280x720.png",
       "sizes": "1280x720",
       "type": "image/png"
     },
     {
-      "src": "/graphics/screenshot.png",
+      "src": "/mario/graphics/screenshot.png",
       "sizes": "1202x547",
       "type": "image/png",
       "form_factor": "wide"
